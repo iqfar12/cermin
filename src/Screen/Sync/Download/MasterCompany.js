@@ -4,7 +4,7 @@ import axios from 'axios';
 export const getMasterCompany = async () => {
   const user = TaskServices.getCurrentUser();
   const dbLocal = TaskServices.getAllData('TM_COMP');
-  const url = 'http://192.168.100.40:3010/companies';
+  const url = 'http://apis-dev1.tap-agri.com/crm-msa-attendance/companies';
 
   let donwloadProgress = {
     count: 0,

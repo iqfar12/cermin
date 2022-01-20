@@ -1,4 +1,4 @@
-import React, {useState, useEffect} from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   StyleSheet,
   Text,
@@ -11,7 +11,7 @@ import {
   TextInput,
   StatusBar,
 } from 'react-native';
-import {Camera as RNCamera} from 'expo-camera';
+import { Camera as RNCamera } from 'expo-camera';
 import {
   FrontFrame,
   FrontLine,
@@ -30,19 +30,20 @@ import {
   GuideDown,
   tersenyum,
 } from '../../assets';
-import {useNavigation, useIsFocused} from '@react-navigation/native';
+import { useNavigation, useIsFocused } from '@react-navigation/native';
 import axios from 'axios';
-import {manipulateAsync} from 'expo-image-manipulator';
-import {Endpoint} from '../../Utils/Endpoint';
+import { manipulateAsync } from 'expo-image-manipulator';
+import { Endpoint } from '../../Utils/Endpoint';
 import * as FaceDetector from 'expo-face-detector';
 import * as faceapi from 'face-api.js';
 import SubHeader from '../../Component/SubHeader';
-import {Fonts} from '../../Utils/Fonts';
+import { Fonts } from '../../Utils/Fonts';
 import Icon from '@expo/vector-icons/MaterialIcons';
-import {shuffleAllArray} from '../../Utils/Shuffle';
+import { shuffleAllArray } from '../../Utils/Shuffle';
 import SoundPlayer from 'react-native-sound-player';
+import WarningModal from '../../Component/WarningModal';
 
-const RegisterScreen = ({route}) => {
+const RegisterScreen = ({ route }) => {
   const [camera, setCamera] = useState();
   const [isLoading, setIsLoading] = useState(false);
   const navigation = useNavigation();
@@ -58,6 +59,7 @@ const RegisterScreen = ({route}) => {
   const [isAlready, setIsAlready] = useState(false);
   const [message, setMessage] = useState('');
   const [RandomPhase, setRandomPhase] = useState(shuffleAllArray([1, 2, 3, 4]));
+  const [cameraFront, setCameraFront] = useState(true);
 
   const filename = () => {
     const val = RandomPhase[step];
@@ -201,11 +203,11 @@ const RegisterScreen = ({route}) => {
       console.log(res.data === '', 'empty');
       console.log(res.data, 'data');
       if (res) {
-        return {valid: true, message: res.data.message};
+        return { valid: true, message: res.data.message };
       }
     } catch (error) {
       console.log(error.response, 'error api');
-      return {valid: true, message: 'Gagal mengambil data'};
+      return { valid: true, message: 'Gagal mengambil data' };
     }
   };
 
@@ -213,7 +215,7 @@ const RegisterScreen = ({route}) => {
     const res = await faceapi
       .detectSingleFace(
         image,
-        new faceapi.TinyFaceDetectorOptions({inputSize: 416, scoreThreshold}),
+        new faceapi.TinyFaceDetectorOptions({ inputSize: 416, scoreThreshold }),
       )
       .withFaceLandmarks();
 
@@ -267,17 +269,17 @@ const RegisterScreen = ({route}) => {
         runClassifications: FaceDetector.FaceDetectorClassifications.none,
       });
       if (res.faces.length > 0) {
-        const {bounds} = res.faces[0];
-        const {origin, size} = bounds;
+        const { bounds } = res.faces[0];
+        const { origin, size } = bounds;
         const crop = {
           originX: origin.x,
           originY: origin.y,
           height: size.height,
           width: size.width,
         };
-        const resize = {width: 160, height: 160};
+        const resize = { width: 160, height: 160 };
 
-        const result = await manipulateAsync(image.uri, [{crop}, {resize}]);
+        const result = await manipulateAsync(image.uri, [{ crop }, { resize }]);
         const corner = await FaceDetector.detectFacesAsync(result.uri, {
           mode: FaceDetector.FaceDetectorMode.fast,
           detectLandmarks: FaceDetector.FaceDetectorLandmarks.none,
@@ -287,16 +289,16 @@ const RegisterScreen = ({route}) => {
         if (jaw <= 136) {
           // Top
           console.log('top');
-          return {valid: true, message: 'Correct'};
+          return { valid: true, message: 'Correct' };
         } else {
-          return {valid: false, message: 'Incorrect Position'};
+          return { valid: false, message: 'Posisi Salah' };
         }
       } else {
-        return {valid: false, message: 'No Face Detected'};
+        return { valid: false, message: 'No Face Detected' };
       }
     } catch (error) {
       console.log(error, 'error');
-      return {valid: false, message: 'Error Image'};
+      return { valid: false, message: 'Error Image' };
     }
   };
 
@@ -308,36 +310,36 @@ const RegisterScreen = ({route}) => {
         runClassifications: FaceDetector.FaceDetectorClassifications.none,
       });
       if (res.faces.length > 0) {
-        const {bounds} = res.faces[0];
-        const {origin, size} = bounds;
+        const { bounds } = res.faces[0];
+        const { origin, size } = bounds;
         const crop = {
           originX: origin.x,
           originY: origin.y,
           height: size.height,
           width: size.width,
         };
-        const resize = {width: 160, height: 160};
+        const resize = { width: 160, height: 160 };
 
-        const result = await manipulateAsync(image.uri, [{crop}, {resize}]);
+        const result = await manipulateAsync(image.uri, [{ crop }, { resize }]);
         const corner = await FaceDetector.detectFacesAsync(result.uri, {
           mode: FaceDetector.FaceDetectorMode.fast,
           detectLandmarks: FaceDetector.FaceDetectorLandmarks.none,
           runClassifications: FaceDetector.FaceDetectorClassifications.none,
         });
-        const {x, y} = corner.faces[0].NOSE_BASE;
+        const { x, y } = corner.faces[0].NOSE_BASE;
         if (x <= 85 && x >= 70) {
           // Center
           console.log('center');
-          return {valid: true, message: 'Correct'};
+          return { valid: true, message: 'Correct' };
         } else {
-          return {valid: false, message: 'Incorrect Position'};
+          return { valid: false, message: 'Posisi Salah' };
         }
       } else {
-        return {valid: false, message: 'No Face Detected'};
+        return { valid: false, message: 'No Face Detected' };
       }
     } catch (error) {
       console.log(error, 'error');
-      return {valid: false, message: 'Error Image'};
+      return { valid: false, message: 'Error Image' };
     }
   };
 
@@ -349,36 +351,36 @@ const RegisterScreen = ({route}) => {
         runClassifications: FaceDetector.FaceDetectorClassifications.none,
       });
       if (res.faces.length > 0) {
-        const {bounds} = res.faces[0];
-        const {origin, size} = bounds;
+        const { bounds } = res.faces[0];
+        const { origin, size } = bounds;
         const crop = {
           originX: origin.x,
           originY: origin.y,
           height: size.height,
           width: size.width,
         };
-        const resize = {width: 160, height: 160};
+        const resize = { width: 160, height: 160 };
 
-        const result = await manipulateAsync(image.uri, [{crop}, {resize}]);
+        const result = await manipulateAsync(image.uri, [{ crop }, { resize }]);
         const corner = await FaceDetector.detectFacesAsync(result.uri, {
           mode: FaceDetector.FaceDetectorMode.fast,
           detectLandmarks: FaceDetector.FaceDetectorLandmarks.none,
           runClassifications: FaceDetector.FaceDetectorClassifications.none,
         });
-        const {x, y} = corner.faces[0].NOSE_BASE;
+        const { x, y } = corner.faces[0].NOSE_BASE;
         if (x >= 90) {
           // Left
           console.log('left');
-          return {valid: true, message: 'Correct'};
+          return { valid: true, message: 'Correct' };
         } else {
-          return {valid: false, message: 'Incorrect Position'};
+          return { valid: false, message: 'Posisi Salah' };
         }
       } else {
-        return {valid: false, message: 'No Face Detected'};
+        return { valid: false, message: 'No Face Detected' };
       }
     } catch (error) {
       console.log(error, 'error');
-      return {valid: false, message: 'Error Image'};
+      return { valid: false, message: 'Error Image' };
     }
   };
 
@@ -390,36 +392,36 @@ const RegisterScreen = ({route}) => {
         runClassifications: FaceDetector.FaceDetectorClassifications.none,
       });
       if (res.faces.length > 0) {
-        const {bounds} = res.faces[0];
-        const {origin, size} = bounds;
+        const { bounds } = res.faces[0];
+        const { origin, size } = bounds;
         const crop = {
           originX: origin.x,
           originY: origin.y,
           height: size.height,
           width: size.width,
         };
-        const resize = {width: 160, height: 160};
+        const resize = { width: 160, height: 160 };
 
-        const result = await manipulateAsync(image.uri, [{crop}, {resize}]);
+        const result = await manipulateAsync(image.uri, [{ crop }, { resize }]);
         const corner = await FaceDetector.detectFacesAsync(result.uri, {
           mode: FaceDetector.FaceDetectorMode.fast,
           detectLandmarks: FaceDetector.FaceDetectorLandmarks.none,
           runClassifications: FaceDetector.FaceDetectorClassifications.none,
         });
-        const {x, y} = corner.faces[0].NOSE_BASE;
+        const { x, y } = corner.faces[0].NOSE_BASE;
         if (x <= 65) {
           // Right
           console.log('right');
-          return {valid: true, message: 'Correct'};
+          return { valid: true, message: 'Correct' };
         } else {
-          return {valid: false, message: 'Incorrect Position'};
+          return { valid: false, message: 'Posisi Salah' };
         }
       } else {
-        return {valid: false, message: 'No Face Detected'};
+        return { valid: false, message: 'No Face Detected' };
       }
     } catch (error) {
       console.log(error, 'error');
-      return {valid: false, message: 'Error Image'};
+      return { valid: false, message: 'Error Image' };
     }
   };
 
@@ -431,23 +433,23 @@ const RegisterScreen = ({route}) => {
         runClassifications: FaceDetector.FaceDetectorClassifications.none,
       });
       if (res.faces.length > 0) {
-        const {bounds} = res.faces[0];
-        const {origin, size} = bounds;
+        const { bounds } = res.faces[0];
+        const { origin, size } = bounds;
         const crop = {
           originX: origin.x,
           originY: origin.y,
           height: size.height,
           width: size.width,
         };
-        const resize = {width: 160, height: 160};
+        const resize = { width: 160, height: 160 };
 
-        const result = await manipulateAsync(image.uri, [{crop}, {resize}]);
+        const result = await manipulateAsync(image.uri, [{ crop }, { resize }]);
         const corner = await FaceDetector.detectFacesAsync(result.uri, {
           mode: FaceDetector.FaceDetectorMode.fast,
           detectLandmarks: FaceDetector.FaceDetectorLandmarks.none,
           runClassifications: FaceDetector.FaceDetectorClassifications.none,
         });
-        const {x, y} = corner.faces[0].NOSE_BASE;
+        const { x, y } = corner.faces[0].NOSE_BASE;
         const jaw = corner.faces[0].bottomMouthPosition.y;
         console.log(jaw, 'face');
         if (x >= 90) {
@@ -468,7 +470,7 @@ const RegisterScreen = ({route}) => {
     } catch (error) {
       console.log(error, 'error');
     }
-    return {valid: true, message: 'valid'};
+    return { valid: true, message: 'valid' };
   };
 
   const takePicture = async () => {
@@ -490,7 +492,7 @@ const RegisterScreen = ({route}) => {
   };
 
   const register = async () => {
-    navigation.replace('Preview Screen', {preview: images, ...route?.params});
+    navigation.replace('Preview Screen', { preview: images, ...route?.params });
     // let formData = new FormData();
     // images.forEach((item, index) => {
     //   formData.append('images', {
@@ -532,7 +534,7 @@ const RegisterScreen = ({route}) => {
   const cropImage = async image => {
     try {
       const resize = await manipulateAsync(image.uri, [
-        {resize: {width: 1080, height: 1440}},
+        { resize: { width: 1080, height: 1440 } },
       ]);
       let position = undefined;
       //   await RNFS.copyFile(mobilenet.uri, pathMobilenet);
@@ -728,23 +730,28 @@ const RegisterScreen = ({route}) => {
     }
     if (failed) {
       return (
-        <Modal transparent visible={failed}>
-          <View style={styles.modalContainer}>
-            <View style={styles.wrappers}>
-              <Text style={styles.hintText}>
-                Gambar Tidak Valid Pastikan Gambar Anda sesuai petunjuk dan
-                Harap Coba lagi {'\n\n'} {message}
-              </Text>
-              <TouchableOpacity
-                activeOpacity={0.8}
-                onPress={() => setFailed(false)}
-                style={styles.failedButton}
-              >
-                <Text style={styles.hintButtonTitle}>Coba Lagi</Text>
-              </TouchableOpacity>
-            </View>
-          </View>
-        </Modal>
+        <WarningModal
+          content={`Gambar Tidak Valid Pastikan Gambar Anda sesuai petunjuk dan Harap Coba lagi \n\n ${message}`}
+          visible={failed}
+          onPress={() => setFailed(false)}
+        />
+        // <Modal transparent visible={failed}>
+        //   <View style={styles.modalContainer}>
+        //     <View style={styles.wrappers}>
+        //       <Text style={styles.hintText}>
+        // Gambar Tidak Valid Pastikan Gambar Anda sesuai petunjuk dan
+        // Harap Coba lagi {'\n\n'} {message}
+        //       </Text>
+        //       <TouchableOpacity
+        //         activeOpacity={0.8}
+        //         onPress={() => setFailed(false)}
+        //         style={styles.failedButton}
+        //       >
+        //         <Text style={styles.hintButtonTitle}>Coba Lagi</Text>
+        //       </TouchableOpacity>
+        //     </View>
+        //   </View>
+        // </Modal>
       );
     }
     if (isAlready) {
@@ -832,7 +839,7 @@ const RegisterScreen = ({route}) => {
   };
 
   return (
-    <>
+    <View style={styles.parent}>
       <StatusBar translucent={false} backgroundColor={'#195FBA'} />
       <SubHeader title={'Kembali'} onBack={() => navigation.goBack()} />
       <View style={styles.container}>
@@ -848,27 +855,25 @@ const RegisterScreen = ({route}) => {
             <Text style={styles.stepTxt}>Pastikan mata melihat kamera</Text>
           </View>
         </View>
-        {isFocused && (
+        {isFocused && !isLoading ?(
           <View style={styles.wrapper}>
-            {!isLoading && (
               <RNCamera
                 style={styles.preview}
                 ref={ref => setCamera(ref)}
-                type={'front'}
+                type={cameraFront ? 'front' : 'back'}
                 autoFocus={'on'}
               />
-            )}
-            <Image style={styles.frame} source={Frame()} />
-            <Image style={styles.line} source={Line()} />
+              <Image style={styles.frame} source={Frame()} />
+              <Image style={styles.line} source={Line()} />
           </View>
-        )}
+        ) : null}
         <View style={styles.cameraContainer}>
           <View activeOpacity={0.8} style={styles.switchCamera}>
             <Icon
               name={'flip-camera-ios'}
               size={35}
               color={'#A0A0A0'}
-              style={{opacity: 0}}
+              style={{ opacity: 0 }}
             />
           </View>
           <TouchableOpacity
@@ -879,18 +884,21 @@ const RegisterScreen = ({route}) => {
           >
             <View style={styles.circle} />
           </TouchableOpacity>
-          <TouchableOpacity activeOpacity={0.8} style={styles.switchCamera}>
+          <TouchableOpacity onPress={() => setCameraFront(!cameraFront)} activeOpacity={0.8} style={styles.switchCamera}>
             <Icon name={'flip-camera-ios'} size={35} color={'#A0A0A0'} />
           </TouchableOpacity>
         </View>
       </View>
-    </>
+    </View>
   );
 };
 
 export default RegisterScreen;
 
 const styles = StyleSheet.create({
+  parent: {
+    flex: 1,
+  },
   container: {
     flex: 1,
     backgroundColor: '#FFF',
@@ -1039,7 +1047,7 @@ const styles = StyleSheet.create({
   },
   left: {
     backgroundColor: '#FFF',
-    width: '22%',
+    width: '20%',
     height: undefined,
     aspectRatio: 1 / 1,
     justifyContent: 'center',

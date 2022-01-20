@@ -54,13 +54,12 @@ const PreRegisterScreen = () => {
   const [location, setLocation] = useState();
   const [locationModal, setLocationModal] = useState(false);
   const [data, setData] = useState();
-  console.log(DummyAFD.TM_AFD);
 
   const onRegister = async () => {
     const id = UuidGenerator();
     const data = {
       ID: id,
-      TYPE: type,
+      TYPE: type === 1 ? 'EMP' : 'NON',
       SOURCE: 'Manual',
       EMPLOYEE_NIK: nik,
       EMPLOYEE_FULLNAME: name,
@@ -133,7 +132,7 @@ const PreRegisterScreen = () => {
           onClose={() => setLocationModal(false)}
           visible={locationModal}
         >
-          <FlatList data={DummyAFD.TM_AFD} keyExtractor={(_, i) => i.toString()} renderItem={renderAfdeling} showsVerticalScrollIndicator={false} />
+          <FlatList data={MasterAfdeling} keyExtractor={(_, i) => i.toString()} renderItem={renderAfdeling} showsVerticalScrollIndicator={false} />
         </MenuModal>
       );
     }
@@ -164,7 +163,7 @@ const PreRegisterScreen = () => {
         <ScrollView>
         <View style={styles.titleContainer}>
           <Text style={styles.title}>Isi keterangan data</Text>
-          <Text style={styles.subTitle}>Silakan Login untuk melanjutkan</Text>
+          {/* <Text style={styles.subTitle}>Silakan Login untuk melanjutkan</Text> */}
         </View>
         <View style={styles.account}>
           <Text style={styles.accountTitle}>Tipe Akun</Text>
@@ -247,15 +246,16 @@ const PreRegisterScreen = () => {
                 { borderWidth: 1, borderColor: '#C5C5C5' },
               ]}
               activeOpacity={0.8}
+              disabled={type === 1}
               onPress={() => setLocationModal(true)}
             >
               <View style={styles.left}>
                 <Icon name={'location-pin'} size={25} color={'#DADADA'} />
                 <Text style={styles.formTxt}>{location === undefined ? 'Pilih Lokasi' : location.AFD_CODE_GIS}</Text>
               </View>
-              <View style={styles.right}>
+              {type === 2 && <View style={styles.right}>
                 <Icon name={'arrow-drop-down'} size={25} color={'#797676'} />
-              </View>
+              </View>}
             </TouchableOpacity>
           </View>
         </View>

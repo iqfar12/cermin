@@ -72,12 +72,10 @@ const PreviewScreen = ({route}) => {
   const onRegister = async () => {
     const imagePath = getImagePath();
     const namePath = imagePath + `/${data?.EMPLOYEE_FULLNAME}`;
-    // await fs.mkdir(namePath);
-    // await expoFS.makeDirectoryAsync(namePath);
+    await fs.mkdir(namePath);
     preview.forEach(async (item, index) => {
-      const path = namePath + `/${data?.EMPLOYEE_FULLNAME}_${index}.jpg`;
-      // await fs.copyFile(item.uri, path);
-      await expoFS.copyAsync(item.uri, path);
+      const path = namePath + `/${data?.EMPLOYEE_FULLNAME}_${index}.jpeg`;
+      await fs.copyFile(item.uri, path);
       const id = UuidGenerator();
       const body = {
         ID: id,
@@ -91,6 +89,8 @@ const PreviewScreen = ({route}) => {
         SYNC_STATUS: null,
         SYNC_TIME: null,
       };
+
+      await TaskServices.saveData('TR_IMAGES', body)
     });
     navigation.reset({
       index: 0,
@@ -148,7 +148,7 @@ const PreviewScreen = ({route}) => {
             <View style={styles.buttonContainer}>
               <TouchableOpacity
                 activeOpacity={0.8}
-                onPress={() => navigation.replace('Registration Home')}
+                onPress={() => navigation.replace('Registration Home', {data: data})}
                 style={styles.retake}
               >
                 <Text style={styles.retakeTxt}>Ambil Ulang</Text>

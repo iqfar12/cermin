@@ -58,32 +58,34 @@ const Dummy = [
 const HistoryRegister = () => {
   const navigation = useNavigation();
   const [menu, setMenu] = useState(0);
-  const Employee = TaskServices.getAllData('TM_EMPLOYEE');
+  const Employee = TaskServices.getAllData('TM_EMPLOYEE').filter((item) => item.REGISTER_TIME !== null);
 
   const Karyawan = useMemo(() => {
-    return Employee.filter((item) => item.TYPE === 1)
+    return Employee.filter((item) => item.TYPE == 'EMP')
   }, [Employee])
 
   const NonKaryawan = useMemo(() => {
-    return Employee.filter((item) => item.TYPE === 2);
+    return Employee.filter((item) => item.TYPE == 'NON');
   }, [Employee])
+
+  console.log(NonKaryawan);
 
   const renderListCard = ({item, index}) => {
     return (
       <View style={styles.card}>
         <View style={styles.topCard}>
           <View style={styles.tag}>
-            <Text style={styles.type}>{item.TYPE === 1 ? 'Karyawan' : 'Non-Karyawan'}</Text>
+            <Text style={styles.type}>{item.TYPE == 'EMP' ? 'Karyawan' : 'Non-Karyawan'}</Text>
           </View>
           <Icon
-            name={item.status ? 'done' : 'radio-button-unchecked'}
+            name={item.SYNC_TIME !== null ? 'done' : 'radio-button-unchecked'}
             size={25}
-            color={item.status ? '#195FBA' : '#FFB81C'}
+            color={item.SYNC_TIME !== null ? '#195FBA' : '#FFB81C'}
           />
         </View>
         <View style={styles.bottomCard}>
-          <Text style={styles.nik}>{item.EMPLOYEE_NIK}</Text>
-          <Text style={styles.name}> | {item.EMPLOYEE_FULLNAME}</Text>
+          <Text style={styles.nik}>{item.EMPLOYEE_NIK?.split('')?.filter(item => item != ' ')?.join('')}</Text>
+          <Text numberOfLines={1} ellipsizeMode={'tail'} style={styles.name}> | {item.EMPLOYEE_FULLNAME}</Text>
         </View>
       </View>
     );
@@ -228,6 +230,7 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontFamily: Fonts.book,
     color: '#6C6C6C',
+    width: '55%'
   },
   list: {
     paddingBottom: 100,

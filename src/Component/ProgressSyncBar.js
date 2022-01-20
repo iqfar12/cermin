@@ -27,7 +27,7 @@ const ProgressSyncBar = ({title, progress, total, sync}) => {
       </View>
       <View style={styles.bottom}>
         <View style={styles.bar}>
-          {sync ? (
+          {sync || total === 0 ? (
             <View
               style={[styles.progress, {width: `${(progress / total) * 100}%`}]}
             />

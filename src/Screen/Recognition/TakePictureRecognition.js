@@ -1,4 +1,4 @@
-import React, {useState, useEffect} from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   StyleSheet,
   Text,
@@ -6,21 +6,25 @@ import {
   TouchableOpacity,
   StatusBar,
   Modal,
+  Image,
 } from 'react-native';
-import {Camera, requestCameraPermissionsAsync} from 'expo-camera';
+import { Camera, requestCameraPermissionsAsync } from 'expo-camera';
 import * as FaceDetector from 'expo-face-detector';
-import {Svg, Defs, Mask, Rect, Circle} from 'react-native-svg';
-import {useIsFocused, useNavigation} from '@react-navigation/native';
+import { Svg, Defs, Mask, Rect, Circle } from 'react-native-svg';
+import { useIsFocused, useNavigation } from '@react-navigation/native';
 import Icon from 'react-native-vector-icons/Feather';
 import axios from 'axios';
-import {Endpoint} from '../../Utils/Endpoint';
+import { Endpoint } from '../../Utils/Endpoint';
 import * as fs from 'expo-file-system';
 import * as faceapi from 'face-api.js';
-import {decodeJpeg} from '@tensorflow/tfjs-react-native';
+import { decodeJpeg } from '@tensorflow/tfjs-react-native';
 import '../../../platform';
 import LoadingModal from '../../Component/LoadingModal';
-import {manipulateAsync} from 'expo-image-manipulator';
-import {shuffleArr} from '../../Utils/Shuffle';
+import { manipulateAsync } from 'expo-image-manipulator';
+import { shuffleArr } from '../../Utils/Shuffle';
+import { FrontFrame, FrontLine, GuideFront } from '../../assets';
+import ExpoIcon from '@expo/vector-icons/MaterialIcons';
+import { Fonts } from '../../Utils/Fonts';
 
 const CircleMask = () => {
   return (
@@ -28,13 +32,14 @@ const CircleMask = () => {
       <Defs>
         <Mask id="mask" x="0" y="0" height="100%" width="100%">
           <Rect height="100%" width="100%" fill="#fff" />
-          <Circle r="30%" cx="50%" cy="40%" fill="black" />
+          <Rect height="90%" width="85%" x="8.5%" y="8%" fill="black" ry="160" rx="160" />
+          {/* <Circle r="30%" cx="50%" cy="40%" fill="black" /> */}
         </Mask>
       </Defs>
       <Rect
         height="100%"
         width="100%"
-        fill="rgba(0, 0, 0, 0.6)"
+        fill="rgba(255, 255, 255, 1)"
         mask="url(#mask)"
         fill-opacity="0"
       />
@@ -42,7 +47,7 @@ const CircleMask = () => {
   );
 };
 
-const TakePictureRecognition = ({route}) => {
+const TakePictureRecognition = ({ route }) => {
   const [camera, setCamera] = useState();
   const [ready, setReady] = useState(false);
   const [isMotion, setIsMotion] = useState(false);
@@ -53,7 +58,7 @@ const TakePictureRecognition = ({route}) => {
   const navigation = useNavigation();
   const [step, setStep] = useState(shuffleArr());
   const [faceId, setFaceId] = useState(0);
-  const {online} = route.params;
+  const { online } = route.params;
 
   const condition4 = event => {
     const rightEye = event?.faces[0]?.rightEyeOpenProbability;
@@ -190,11 +195,11 @@ const TakePictureRecognition = ({route}) => {
 
   const takePicture = async () => {
     if (!camera) return;
-    const image = await camera.takePictureAsync({base64: true});
+    const image = await camera.takePictureAsync({ base64: true });
     if (image) {
       setIsLoading(true);
-      const resize = {width: image.width / 5, height: image.height / 5};
-      const results = await manipulateAsync(image.uri, [{resize}], {
+      const resize = { width: image.width / 5, height: image.height / 5 };
+      const results = await manipulateAsync(image.uri, [{ resize }], {
         base64: true,
       });
       // console.log(results.uri, results.height, results.width);
@@ -245,9 +250,9 @@ const TakePictureRecognition = ({route}) => {
 
   const wording = val => {
     if (val === 0) {
-      return 'Hadapkan wajah 15 derajat ke kiri';
+      return 'Hadapkan wajah ke kiri';
     } else if (val === 1) {
-      return 'Hadapkan wajah 15 derajat ke kanan';
+      return 'Hadapkan wajah ke kanan';
     } else if (val === 2) {
       return 'Tersenyum';
     } else {
@@ -256,77 +261,62 @@ const TakePictureRecognition = ({route}) => {
   };
 
   return (
-    <>
+    <View style={{flex: 1}}>
       {showModal()}
       <StatusBar backgroundColor={'#0E5CBE'} />
       <View style={styles.container}>
         <View style={styles.header}>
           <Icon
-            name={'arrow-left'}
+            name={'chevron-left'}
             size={25}
-            color={'#F0F2F2'}
+            color={'#6C6C6C'}
             style={styles.back}
             onPress={() => navigation.goBack()}
           />
-          <Text style={styles.title}>Pengenalan Wajah</Text>
+          <Text style={styles.title}>Kembali</Text>
+          <ExpoIcon
+            name={'photo-camera'}
+            size={25}
+            color={'#195FBA'}
+            style={styles.switch}
+            onPress={() => console.log('press')} />
         </View>
-        {/* {isFocused && <RNCamera
-          ref={ref => setCamera(ref)}
-          style={styles.preview}
-          type={'front'}
-          captureAudio={false}
-          onCameraReady={() => console.log('ready')}
-          onMountError={(err) => console.log(err, 'error')}
-        />} */}
         {isFocused ? (
-          <Camera
-            ref={ref => {
-              setCamera(ref);
-            }}
-            style={styles.preview}
-            type={'front'}
-            ratio={'4:3'}
-            faceDetectorSettings={{
-              mode: FaceDetector.FaceDetectorMode.fast,
-              detectLandmarks: FaceDetector.FaceDetectorLandmarks.none,
-              runClassifications: FaceDetector.FaceDetectorClassifications.none,
-              minDetectionInterval: 100,
-              tracking: true,
-            }}
-            onCameraReady={() => setReady(true)}
-            onMountError={err => console.log(err, 'error mount')}
-            onFacesDetected={ready ? onFacesDetected : null}
-          >
-            <CircleMask />
-          </Camera>
+          <View style={styles.wrapper}>
+            <Camera
+              ref={ref => {
+                setCamera(ref);
+              }}
+              style={styles.preview}
+              type={'front'}
+              ratio={'4:3'}
+              faceDetectorSettings={{
+                mode: FaceDetector.FaceDetectorMode.fast,
+                detectLandmarks: FaceDetector.FaceDetectorLandmarks.none,
+                runClassifications: FaceDetector.FaceDetectorClassifications.none,
+                minDetectionInterval: 100,
+                tracking: true,
+              }}
+              onCameraReady={() => setReady(true)}
+              onMountError={err => console.log(err, 'error mount')}
+              onFacesDetected={ready ? onFacesDetected : null}
+            >
+              <CircleMask />
+              <Image style={styles.frame} source={FrontFrame} />
+              <Image style={styles.frame} source={FrontLine} />
+            </Camera>
+          </View>
         ) : null}
-        <Text style={styles.subTitle}>
-          {wording(step[motionCount]) + '\n'} beberapa saat hingga Tombolnya
-          berwarna biru
-        </Text>
-        {/* <View
-          style={[
-            styles.mask,
-            {borderColor: isMotion ? '#0E5CBE' : '#FF0000'},
-          ]}>
-          <View style={styles.masking} />
-        </View> */}
-        <View style={styles.buttonContainer}>
-          <TouchableOpacity
-            style={styles.button}
-            activeOpacity={0.8}
-            onPress={takePicture}
-          >
-            <View
-              style={[
-                styles.round,
-                {backgroundColor: isMotion ? '#0E5CBE' : '#FF0000'},
-              ]}
-            />
-          </TouchableOpacity>
+        <View style={styles.body}>
+          <View style={styles.hintImage}>
+              <Image style={styles.image} source={GuideFront} />
+          </View>
+          <Text style={styles.subTitle}>
+            {wording(step[motionCount])}
+          </Text>
         </View>
       </View>
-    </>
+    </View>
   );
 };
 
@@ -378,19 +368,16 @@ const styles = StyleSheet.create({
     marginBottom: -25,
   },
   subTitle: {
-    marginHorizontal: 20,
-    textAlign: 'center',
-    paddingVertical: 5,
-    color: '#888888',
+    fontSize: 24,
+    fontFamily: Fonts.bold,
+    color: '#6C6C6C'
   },
   header: {
-    backgroundColor: '#0E5CBE',
+    backgroundColor: '#FFF',
     flexDirection: 'row',
-    justifyContent: 'center',
     alignItems: 'center',
     paddingVertical: 16,
     position: 'relative',
-    marginBottom: 30,
   },
   back: {
     position: 'absolute',
@@ -398,8 +385,40 @@ const styles = StyleSheet.create({
     padding: 16,
     alignSelf: 'center',
   },
-  title: {
-    color: '#FFFFFF',
-    fontSize: 20,
+  switch: {
+    position: 'absolute',
+    right: 0,
+    paddingHorizontal: 20,
+    paddingVertical: 16,
+    alignSelf: 'center',
   },
+  title: {
+    color: '#6C6C6C',
+    fontSize: 20,
+    marginLeft: 50,
+  },
+  frame: {
+    width: '100%',
+    height: undefined,
+    aspectRatio: 3 / 4,
+    position: 'absolute',
+  },
+  hintImage: {
+    width: '25%',
+    height: undefined,
+    aspectRatio: 1 / 1,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  image: {
+    flex: 1,
+    resizeMode: 'contain'
+  },
+  body: {
+    alignItems: 'center',
+    borderTopWidth: 1,
+    borderColor: '#C5C5C5',
+    paddingTop: 20,
+    marginTop: 10,
+  }
 });

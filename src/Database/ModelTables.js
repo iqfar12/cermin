@@ -48,7 +48,7 @@ const TM_EMPLOYEE = {
   primaryKey: 'ID',
   properties: {
     ID: 'string?',
-    TYPE: 'int?',
+    TYPE: 'string?',
     SOURCE: 'string?',
     EMPLOYEE_NIK: 'string?',
     EMPLOYEE_FULLNAME: 'string?',

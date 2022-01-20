@@ -144,7 +144,6 @@ const ProfileScreen = () => {
   const onResetData = async () => {
     console.log('resetData');
     const TM_DATA = [
-      'TM_USERS',
       'TM_PERMISSIONS',
       'TM_EMPLOYEE',
       'TM_AFD',

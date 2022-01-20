@@ -1,4 +1,4 @@
-import React, {useState, useEffect} from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import {
   StyleSheet,
   Text,
@@ -8,27 +8,27 @@ import {
   ScrollView,
 } from 'react-native';
 import Icon from 'react-native-vector-icons/Feather';
-import {useNavigation} from '@react-navigation/native';
+import { useNavigation } from '@react-navigation/native';
 import ProgressSyncBar from '../../Component/ProgressSyncBar';
-import {getMasterDataset} from './Download/MasterDataset';
-import {Fonts} from '../../Utils/Fonts';
+import { getMasterDataset } from './Download/MasterDataset';
+import { Fonts } from '../../Utils/Fonts';
 import LottieView from 'lottie-react-native';
-import {Sync} from '../../assets';
+import { Sync } from '../../assets';
 import SyncNotif from '../../Component/SyncNotif';
 import NetInfo from '@react-native-community/netinfo';
 import NoConnectionModal from '../../Component/NoConnectionModal';
 import TaskServices from '../../Database/TaskServices';
-import {getMasterAfdeling} from './Download/MasterAfdeling';
-import {getMasterCompany} from './Download/MasterCompany';
-import {getMasterEst} from './Download/MasterEst';
-import {getMasterRegion} from './Download/MasterRegion';
-import {getMasterEmployee} from './Download/MasterEmployee';
+import { getMasterAfdeling } from './Download/MasterAfdeling';
+import { getMasterCompany } from './Download/MasterCompany';
+import { getMasterEst } from './Download/MasterEst';
+import { getMasterRegion } from './Download/MasterRegion';
+import { getMasterEmployee } from './Download/MasterEmployee';
 
-const Percentage = () => {
+const Percentage = ({ value = 0 }) => {
   return (
     <View style={styles.percentage}>
       <Text style={styles.percentageSum}>
-        30<Text style={styles.symbol}>%</Text>
+        {value}<Text style={styles.symbol}>%</Text>
       </Text>
     </View>
   );
@@ -47,62 +47,72 @@ const SyncScreen = () => {
   const [masterAfdeling, setMasterAfdeling] = useState({
     progress: 0,
     total: 0,
+    status: 0
   });
   const [masterCompanies, setMasterCompanies] = useState({
     progress: 0,
     total: 0,
+    status: 0
   });
   const [masterEst, setMasterEst] = useState({
     progress: 0,
     total: 0,
+    status: 0
   });
   const [masterRegion, setMasterRegion] = useState({
     progress: 0,
     total: 0,
+    status: 0,
   });
   const [masterEmployee, setMasterEmployee] = useState({
     progress: 0,
     total: 0,
+    status: 0
   });
 
   const syncDownload = async () => {
     // Get Master Afdeling
-    getMasterAfdeling().then(data => {
+    await getMasterAfdeling().then(data => {
       setMasterAfdeling({
         progress: data.count,
         total: data.total,
+        status: 1,
       });
     });
 
     // Get Master Companies
-    getMasterCompany().then(data => {
+    await getMasterCompany().then(data => {
       setMasterCompanies({
         progress: data.count,
         total: data.total,
+        status: 1
       });
     });
 
     // Get Master Estate
-    getMasterEst().then(data => {
+    await getMasterEst().then(data => {
       setMasterEst({
         progress: data.count,
         total: data.total,
+        status: 1
       });
     });
 
     // Get Master Region
-    getMasterRegion().then(data => {
+    await getMasterRegion().then(data => {
       setMasterRegion({
         progress: data.count,
         total: data.total,
+        status: 1
       });
     });
 
     // Get Master Employee
-    getMasterEmployee().then(data => {
+    await getMasterEmployee().then(data => {
       setMasterEmployee({
         progress: data.count,
         total: data.total,
+        status: 1
       });
     });
   };
@@ -110,17 +120,14 @@ const SyncScreen = () => {
   const onSync = async () => {
     const isConnected = await NetInfo.fetch();
     if (isConnected.isConnected) {
-      setSync(!sync);
       setLoop(true);
+      setSync(true);
       animation.play();
-      updateUserSync();
+      await updateUserSync();
 
-      await syncDownload();
-
-      setTimeout(() => {
-        setSync(false);
-        setLoop(false);
-      }, 3000);
+      await syncDownload()
+      setSync(false);
+      setLoop(false);
     } else {
       setConnection(true);
     }
@@ -152,6 +159,17 @@ const SyncScreen = () => {
       );
     }
   };
+
+  const ValuePercentage = useMemo(() => {
+    const total = masterAfdeling.status + masterCompanies.status + masterEmployee.status + masterEst.status + masterRegion.status
+    return (total / 5) * 100
+  }, [
+    masterAfdeling,
+    masterCompanies,
+    masterEmployee,
+    masterEst,
+    masterRegion
+  ])
 
   return (
     <>
@@ -186,28 +204,28 @@ const SyncScreen = () => {
                 <Text style={styles.syncTxt}>Sync</Text>
               </TouchableOpacity>
             ) : (
-              <Percentage />
-            )}
+                <Percentage value={ValuePercentage} />
+              )}
           </View>
 
           <View style={styles.section}>
             <Text style={styles.sectionTitle}>Upload Data</Text>
             <ProgressSyncBar
               title={'Attendance'}
-              total={masterDataset.total}
-              progress={masterDataset.progress}
+              total={masterAfdeling.total}
+              progress={masterAfdeling.progress}
               sync={sync}
             />
             <ProgressSyncBar
               title={'Images'}
-              total={masterDataset.total}
-              progress={masterDataset.progress}
+              total={masterAfdeling.total}
+              progress={masterAfdeling.progress}
               sync={sync}
             />
             <ProgressSyncBar
               title={'Master Data Karyawan'}
-              total={masterDataset.total}
-              progress={masterDataset.progress}
+              total={masterAfdeling.total}
+              progress={masterAfdeling.progress}
               sync={sync}
             />
           </View>
