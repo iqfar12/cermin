@@ -23,6 +23,7 @@ import { getMasterCompany } from './Download/MasterCompany';
 import { getMasterEst } from './Download/MasterEst';
 import { getMasterRegion } from './Download/MasterRegion';
 import { getMasterEmployee } from './Download/MasterEmployee';
+import { uploadSyncEmployee } from './Upload/UploadEmployee';
 
 const Percentage = ({ value = 0 }) => {
   return (
@@ -69,6 +70,11 @@ const SyncScreen = () => {
     total: 0,
     status: 0
   });
+  const [uploadEmployee, setUploadEmployee] = useState({
+    progress: 0,
+    total: 0,
+    status: 0,
+  })
 
   const syncDownload = async () => {
     // Get Master Afdeling
@@ -123,9 +129,17 @@ const SyncScreen = () => {
       setLoop(true);
       setSync(true);
       animation.play();
-      await updateUserSync();
+
+      await uploadSyncEmployee().then((data) => {
+        setUploadEmployee({
+          progress: data.count,
+          total: data.total,
+          status: 1
+        })
+      })
 
       await syncDownload()
+      await updateUserSync();
       setSync(false);
       setLoop(false);
     } else {
@@ -161,14 +175,15 @@ const SyncScreen = () => {
   };
 
   const ValuePercentage = useMemo(() => {
-    const total = masterAfdeling.status + masterCompanies.status + masterEmployee.status + masterEst.status + masterRegion.status
-    return (total / 5) * 100
+    const total = masterAfdeling.status + masterCompanies.status + masterEmployee.status + masterEst.status + masterRegion.status + uploadEmployee.status
+    return Math.floor((total / 6) * 100)
   }, [
     masterAfdeling,
     masterCompanies,
     masterEmployee,
     masterEst,
-    masterRegion
+    masterRegion,
+    uploadEmployee
   ])
 
   return (
@@ -210,7 +225,7 @@ const SyncScreen = () => {
 
           <View style={styles.section}>
             <Text style={styles.sectionTitle}>Upload Data</Text>
-            <ProgressSyncBar
+            {/* <ProgressSyncBar
               title={'Attendance'}
               total={masterAfdeling.total}
               progress={masterAfdeling.progress}
@@ -221,11 +236,11 @@ const SyncScreen = () => {
               total={masterAfdeling.total}
               progress={masterAfdeling.progress}
               sync={sync}
-            />
+            /> */}
             <ProgressSyncBar
               title={'Master Data Karyawan'}
-              total={masterAfdeling.total}
-              progress={masterAfdeling.progress}
+              total={uploadEmployee.total}
+              progress={uploadEmployee.progress}
               sync={sync}
             />
           </View>
