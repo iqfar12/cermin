@@ -7,6 +7,7 @@ import MainVerificationScreen from '../Screen/Verification/MainVerificationScree
 import PreviewVerificationScreen from '../Screen/Verification/PreviewVerificationScreen';
 import TakePictureRecognition from '../Screen/Recognition/TakePictureRecognition';
 import PreviewRecognition from '../Screen/Recognition/PreviewRecognition';
+import LeaveScreen from '../Screen/Agenda';
 import {
   HomeScreen,
   RecognitionScreen,
@@ -66,6 +67,7 @@ const MainStackNavigator = () => {
         <StackNavigator.Screen name={'Profile'} component={ProfileScreen} />
         <StackNavigator.Screen name={'Login'} component={LoginScreen} />
         <StackNavigator.Screen name={'Sync'} component={SyncScreen} />
+        <StackNavigator.Screen name={'Leave'} component={LeaveScreen} />
       </StackNavigator.Navigator>
     </NavigationContainer>
   );

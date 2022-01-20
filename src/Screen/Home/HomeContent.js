@@ -88,7 +88,7 @@ const HomeContent = () => {
       title: 'Izin',
       iconColor: '#423FDA',
       onNavigation: () => {
-        navigation.navigate('Take Picture Recognition', {online: true});
+        navigation.navigate('Leave', {online: true});
       },
     },
   ];
