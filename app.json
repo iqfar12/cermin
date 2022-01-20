@@ -8,6 +8,9 @@
     ],
     "android": {
       "package": "com.cermin.app"
+    },
+    "ios": {
+      "bundleIdentifier": "com.cermin.app"
     }
   },
   "name": "cermin"
