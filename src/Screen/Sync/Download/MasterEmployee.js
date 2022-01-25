@@ -56,6 +56,10 @@ export const getMasterEmployee = async () => {
           );
         }
       }
+      downloadProgress = {
+        ...downloadProgress,
+        total: downloadProgress.total + res.data.data.length
+      }
     } catch (error) {
       console.log(error, 'error');
     }

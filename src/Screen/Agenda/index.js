@@ -1,5 +1,5 @@
-import React from "react";
-import { View, Text, StyleSheet, TouchableOpacity } from "react-native";
+import React, { useState, useMemo } from "react";
+import { View, Text, StyleSheet, TouchableOpacity, FlatList, TextInput } from "react-native";
 import { useNavigation } from '@react-navigation/native';
 import Icon from '@expo/vector-icons/MaterialIcons'
 
@@ -8,6 +8,9 @@ import SubHeader from '../../Component/SubHeader';
 
 // Font
 import { Fonts } from '../../Utils/Fonts';
+import BottomModal from "../../Component/BottomModal";
+import TaskServices from "../../Database/TaskServices";
+import MenuModal from "../../Component/MenuModal";
 
 
 const RightComponent = ({ navigation }) => {
@@ -23,11 +26,126 @@ const RightComponent = ({ navigation }) => {
     );
 };
 
+const LeaveType = [
+    {
+        name: 'Absen Masuk',
+        type: 1,
+    },
+    {
+        name: 'Absen Keluar',
+        type: 2,
+    }
+]
+
 const LeaveScreen = () => {
     const navigation = useNavigation();
+    const [userModal, setUserModal] = useState(false)
+    const [userSearch, setUserSearch] = useState('');
+    const MasterEmployee = TaskServices.getAllData('TM_EMPLOYEE');
+    const [user, setUser] = useState();
+    const [descrip, setDescrip] = useState('')
+    const [leaveType, setLeaveType] = useState(1);
+    const [typeModal, setTypeModal] = useState(false);
+
+    const ListEmployee = useMemo(() => {
+        if (userSearch !== '') {
+            return MasterEmployee.filter((item) =>
+                item.EMPLOYEE_NIK.split(' ').join('').includes(userSearch) ||
+                item.EMPLOYEE_FULLNAME.toLowerCase().includes(userSearch.toLowerCase()))
+        } else {
+            return MasterEmployee;
+        }
+    }, [MasterEmployee, userSearch])
+
+    const onPickEmployee = (val) => {
+        setUser(val);
+        setUserSearch('');
+        setUserModal(false);
+    }
+
+    const renderEmployee = ({ item, index }) => {
+        const nik = item.EMPLOYEE_NIK.split(' ').join('');
+        return (
+            <TouchableOpacity
+                onPress={() => onPickEmployee(item)}
+                key={index}
+                activeOpacity={0.8}
+                style={styles.modalButton}
+            >
+                <Text style={styles.modalButtonTitle}>{nik} - {item.EMPLOYEE_FULLNAME}</Text>
+            </TouchableOpacity>
+        )
+    }
+
+    const onPickType = (val) => {
+        setLeaveType(val);
+        setTypeModal(false)
+    }
+
+    const onLeave = () => {
+        navigation.navigate('Take Picture Leave')
+    }
+
+    const showModal = () => {
+        if (userModal) {
+            return (
+                <BottomModal
+                    visible={userModal}
+                    onClose={() => {
+                        setUserModal(false)
+                        setUserSearch('')
+                    }}
+                    title={'Pilih User'}
+                    search={true}
+                    searchPlaceholder={'Cari User'}
+                    searchValue={userSearch}
+                    onSearch={(val) => setUserSearch(val)}
+                    titleBottomButton={'Tutup'}
+                    size={0.5}
+                    bottomOnPress={() => {
+                        setUserModal(false)
+                        setUserSearch('');
+                    }}>
+                    <FlatList
+                        data={ListEmployee}
+                        keyExtractor={(_, i) => i.toString()}
+                        renderItem={renderEmployee}
+                        contentContainerStyle={styles.list}
+                        showsVerticalScrollIndicator={false}
+                    />
+                </BottomModal>
+            )
+        }
+        if (typeModal) {
+            return (
+              <MenuModal onClose={() => setTypeModal(false)} visible={typeModal}>
+                {LeaveType.map((item, index) => (
+                  <TouchableOpacity
+                    onPress={() => onPickType(item.type)}
+                    key={index}
+                    activeOpacity={0.8}
+                    style={styles.modalButton}
+                  >
+                    <Text style={styles.modalButtonTitle}>{item.name}</Text>
+                    <Icon name={'adjust'} size={25} color={'#195FBA'} />
+                  </TouchableOpacity>
+                ))}
+              </MenuModal>
+            );
+          }
+    }
+
+    const onDisabled = () => {
+        if (user === undefined || descrip === '') {
+            return true
+        } else {
+            return false
+        }
+    }
 
     return (
         <View style={styles.container}>
+            {showModal()}
             <View style={styles.top}>
                 <SubHeader
                     right={<RightComponent navigation={navigation} />}
@@ -41,10 +159,10 @@ const LeaveScreen = () => {
             </View>
             <View style={styles.AccountContainer}>
                 <Text style={styles.AccountTitle}>Pilih Akun</Text>
-                <TouchableOpacity style={styles.TouchAccount}>
+                <TouchableOpacity activeOpacity={0.8} onPress={() => setUserModal(true)} style={styles.TouchAccount}>
                     <Icon name="person" size={24} color="#C5C5C5" />
                     <View style={styles.ContentContainer}>
-                        <Text style={styles.TextContent}>321312321321 <Text style={styles.TextSubContent}>| John Doe</Text></Text>
+                        <Text style={styles.TextContent} numberOfLines={1} ellipsizeMode={'tail'}>{user ? user.EMPLOYEE_NIK : 'Pilih User'} <Text style={styles.TextSubContent}>{user ? `| ${user.EMPLOYEE_FULLNAME}` : ''}</Text></Text>
                     </View>
                     <Icon name="arrow-drop-down" size={24} color="#6C6C6C" />
                 </TouchableOpacity>
@@ -54,27 +172,34 @@ const LeaveScreen = () => {
                 <TouchableOpacity style={styles.LeaveContent}>
                     <Icon name="location-pin" size={24} color="#C5C5C5" />
                     <View style={styles.ContainerTextLeave}>
-                        <Text style={styles.TextLeave}>4213B</Text>
+                        <Text style={styles.TextLeave}>{user ? user.LOCATION : 'Lokasi'}</Text>
                     </View>
                     <Icon name="arrow-drop-down" size={24} color="#6C6C6C" />
                 </TouchableOpacity>
                 <Text style={styles.LeaveTitle}>Jenis Izin</Text>
-                <TouchableOpacity style={styles.LeaveContent}>
+                <TouchableOpacity activeOpacity={0.8} onPress={() => setTypeModal(true)} style={styles.LeaveContent}>
                     <View style={styles.ContainerTextLeave}>
-                        <Text style={styles.TextLeave}>Absen Masuk</Text>
+                        <Text style={styles.TextLeave}>{LeaveType.find((item) => item.type === leaveType)?.name}</Text>
                     </View>
                     <Icon name="arrow-drop-down" size={24} color="#6C6C6C" />
                 </TouchableOpacity>
                 <Text style={styles.LeaveTitle}>Keterangan</Text>
-                <TouchableOpacity style={styles.LeaveContent}>
+                <View style={styles.inputContainer}>
+                    <TextInput
+                        placeholder={'Alasan Izin'}
+                        value={descrip}
+                        onChangeText={(val) => setDescrip(val)}
+                        style={styles.input} />
+                </View>
+                {/* <TouchableOpacity style={styles.LeaveContent}>
                     <View style={styles.ContainerTextLeave}>
                         <Text style={styles.TextLeave}>Sakit Perut</Text>
                     </View>
                     <Icon name="arrow-drop-down" size={24} color="#6C6C6C" />
-                </TouchableOpacity>
+                </TouchableOpacity> */}
             </View>
             <View style={styles.ButtonContainer}>
-                <TouchableOpacity style={styles.TouchButton}>
+                <TouchableOpacity disabled={onDisabled()} activeOpacity={0.8} onPress={onLeave} style={[styles.TouchButton, onDisabled() && {backgroundColor: '#C5C5C5'}]}>
                     <Text style={styles.TextButton}>Berikan Izin</Text>
                 </TouchableOpacity>
             </View>
@@ -124,7 +249,8 @@ const styles = StyleSheet.create({
         flex: 1,
         borderBottomWidth: 1,
         borderBottomColor: '#C5C5C5',
-        justifyContent: 'center'
+        justifyContent: 'center',
+        marginBottom: 15,
     },
     AccountTitle: {
         fontFamily: Fonts.bold,
@@ -167,8 +293,8 @@ const styles = StyleSheet.create({
         flexDirection: 'row',
         alignItems: 'center',
         justifyContent: 'space-evenly',
-        marginHorizontal: 40,
-        paddingVertical: 13,
+        marginHorizontal: 30,
+        paddingVertical: 16,
         borderRadius: 30,
         borderColor: '#C5C5C5',
         borderWidth: 1
@@ -194,6 +320,37 @@ const styles = StyleSheet.create({
         fontFamily: Fonts.bold,
         fontSize: 16,
         color: '#FFF'
+    },
+    modalButton: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        justifyContent: 'space-between',
+        borderWidth: 1,
+        borderColor: '#D7EAFE',
+        padding: 10,
+        borderRadius: 10,
+        marginBottom: 10,
+        marginHorizontal: 20,
+    },
+    modalButtonTitle: {
+        fontSize: 16,
+        fontFamily: Fonts.book,
+        color: '#000',
+    },
+    list: {
+        paddingTop: 15,
+        paddingBottom: 10
+    },
+    input: {
+        marginHorizontal: 30,
+        borderWidth: 1,
+        borderColor: '#C5C5C5',
+        borderRadius: 30,
+        paddingVertical: 16,
+        paddingHorizontal: 20,
+        fontSize: 16,
+        color: '#000',
+        fontFamily: Fonts.book,
     }
 })
 

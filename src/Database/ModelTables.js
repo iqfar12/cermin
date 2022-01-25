@@ -55,7 +55,9 @@ const TM_EMPLOYEE = {
     EMPLOYEE_POSITION: 'string?',
     EMPLOYEE_JOINDATE: 'date?',
     EMPLOYEE_RESIGNDATE: 'date?',
-    AFD_CODE: 'string?',
+    REGISTER_STATUS: 'string?',
+    REFERENCE_LOCATION: 'string?',
+    LOCATION: 'string?',
     FACE_DESCRIPTOR: 'string?',
     INSERT_TIME: 'date?',
     INSERT_USER: 'string?',
@@ -67,7 +69,6 @@ const TM_EMPLOYEE = {
     DELETE_USER: 'string?',
     SYNC_STATUS: 'int?',
     SYNC_TIME: 'date?',
-    JOB_CODE: 'string?'
   },
 };
 
@@ -155,7 +156,7 @@ const TM_ABSENCE_TYPE = {
   primaryKey: 'CODE',
   properties: {
     CODE: 'string?',
-    SOURCE: 'int?',
+    SOURCE: 'string?',
     DESCRIPTION: 'string?',
     TYPE: 'int?',
     INSERT_TIME: 'date?',

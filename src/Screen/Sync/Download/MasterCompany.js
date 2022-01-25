@@ -6,7 +6,7 @@ export const getMasterCompany = async () => {
   const dbLocal = TaskServices.getAllData('TM_COMP');
   const url = 'http://apis-dev1.tap-agri.com/crm-msa-attendance/companies';
 
-  let donwloadProgress = {
+  let downloadProgress = {
     count: 0,
     total: dbLocal.length,
   };
@@ -33,17 +33,21 @@ export const getMasterCompany = async () => {
 
             TaskServices.saveData('TM_COMP', data);
 
-            donwloadProgress = {
-              ...donwloadProgress,
-              count: donwloadProgress.count + 1,
+            downloadProgress = {
+              ...downloadProgress,
+              count: downloadProgress.count + 1,
             };
           }),
         );
       }
     }
+    downloadProgress = {
+      ...downloadProgress,
+      total: downloadProgress.total + res.data.data.length
+    }
   } catch (error) {
     console.log(error, 'error');
   }
 
-  return donwloadProgress;
+  return downloadProgress;
 };

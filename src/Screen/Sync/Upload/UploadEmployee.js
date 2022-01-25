@@ -25,7 +25,7 @@ export const uploadSyncEmployee = async () => {
             })
             formData.append('employeeNik', item.EMPLOYEE_NIK)
             formData.append('employeeFullname', item.EMPLOYEE_FULLNAME)
-            formData.append('afdCode', item.AFD_CODE)
+            formData.append('afdCode', item.LOCATION)
             try {
                const res = await axios.post(url, formData, {
                    headers: {
@@ -42,7 +42,7 @@ export const uploadSyncEmployee = async () => {
                    }
                }
             } catch (error) {
-                console.log({...error}, 'error')
+                console.log(error.response, 'error register')
             }
         })
     }

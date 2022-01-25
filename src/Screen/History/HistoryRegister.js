@@ -61,11 +61,11 @@ const HistoryRegister = () => {
   const Employee = TaskServices.getAllData('TM_EMPLOYEE').filter((item) => item.REGISTER_TIME !== null);
 
   const Karyawan = useMemo(() => {
-    return Employee.filter((item) => item.TYPE == 'EMP')
+    return Employee.filter((item) => item.TYPE == 'E')
   }, [Employee])
 
   const NonKaryawan = useMemo(() => {
-    return Employee.filter((item) => item.TYPE == 'NON');
+    return Employee.filter((item) => item.TYPE == 'N');
   }, [Employee])
 
   console.log(NonKaryawan);

@@ -13,7 +13,7 @@ import Icon from '@expo/vector-icons/MaterialIcons';
 import SubmitButton from '../../Component/SubmitButton';
 import { Fonts } from '../../Utils/Fonts';
 
-const PreviewRecognition = ({ route }) => {
+const PreviewAttendanceRest = ({ route }) => {
   const navigation = useNavigation();
   const { data, image } = route.params;
 
@@ -47,13 +47,13 @@ const PreviewRecognition = ({ route }) => {
             <View style={styles.buttonContainer}>
               <TouchableOpacity
                 activeOpacity={0.8}
-                onPress={() => navigation.replace('Take Picture Recognition', { data: data })}
+                onPress={() => navigation.replace('Attendance Rest', { data: data })}
                 style={styles.retake}
               >
                 <Text style={styles.retakeTxt}>Ambil Ulang</Text>
-                <Icon name={'party-mode'} size={30} color={'#195FBA'} />
+                <Icon name={'party-mode'} size={30} color={'#FFB81C'} />
               </TouchableOpacity>
-              <SubmitButton onPress={() => {navigation.navigate('Home')}} title={'Absen'} />
+              <SubmitButton backgroundColor={'#FFB81C'} onPress={() => {navigation.navigate('Home')}} title={'Absen Istirahat'} />
             </View>
           </View>
         </ScrollView>
@@ -62,7 +62,7 @@ const PreviewRecognition = ({ route }) => {
   );
 };
 
-export default PreviewRecognition;
+export default PreviewAttendanceRest;
 
 const styles = StyleSheet.create({
   container: {

@@ -64,14 +64,14 @@ const PreRegisterScreen = () => {
     const id = UuidGenerator();
     const data = {
       ID: type === 1 ? data?.ID : id,
-      TYPE: type === 1 ? 'EMP' : 'NON',
-      SOURCE: type === 1 ? data?.SOURCE : 'Manual',
+      TYPE: type === 1 ? 'E' : 'N',
+      SOURCE: type === 1 ? data?.SOURCE : 'MANUAL',
       EMPLOYEE_NIK: type === 1 ? data?.EMPLOYEE_NIK.split(' ').join('') : nik,
       EMPLOYEE_FULLNAME: type === 1 ? data?.EMPLOYEE_FULLNAME : name.toUpperCase(),
       EMPLOYEE_POSITION: type === 1 ? data?.EMPLOYEE_POSITION : null,
       EMPLOYEE_JOINDATE: type === 1 ? data?.EMPLOYEE_JOINDATE : new Date(),
       EMPLOYEE_RESIGNDATE: type === 1 ? data?.EMPLOYEE_RESIGNDATE : null,
-      AFD_CODE: type === 1 ? data?.AFD_CODE : location.AFD_CODE_GIS,
+      LOCATION: type === 1 ? data?.AFD_CODE : location.AFD_CODE_GIS,
       FACE_DESCRIPTOR: type === 1 ? data?.FACE_DESCRIPTOR : null,
       INSERT_TIME: new Date(),
       INSERT_USER: type === 1 ? data?.INSERT_USER : user.NAME,
@@ -121,7 +121,7 @@ const PreRegisterScreen = () => {
   }
 
   const renderEmployee = ({ item, index }) => {
-    const nik = item.EMPLOYEE_NIK.split('/').join('').split(' ').join('');
+    const nik = item.EMPLOYEE_NIK.split(' ').join('');
     return (
       <TouchableOpacity
         onPress={() => onPickEmployee(item)}
@@ -148,7 +148,7 @@ const PreRegisterScreen = () => {
   }, [MasterAfdeling, locationSearch])
 
   const ListEmployee = useMemo(() => {
-    const res = MasterEmployee.filter((item) => item.TYPE === 'EMP');
+    const res = MasterEmployee.filter((item) => item.TYPE === 'E');
 
     if (employeeSearch !== '') {
       return res.filter((item) =>
@@ -158,9 +158,6 @@ const PreRegisterScreen = () => {
       return res;
     }
   }, [MasterEmployee, employeeSearch])
-
-
-  console.log(ListEmployee[0])
 
   const showModal = () => {
     if (typeModal) {

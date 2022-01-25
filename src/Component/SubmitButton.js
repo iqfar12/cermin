@@ -2,13 +2,13 @@ import React from 'react';
 import {StyleSheet, Text, View, TouchableOpacity} from 'react-native';
 import {Fonts} from '../Utils/Fonts';
 
-const SubmitButton = ({onPress, title, disabled}) => {
+const SubmitButton = ({onPress, title, disabled, backgroundColor}) => {
   return (
     <TouchableOpacity
       activeOpacity={0.8}
       onPress={onPress}
       disabled={disabled}
-      style={[styles.container, disabled && styles.disabled]}
+      style={[styles.container, disabled && styles.disabled, backgroundColor && {backgroundColor: backgroundColor}]}
     >
       <Text style={styles.title}>{title}</Text>
     </TouchableOpacity>

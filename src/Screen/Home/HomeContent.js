@@ -72,7 +72,7 @@ const HomeContent = () => {
       title: 'Pulang',
       iconColor: '#DC1B0F',
       onNavigation: () => {
-        navigation.navigate('Take Picture Recognition', {online: true});
+        navigation.navigate('Attendance Out');
       },
     },
     {
@@ -80,7 +80,7 @@ const HomeContent = () => {
       title: 'Istirahat',
       iconColor: '#FFB81C',
       onNavigation: () => {
-        navigation.navigate('Take Picture Recognition', {online: true});
+        navigation.navigate('Attendance Rest');
       },
     },
     {
@@ -136,10 +136,15 @@ const HomeContent = () => {
   return (
     <View style={styles.container}>
       <ScrollView
+        scrollEnabled={false}
         showsVerticalScrollIndicator={false}
         contentContainerStyle={styles.scroll}
       >
-        {sync && <SyncNotif />}
+        {sync && (
+          <View style={styles.sync}>
+            <SyncNotif />
+          </View>
+        )}
         <View style={styles.top}>
           <View style={styles.backgroundImage}>
             <Image source={BackgroundHome} style={styles.image} />
@@ -204,7 +209,7 @@ const styles = StyleSheet.create({
   },
   top: {
     position: 'relative',
-    justifyContent: 'center',
+    // justifyContent: 'center',
     alignItems: 'center',
     marginBottom: 20,
   },
@@ -214,6 +219,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   date: {
+    marginTop: 60,
     fontSize: 24,
     fontFamily: Fonts.book,
     color: '#FFF',
@@ -226,7 +232,7 @@ const styles = StyleSheet.create({
   bottom: {
     backgroundColor: '#F9F9F9',
     flex: 1,
-    marginTop: 10,
+    marginTop: -35,
     borderTopLeftRadius: 30,
     borderTopRightRadius: 30,
     padding: 20,
@@ -275,4 +281,8 @@ const styles = StyleSheet.create({
     fontFamily: Fonts.book,
     color: '#4E4C4C',
   },
+  sync: {
+    position: 'absolute',
+    width: '100%',
+  }
 });

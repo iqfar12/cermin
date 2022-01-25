@@ -24,6 +24,7 @@ import { getMasterEst } from './Download/MasterEst';
 import { getMasterRegion } from './Download/MasterRegion';
 import { getMasterEmployee } from './Download/MasterEmployee';
 import { uploadSyncEmployee } from './Upload/UploadEmployee';
+import { AbsenceCode } from './Download/AbsenceCode';
 
 const Percentage = ({ value = 0 }) => {
   return (
@@ -75,6 +76,11 @@ const SyncScreen = () => {
     total: 0,
     status: 0,
   })
+  const [absenceCode, setAbsenceCode] = useState({
+    progress: 0,
+    total: 0,
+    status: 0,
+  })
 
   const syncDownload = async () => {
     // Get Master Afdeling
@@ -121,7 +127,26 @@ const SyncScreen = () => {
         status: 1
       });
     });
+
+    // Get Absence Code
+    await AbsenceCode().then((data) => {
+      setAbsenceCode({
+        progress: data.count,
+        total: data.total,
+        status: 1,
+      })
+    })
   };
+
+  const onUpload = async () => {
+    await uploadSyncEmployee().then((data) => {
+      setUploadEmployee({
+        progress: data.count,
+        total: data.total,
+        status: 1
+      })
+    })
+  }
 
   const onSync = async () => {
     const isConnected = await NetInfo.fetch();
@@ -129,16 +154,9 @@ const SyncScreen = () => {
       setLoop(true);
       setSync(true);
       animation.play();
-
-      await uploadSyncEmployee().then((data) => {
-        setUploadEmployee({
-          progress: data.count,
-          total: data.total,
-          status: 1
-        })
+      await onUpload().then(async () => {
+        await syncDownload()
       })
-
-      await syncDownload()
       await updateUserSync();
       setSync(false);
       setLoop(false);
@@ -175,15 +193,16 @@ const SyncScreen = () => {
   };
 
   const ValuePercentage = useMemo(() => {
-    const total = masterAfdeling.status + masterCompanies.status + masterEmployee.status + masterEst.status + masterRegion.status + uploadEmployee.status
-    return Math.floor((total / 6) * 100)
+    const total = masterAfdeling.status + masterCompanies.status + masterEmployee.status + masterEst.status + masterRegion.status + uploadEmployee.status + absenceCode.status
+    return Math.floor((total / 7) * 100)
   }, [
     masterAfdeling,
     masterCompanies,
     masterEmployee,
     masterEst,
     masterRegion,
-    uploadEmployee
+    uploadEmployee,
+    absenceCode
   ])
 
   return (
@@ -275,6 +294,12 @@ const SyncScreen = () => {
               title={'Master Employee'}
               total={masterEmployee.total}
               progress={masterEmployee.progress}
+              sync={sync}
+            />
+            <ProgressSyncBar
+              title={'Absence Code'}
+              total={absenceCode.total}
+              progress={absenceCode.progress}
               sync={sync}
             />
           </View>

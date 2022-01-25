@@ -18,6 +18,12 @@ import {
   HistoryRegister,
 } from '../Screen';
 import ListRegisterScreen from '../Screen/Registration/ListRegisterScreen';
+import TakePictureLeave from '../Screen/Agenda/TakePictureLeave';
+import PreviewPictureLeave from '../Screen/Agenda/PreviewPictureLeave';
+import AttendanceOut from '../Screen/Attendance Out/AttendanceOut';
+import PreviewAttendanceOut from '../Screen/Attendance Out/PreviewAttendanceOut';
+import AttendanceRest from '../Screen/Attendance Rest/AttendanceRest';
+import PreviewAttendanceRest from '../Screen/Attendance Rest/PreviewAttendanceRest';
 
 const StackNavigator = createNativeStackNavigator();
 
@@ -68,7 +74,14 @@ const MainStackNavigator = () => {
         <StackNavigator.Screen name={'Login'} component={LoginScreen} />
         <StackNavigator.Screen name={'Sync'} component={SyncScreen} />
         <StackNavigator.Screen name={'Leave'} component={LeaveScreen} />
-      </StackNavigator.Navigator>
+        <StackNavigator.Screen name={'Take Picture Leave'} component={TakePictureLeave} />
+        <StackNavigator.Screen name={'Preview Picture Leave'} component={PreviewPictureLeave} />
+        <StackNavigator.Screen name={'Attendance Out'} component={AttendanceOut} />
+        <StackNavigator.Screen name={'Preview Attendance Out'} component={PreviewAttendanceOut} />
+        <StackNavigator.Screen name={'Attendance Rest'} component={AttendanceRest} />
+        <StackNavigator.Screen name={'Preview Attendance Rest'} component={PreviewAttendanceRest} />
+
+     </StackNavigator.Navigator>
     </NavigationContainer>
   );
 };

@@ -164,7 +164,7 @@ const ProfileScreen = () => {
         <View style={styles.imageContainer}>
           <Image style={styles.image} source={Person} />
           <Text style={styles.username}>{user.NAME}</Text>
-          <Text style={styles.companyname}>PT Lorem Ipsum dolor sir amet</Text>
+          <Text style={styles.companyname}>{user.REFERENCE_LOCATION}</Text>
           <View style={styles.rolecontainer}>
             <Text style={styles.role}>Admin</Text>
           </View>

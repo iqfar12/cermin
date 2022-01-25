@@ -13,7 +13,7 @@ import Icon from '@expo/vector-icons/MaterialIcons';
 import SubmitButton from '../../Component/SubmitButton';
 import { Fonts } from '../../Utils/Fonts';
 
-const PreviewRecognition = ({ route }) => {
+const PreviewPictureLeave = ({ route }) => {
   const navigation = useNavigation();
   const { data, image } = route.params;
 
@@ -32,7 +32,7 @@ const PreviewRecognition = ({ route }) => {
           </View>
           <View style={styles.bottom}>
             <View style={styles.infoContainer}>
-              <Text style={styles.name}>{'Melisa Soetanti'}</Text>
+              <Text style={styles.name}>{data ? data.label : 'Uknonwn'}</Text>
               <View style={styles.midText}>
                 <Text style={styles.nik}>{'32166343266'}</Text>
                 <Icon name={'location-pin'} size={20} color={'#C5C5C5'} />
@@ -47,13 +47,13 @@ const PreviewRecognition = ({ route }) => {
             <View style={styles.buttonContainer}>
               <TouchableOpacity
                 activeOpacity={0.8}
-                onPress={() => navigation.replace('Take Picture Recognition', { data: data })}
+                onPress={() => navigation.replace('Take Picture Leave', { data: data })}
                 style={styles.retake}
               >
                 <Text style={styles.retakeTxt}>Ambil Ulang</Text>
                 <Icon name={'party-mode'} size={30} color={'#195FBA'} />
               </TouchableOpacity>
-              <SubmitButton onPress={() => {navigation.navigate('Home')}} title={'Absen'} />
+              <SubmitButton onPress={() => {navigation.navigate('Home')}} title={'Izin'} />
             </View>
           </View>
         </ScrollView>
@@ -62,7 +62,7 @@ const PreviewRecognition = ({ route }) => {
   );
 };
 
-export default PreviewRecognition;
+export default PreviewPictureLeave;
 
 const styles = StyleSheet.create({
   container: {
