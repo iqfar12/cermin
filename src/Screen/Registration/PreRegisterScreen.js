@@ -44,7 +44,23 @@ const TypeEmployee = [
   },
 ];
 
+const ReferenceLocation = [
+  {
+    value: 'Afdeling',
+    name: 'Afdeling',
+  },
+  {
+    value: 'Estate',
+    name: 'Estate',
+  }, {
+    value: 'Company',
+    name: 'Company',
+  },
+]
+
 const PreRegisterScreen = () => {
+  const MasterEstate = TaskServices.getAllData('TM_EST');
+  const MasterCompany = TaskServices.getAllData('TM_COMP');
   const MasterAfdeling = TaskServices.getAllData('TM_AFD');
   const MasterEmployee = TaskServices.getAllData('TM_EMPLOYEE');
   const navigation = useNavigation();
@@ -59,9 +75,20 @@ const PreRegisterScreen = () => {
   const [data, setData] = useState();
   const [employeeModal, setEmployeeModal] = useState(false);
   const [employeeSearch, setEmployeeSearch] = useState('');
+  const [referenceLocation, setReferenceLocation] = useState('Afdeling');
+  const [referenceModal, setReferenceModal] = useState(false);
 
   const onRegister = async () => {
     const id = UuidGenerator();
+    const locationCode = () => {
+      if (referenceLocation == 'Afdeling') {
+        return location.AFD_CODE_GIS
+      } else if (referenceLocation == 'Estate') {
+        return location.EST_CODE
+      } else {
+        return location.COMP_CODE
+      }
+    }
     const data = {
       ID: type === 1 ? data?.ID : id,
       TYPE: type === 1 ? 'E' : 'N',
@@ -71,7 +98,9 @@ const PreRegisterScreen = () => {
       EMPLOYEE_POSITION: type === 1 ? data?.EMPLOYEE_POSITION : null,
       EMPLOYEE_JOINDATE: type === 1 ? data?.EMPLOYEE_JOINDATE : new Date(),
       EMPLOYEE_RESIGNDATE: type === 1 ? data?.EMPLOYEE_RESIGNDATE : null,
-      LOCATION: type === 1 ? data?.AFD_CODE : location.AFD_CODE_GIS,
+      REFERENCE_LOCATION: type === 1 ? data.REFERENCE_LOCATION : referenceLocation,
+      AFD_CODE: type === 1 ? data?.AFD_CODE : locationCode(),
+      REGISTER_STATUS: 'PROCESS',
       FACE_DESCRIPTOR: type === 1 ? data?.FACE_DESCRIPTOR : null,
       INSERT_TIME: new Date(),
       INSERT_USER: type === 1 ? data?.INSERT_USER : user.NAME,
@@ -100,7 +129,31 @@ const PreRegisterScreen = () => {
     setEmployeeSearch('')
   };
 
+  const onPickReference = val => {
+    setReferenceLocation(val);
+    setReferenceModal(false);
+  }
+
   const renderAfdeling = ({ item, index }) => {
+    const code = () => {
+      if (referenceLocation == 'Afdeling') {
+        return item.AFD_CODE_GIS
+      } else if (referenceLocation == 'Estate') {
+        return item.EST_CODE
+      } else {
+        return item.COMP_CODE
+      }
+    }
+
+    const name = () => {
+      if (referenceLocation == 'Afdeling') {
+        return item.AFD_NAME
+      } else if (referenceLocation == 'Estate') {
+        return item.EST_NAME
+      } else {
+        return item.COMP_NAME
+      }
+    }
     return (
       <TouchableOpacity
         onPress={() => onPickLocation(item)}
@@ -108,7 +161,7 @@ const PreRegisterScreen = () => {
         activeOpacity={0.8}
         style={styles.modalButton}
       >
-        <Text style={styles.modalButtonTitle}>{item.AFD_CODE_GIS} - {item.AFD_NAME}</Text>
+        <Text style={styles.modalButtonTitle}>{code()} - {name()}</Text>
         <Icon name={'adjust'} size={25} color={'#195FBA'} />
       </TouchableOpacity>
     )
@@ -147,6 +200,43 @@ const PreRegisterScreen = () => {
     }
   }, [MasterAfdeling, locationSearch])
 
+  const ListEstate = useMemo(() => {
+    const res = MasterEstate.map((item) => item).sort((a, b) => parseInt(a.COMP_CODE, 10) - parseInt(b.COMP_CODE, 10))
+    if (locationSearch !== '') {
+      return res.filter((item) =>
+        item.EST_NAME.toLowerCase().includes(locationSearch.toLocaleLowerCase()) ||
+        item.COMP_CODE.includes(locationSearch) ||
+        item.EST_CODE.includes(locationSearch) ||
+        item.WERKS.includes(locationSearch)
+      )
+    } else {
+      return res
+    }
+  }, [MasterEstate, locationSearch])
+
+  const ListCompany = useMemo(() => {
+    const res = MasterCompany.map((item) => item).sort((a, b) => parseInt(a.COMP_CODE, 10) - parseInt(b.COMP_CODE, 10))
+    if (locationSearch !== '') {
+      return res.filter((item) =>
+        item.COMP_NAME.toLowerCase().includes(locationSearch.toLocaleLowerCase()) ||
+        item.COMP_CODE.includes(locationSearch) ||
+        item.REGION_CODE.includes(locationSearch)
+      )
+    } else {
+      return res
+    }
+  }, [MasterCompany, locationSearch])
+
+  const List = () => {
+    if (referenceLocation == 'Afdeling') {
+      return ListAfdeling
+    } else if (referenceLocation == 'Estate') {
+      return ListEstate
+    } else {
+      return ListCompany
+    }
+  }
+
   const ListEmployee = useMemo(() => {
     const res = MasterEmployee.filter((item) => item.TYPE === 'E');
 
@@ -177,6 +267,23 @@ const PreRegisterScreen = () => {
         </MenuModal>
       );
     }
+    if (referenceModal) {
+      return (
+        <MenuModal onClose={() => setReferenceModal(false)} visible={referenceModal}>
+          {ReferenceLocation.map((item, index) => (
+            <TouchableOpacity
+              onPress={() => onPickReference(item.value)}
+              key={index}
+              activeOpacity={0.8}
+              style={styles.modalButton}
+            >
+              <Text style={styles.modalButtonTitle}>{item.name}</Text>
+              <Icon name={'adjust'} size={25} color={'#195FBA'} />
+            </TouchableOpacity>
+          ))}
+        </MenuModal>
+      );
+    }
     if (locationModal) {
       return (
         <BottomModal
@@ -193,11 +300,11 @@ const PreRegisterScreen = () => {
           titleBottomButton={'Tutup'}
           size={0.5}
           bottomOnPress={() => {
-            setLocation(false)
+            setLocationModal(false)
             setLocationSearch('')
           }}>
           <FlatList
-            data={ListAfdeling}
+            data={List()}
             keyExtractor={(_, i) => i.toString()}
             renderItem={renderAfdeling}
             contentContainerStyle={styles.list}
@@ -247,6 +354,16 @@ const PreRegisterScreen = () => {
       return false;
     }
   };
+
+  const locations = () => {
+    if (referenceLocation == 'Afdeling') {
+      return location.AFD_CODE_GIS
+    } else if (referenceLocation == 'Estate') {
+      return location.EST_NAME
+    } else {
+      return location.COMP_NAME
+    }
+  }
 
   return (
     <>
@@ -337,6 +454,33 @@ const PreRegisterScreen = () => {
                 )}
             </View>
             <View style={styles.form}>
+              <Text style={styles.accountTitle}>Referensi Lokasi</Text>
+              <TouchableOpacity
+                style={[
+                  styles.accountBar,
+                  { borderWidth: 1, borderColor: '#C5C5C5' },
+                ]}
+                activeOpacity={0.8}
+                disabled={type === 1}
+                onPress={() => setReferenceModal(true)}
+              >
+                {type === 1 ?
+                  <View style={styles.left}>
+                    <Icon name={'location-pin'} size={25} color={'#DADADA'} />
+                    <Text style={styles.formTxt}>{data === undefined ? 'Pilih Referensi Lokasi' : data?.REFERENCE_LOCATION}</Text>
+                  </View>
+                  :
+                  <View style={styles.left}>
+                    <Icon name={'location-pin'} size={25} color={'#DADADA'} />
+                    <Text style={styles.formTxt}>{referenceLocation}</Text>
+                  </View>
+                }
+                {type === 2 && <View style={styles.right}>
+                  <Icon name={'arrow-drop-down'} size={25} color={'#797676'} />
+                </View>}
+              </TouchableOpacity>
+            </View>
+            <View style={styles.form}>
               <Text style={styles.accountTitle}>Lokasi</Text>
               <TouchableOpacity
                 style={[
@@ -355,7 +499,7 @@ const PreRegisterScreen = () => {
                   :
                   <View style={styles.left}>
                     <Icon name={'location-pin'} size={25} color={'#DADADA'} />
-                    <Text style={styles.formTxt}>{location === undefined ? 'Pilih Lokasi' : location.AFD_CODE_GIS}</Text>
+                    <Text style={styles.formTxt}>{location === undefined ? 'Pilih Lokasi' : locations()}</Text>
                   </View>
                 }
                 {type === 2 && <View style={styles.right}>

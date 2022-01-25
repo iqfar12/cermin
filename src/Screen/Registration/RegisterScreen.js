@@ -534,7 +534,7 @@ const RegisterScreen = ({ route }) => {
   const cropImage = async image => {
     try {
       const resize = await manipulateAsync(image.uri, [
-        { resize: { width: 1080, height: 1440 } },
+        { resize: { width: 768, height: 1024 } },
       ]);
       let position = undefined;
       //   await RNFS.copyFile(mobilenet.uri, pathMobilenet);

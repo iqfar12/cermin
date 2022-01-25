@@ -62,16 +62,18 @@ const LoginScreen = () => {
       USER_NAME: data.username,
       ACCESS_TOKEN: token,
       NAME: data.name,
-      JOB_DESC: data.jobName,
-      ROLE_NAME: 1,
-      REFERENCE_LOCATION: data.location,
+      JOB_DESC: data.jobDesc,
+      ROLE_NAME: data.roleId,
+      REFERENCE_LOCATION: data.referenceLocation,
       LOCATION: data.location,
-      INSERT_TIME: new Date(),
+      INSERT_TIME: data.insertTime,
       INSERT_USER: data.name,
-      UPDATE_TIME: new Date(),
+      UPDATE_TIME: data.updateTime,
       UPDATE_USER: data.name,
-      DELETE_TIME: new Date(),
-      DELETE_USER: data.name,
+      COMP_CODE: data.compCode,
+      COMP_NAME: data.company.compName,
+      DELETE_TIME: null,
+      DELETE_USER: null,
       LAST_SYNC: null,
       SERVER: ServerList[server].baseUrl
     };
@@ -88,7 +90,7 @@ const LoginScreen = () => {
         },
       });
       if (res) {
-        await postRealm(res.data.user.data, token);
+        await postRealm(res.data.user, token);
         setIsLoading(false);
         navigation.replace('Home');
       }

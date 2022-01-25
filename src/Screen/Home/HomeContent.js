@@ -48,7 +48,7 @@ const HomeContent = () => {
   const MasterEmployee = TaskServices.getAllData('TM_EMPLOYEE');
 
   const ListNotRegisterEmployee = useMemo(() => {
-    return MasterEmployee.filter((item) => item.REGISTER_STATUS === null);
+    return MasterEmployee.filter((item) => item.REGISTER_STATUS == "NONE");
   }, [MasterEmployee])
 
   useEffect(() => {

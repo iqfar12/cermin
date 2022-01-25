@@ -82,6 +82,46 @@ const SyncScreen = () => {
     status: 0,
   })
 
+  useEffect(() => {
+    if (!sync) {
+      setMasterAfdeling({
+        progress: 0,
+        total: 0,
+        status: 0
+      });
+      setMasterCompanies({
+        progress: 0,
+        total: 0,
+        status: 0
+      });
+      setMasterEst({
+        progress: 0,
+        total: 0,
+        status: 0
+      });
+      setMasterRegion({
+        progress: 0,
+        total: 0,
+        status: 0,
+      });
+      setMasterEmployee({
+        progress: 0,
+        total: 0,
+        status: 0
+      });
+      setUploadEmployee({
+        progress: 0,
+        total: 0,
+        status: 0,
+      })
+      setAbsenceCode({
+        progress: 0,
+        total: 0,
+        status: 0,
+      })
+    }
+  }, [sync])
+
   const syncDownload = async () => {
     // Get Master Afdeling
     await getMasterAfdeling().then(data => {
@@ -158,8 +198,10 @@ const SyncScreen = () => {
         await syncDownload()
       })
       await updateUserSync();
-      setSync(false);
-      setLoop(false);
+      setTimeout(() => {
+        setSync(false);
+        setLoop(false);
+      }, 3000)
     } else {
       setConnection(true);
     }

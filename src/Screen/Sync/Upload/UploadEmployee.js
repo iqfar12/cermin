@@ -25,7 +25,8 @@ export const uploadSyncEmployee = async () => {
             })
             formData.append('employeeNik', item.EMPLOYEE_NIK)
             formData.append('employeeFullname', item.EMPLOYEE_FULLNAME)
-            formData.append('afdCode', item.LOCATION)
+            formData.append('afdCode', item.AFD_CODE)
+            console.log(formData, 'body')
             try {
                const res = await axios.post(url, formData, {
                    headers: {
@@ -40,6 +41,14 @@ export const uploadSyncEmployee = async () => {
                        ...uploadCount,
                        count: uploadCount.count + 1
                    }
+
+                   const data = {
+                       ID: item.ID,
+                       SYNC_TIME: new Date(),
+                       SYNC_STATUS: 1,
+                   }
+
+                   TaskServices.saveData('TM_EMPLOYEE', data)
                }
             } catch (error) {
                 console.log(error.response, 'error register')

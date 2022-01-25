@@ -17,7 +17,7 @@ const HeaderHome = ({onSetting, onSync, User}) => {
               {User.NAME}
             </Text>
             <Text style={styles.name} numberOfLines={1} ellipsizeMode={'tail'}>
-              {User.REFERENCE_LOCATION}
+              {User.COMP_NAME}
             </Text>
           </View>
         </View>

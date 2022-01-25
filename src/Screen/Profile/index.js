@@ -170,7 +170,7 @@ const ProfileScreen = () => {
         <View style={styles.imageContainer}>
           <Image style={styles.image} source={Person} />
           <Text style={styles.username}>{user.NAME}</Text>
-          <Text style={styles.companyname}>{user.REFERENCE_LOCATION}</Text>
+          <Text style={styles.companyname}>{user.COMP_NAME}</Text>
           <View style={styles.rolecontainer}>
             <Text style={styles.role}>Admin</Text>
           </View>

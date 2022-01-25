@@ -2,8 +2,12 @@ import React from 'react';
 import {StyleSheet, Text, View, TouchableOpacity} from 'react-native';
 import {Fonts} from '../Utils/Fonts';
 import Icon from '@expo/vector-icons/MaterialIcons';
+import TaskServices from '../Database/TaskServices';
 
 const RecognizeBarCard = ({onPress, data = []}) => {
+  const MasterEmployee = TaskServices.getAllData('TM_EMPLOYEE');
+  const isRegister = Math.floor((data.length / MasterEmployee.length) * 100);
+  const percentage = 100 - isRegister;
   return (
     <View style={styles.container}>
       <View style={styles.left}>
@@ -13,7 +17,7 @@ const RecognizeBarCard = ({onPress, data = []}) => {
       <View style={styles.mid}>
         <Text style={styles.inActiveNum}>Belum didaftarkan</Text>
         <View style={styles.barContainer}>
-          <View style={[styles.bar, {width: '30%'}]} />
+          <View style={[styles.bar, {width: `${percentage}%`}]} />
         </View>
       </View>
       <TouchableOpacity activeOpacity={0.8} onPress={onPress} style={styles.right}>

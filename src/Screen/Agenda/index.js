@@ -42,6 +42,7 @@ const LeaveScreen = () => {
     const [userModal, setUserModal] = useState(false)
     const [userSearch, setUserSearch] = useState('');
     const MasterEmployee = TaskServices.getAllData('TM_EMPLOYEE');
+    const MasterAbsenceType = TaskServices.getAllData('TM_ABSENCE_TYPE');
     const [user, setUser] = useState();
     const [descrip, setDescrip] = useState('')
     const [leaveType, setLeaveType] = useState(1);
@@ -119,14 +120,14 @@ const LeaveScreen = () => {
         if (typeModal) {
             return (
               <MenuModal onClose={() => setTypeModal(false)} visible={typeModal}>
-                {LeaveType.map((item, index) => (
+                {MasterAbsenceType.map((item, index) => (
                   <TouchableOpacity
-                    onPress={() => onPickType(item.type)}
+                    onPress={() => onPickType(item.CODE)}
                     key={index}
                     activeOpacity={0.8}
                     style={styles.modalButton}
                   >
-                    <Text style={styles.modalButtonTitle}>{item.name}</Text>
+                    <Text style={styles.modalButtonTitle}>{item.TYPE}</Text>
                     <Icon name={'adjust'} size={25} color={'#195FBA'} />
                   </TouchableOpacity>
                 ))}
@@ -179,7 +180,7 @@ const LeaveScreen = () => {
                 <Text style={styles.LeaveTitle}>Jenis Izin</Text>
                 <TouchableOpacity activeOpacity={0.8} onPress={() => setTypeModal(true)} style={styles.LeaveContent}>
                     <View style={styles.ContainerTextLeave}>
-                        <Text style={styles.TextLeave}>{LeaveType.find((item) => item.type === leaveType)?.name}</Text>
+                        <Text style={styles.TextLeave}>{MasterAbsenceType.find((item) => item.CODE === leaveType)?.TYPE}</Text>
                     </View>
                     <Icon name="arrow-drop-down" size={24} color="#6C6C6C" />
                 </TouchableOpacity>
