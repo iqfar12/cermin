@@ -32,7 +32,7 @@ export const getMasterEmployee = async () => {
                 EMPLOYEE_POSITION: item.employeePosition,
                 EMPLOYEE_JOINDATE: item.employeeJoinDate,
                 EMPLOYEE_RESIGNDATE: item.employeeResignDate,
-                AFD_CODE: item.afdCodeGis,
+                LOCATION: item.afdCode,
                 FACE_DESCRIPTOR: item.faceDescriptor,
                 INSERT_TIME: item.insertTime,
                 INSERT_USER: item.insertUser,

@@ -151,7 +151,7 @@ const LoginScreen = () => {
               style={styles.modalButton}
             >
               <Text style={styles.modalButtonTitle}>{item.name}</Text>
-              <Icon name={'adjust'} size={25} color={'#195FBA'} />
+              <Icon name={'adjust'} size={25} color={index === server ? '#195FBA' : '#C5C5C5'} />
             </TouchableOpacity>
           ))}
         </MenuModal>

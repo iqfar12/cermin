@@ -29,8 +29,10 @@ import Sentot from './Sentot.png';
 import Sync from './Sync.json';
 import ic_no_internet from './ic-no-internet.png';
 import Warning from './Warning.png';
+import Success from './Success.png';
 
 export {
+  Success,
   Warning,
   ic_no_internet,
   Sync,

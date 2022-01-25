@@ -3,24 +3,17 @@ import {StyleSheet, Text, View, Image, TouchableOpacity} from 'react-native';
 import MaterialIcons from '@expo/vector-icons/MaterialCommunityIcons';
 
 import {Sentot, Person} from '../../assets';
-import Maison from '../../Utils/Fonts';
+import Maison, { Fonts } from '../../Utils/Fonts';
 import {useNavigation} from '@react-navigation/native';
 import TaskServices from '../../Database/TaskServices';
 import fs from 'react-native-fs';
 import * as expoFS from 'expo-file-system';
+import SuccessModal from '../../Component/SuccessModal';
 
 const ProfileScreen = () => {
   const navigation = useNavigation();
   const user = TaskServices.getCurrentUser();
   const Menu = [
-    {
-      icon: 'sync',
-      title: 'Sinkronisasi Data',
-      arrow: 'chevron-right',
-      onNavigation: () => {
-        navigation.navigate('Sync');
-      },
-    },
     {
       icon: 'cloud-upload',
       title: 'Backup Database',
@@ -46,12 +39,6 @@ const ProfileScreen = () => {
       },
     },
     {
-      icon: 'cellphone-information',
-      title: 'Mobile Version',
-      arrow: 'chevron-right',
-      onNavigation: () => {},
-    },
-    {
       icon: 'logout',
       title: 'Logout',
       arrow: 'chevron-right',
@@ -60,6 +47,9 @@ const ProfileScreen = () => {
       },
     },
   ];
+  const [backupModal, setBackUpModal] = useState(false);
+  const [exportModal, setExportModal] = useState(false);
+  const [resetModal, setResetModal] = useState(false);
 
   const onLogout = async () => {
     TaskServices.deleteAllData('TM_USERS');
@@ -88,6 +78,7 @@ const ProfileScreen = () => {
     await fs.copyFile(realm, backupPath);
     // await expoFS.copyAsync(realm, backupPath);
     console.log('success');
+    setBackUpModal(true)
   };
 
   const onExport = async () => {
@@ -112,6 +103,7 @@ const ProfileScreen = () => {
       'file:///storage/emulated/0/Android/media/com.cermin/Local/Database/database.json';
     await fs.writeFile(exportPath, JSON.stringify(data), 'utf8');
     console.log('success');
+    setExportModal(true)
   };
 
   const renderMenu = data => {
@@ -141,6 +133,18 @@ const ProfileScreen = () => {
     ));
   };
 
+  const showModal = () => {
+    if (backupModal) {
+      return <SuccessModal title={'Backup Berhasil'} content={'Backup Database Anda Berhasil'} visible={backupModal} onPress={() => setBackUpModal(false)} />
+    }
+    if (exportModal) {
+      return <SuccessModal title={'Export Berhasil'} content={'Export Data Transaksi Anda Berhasil'} visible={exportModal} onPress={() => setExportModal(false)} />
+    }
+    if (resetModal) {
+      return <SuccessModal title={'Reset Berhasil'} content={'Reset Database Anda Berhasil'} visible={resetModal} onPress={() => setResetModal(false)} />
+    }
+  }
+
   const onResetData = async () => {
     console.log('resetData');
     const TM_DATA = [
@@ -156,10 +160,12 @@ const ProfileScreen = () => {
     TM_DATA.forEach(async item => {
       TaskServices.deleteAllData(item);
     });
+    setResetModal(true);
   };
 
   return (
     <View style={styles.container}>
+      {showModal()}
       <View style={styles.top}>
         <View style={styles.imageContainer}>
           <Image style={styles.image} source={Person} />
@@ -171,7 +177,9 @@ const ProfileScreen = () => {
         </View>
       </View>
       <View style={styles.middle}>{renderMenu(Menu)}</View>
-      <View style={styles.bottom} />
+      <View style={styles.bottom}>
+        <Text style={styles.version}>mobile version v1.0.0</Text>
+      </View>
     </View>
   );
 };
@@ -231,6 +239,8 @@ const styles = StyleSheet.create({
   },
   bottom: {
     flex: 0.7,
+    alignItems: 'center',
+    justifyContent: 'flex-end',
   },
   menucontainer: {
     paddingVertical: 5,
@@ -268,4 +278,10 @@ const styles = StyleSheet.create({
     alignSelf: 'flex-end',
     marginRight: 15,
   },
+  version: {
+    fontSize: 16,
+    fontFamily: Fonts.book,
+    color: '#383636',
+    marginBottom: 25,
+  }
 });

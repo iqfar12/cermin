@@ -1,10 +1,9 @@
-import React, { useMemo } from 'react'
+import React from 'react'
 import { StyleSheet, Text, View, TouchableOpacity, TextInput, FlatList } from 'react-native'
 import { useNavigation } from '@react-navigation/native';
 import { Fonts } from '../../Utils/Fonts';
 import SubHeader from '../../Component/SubHeader';
 import Icon from '@expo/vector-icons/MaterialIcons'
-import TaskServices from '../../Database/TaskServices';
 
 const RightComponent = ({ navigation }) => {
     return (
@@ -43,27 +42,22 @@ const DummyData = [
     },
 ]
 
-const ListRegisterScreen = () => {
+const HistoryAgenda = () => {
     const navigation = useNavigation();
-    const MasterEmployee = TaskServices.getAllData('TM_EMPLOYEE');
-    
-    const ListEmployee = useMemo(() => {
-        return MasterEmployee.filter((item) => item.REGISTER_STATUS === null)
-    }, [MasterEmployee])
 
     const renderListCard = ({ item, index }) => {
         return (
             <View style={styles.card}>
                 <View style={styles.cardLeft}>
-                    <Text style={styles.name}>{item.EMPLOYEE_FULLNAME}</Text>
-                    <Text style={styles.nik}>{item.EMPLOYEE_NIK} </Text>
+                    <Text style={styles.name}>John Doe</Text>
+                    <Text style={styles.nik}>3013021988280001 </Text>
                 </View>
                 <View style={styles.cardRight}>
                     <View style={styles.location}>
                         <Icon name={'location-pin'} size={20} color={'#C5C5C5'} />
-                        <Text style={styles.locationTxt}>{item.LOCATION}</Text>
+                        <Text style={styles.locationTxt}>4213B</Text>
                     </View>
-                    <Icon name={'keyboard-arrow-right'} size={25} color={'#2F78D7'} />
+                    <Icon name={'radio-button-unchecked'} size={25} color={'#FFB81C'} />
                 </View>
             </View>
         )
@@ -72,13 +66,12 @@ const ListRegisterScreen = () => {
     return (
         <View style={styles.wrapper}>
             <SubHeader
-                right={<RightComponent navigation={navigation} />}
                 onBack={() => navigation.goBack()}
                 title={'Kembali'}
             />
             <View style={styles.container}>
                 <View style={styles.header}>
-                    <Text style={styles.headerTitle}>User Belum Terdaftar ({ListEmployee.length})</Text>
+                    <Text style={styles.headerTitle}>Daftar Izin</Text>
                 </View>
                 <View style={styles.body}>
                     <View style={styles.search}>
@@ -95,7 +88,7 @@ const ListRegisterScreen = () => {
                         </View>
                     </View>
                     <FlatList
-                     data={ListEmployee}
+                     data={DummyData}
                      renderItem={renderListCard}
                      keyExtractor={(_, i) => i.toString()}
                      contentContainerStyle={styles.list}
@@ -107,7 +100,7 @@ const ListRegisterScreen = () => {
     )
 }
 
-export default ListRegisterScreen
+export default HistoryAgenda
 
 const styles = StyleSheet.create({
     wrapper: {
@@ -203,9 +196,8 @@ const styles = StyleSheet.create({
     cardLeft: {
         borderRightWidth: 1,
         borderColor: '#C5C5C5',
-        paddingRight: 10,
+        paddingRight: 50,
         marginRight: 20,
-        width: '55%',
     },
     name: {
         fontSize: 16,

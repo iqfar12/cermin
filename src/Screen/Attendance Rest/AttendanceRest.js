@@ -58,6 +58,7 @@ const AttendanceRest = ({ route }) => {
   const navigation = useNavigation();
   const [step, setStep] = useState(shuffleArr());
   const [faceId, setFaceId] = useState(0);
+  const [front, setFront] = useState(true);
 
   const condition4 = event => {
     const rightEye = event?.faces[0]?.rightEyeOpenProbability;
@@ -278,7 +279,7 @@ const AttendanceRest = ({ route }) => {
             size={25}
             color={'#FFB81C'}
             style={styles.switch}
-            onPress={() => console.log('press')} />
+            onPress={() => setFront(!front)} />
         </View>
         {isFocused ? (
           <View style={styles.wrapper}>
@@ -287,7 +288,7 @@ const AttendanceRest = ({ route }) => {
                 setCamera(ref);
               }}
               style={styles.preview}
-              type={'front'}
+              type={front ? 'front' : 'back'}
               ratio={'4:3'}
               faceDetectorSettings={{
                 mode: FaceDetector.FaceDetectorMode.fast,

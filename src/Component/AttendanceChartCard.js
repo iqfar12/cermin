@@ -5,7 +5,7 @@ import {Calendar} from '../assets';
 import {Fonts} from '../Utils/Fonts';
 import Icon from '@expo/vector-icons/MaterialIcons';
 
-const AttendanceChartCard = () => {
+const AttendanceChartCard = ({onPress}) => {
   return (
     <View style={styles.container}>
       <View style={styles.chartContainer}>
@@ -29,7 +29,7 @@ const AttendanceChartCard = () => {
           <Text style={styles.txt}>Absensi Lengkap</Text>
         </View>
       </View>
-      <TouchableOpacity activeOpacity={0.8} style={styles.right}>
+      <TouchableOpacity activeOpacity={0.8} onPress={onPress} style={styles.right}>
         <Icon name={'keyboard-arrow-right'} size={25} color={'#2F78D7'} />
       </TouchableOpacity>
     </View>

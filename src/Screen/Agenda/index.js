@@ -16,7 +16,7 @@ import MenuModal from "../../Component/MenuModal";
 const RightComponent = ({ navigation }) => {
     return (
         <TouchableOpacity
-            onPress={() => navigation.navigate('History Register')}
+            onPress={() => navigation.navigate('History Agenda')}
             activeOpacity={0.8}
             style={styles.right}
         >

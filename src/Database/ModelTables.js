@@ -158,7 +158,7 @@ const TM_ABSENCE_TYPE = {
     CODE: 'string?',
     SOURCE: 'string?',
     DESCRIPTION: 'string?',
-    TYPE: 'int?',
+    TYPE: 'string?',
     INSERT_TIME: 'date?',
     INSERT_USER: 'string?',
     UPDATE_TIME: 'date?',

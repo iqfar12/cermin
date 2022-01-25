@@ -29,6 +29,7 @@ import SyncNotif from '../../Component/SyncNotif';
 import moment from 'moment';
 import NoConnectionModal from '../../Component/NoConnectionModal';
 import WarningModal from '../../Component/WarningModal';
+import SuccessModal from '../../Component/SuccessModal';
 
 moment.locale('id');
 const HomeScreen = ({route}) => {
@@ -180,8 +181,6 @@ const HomeScreen = ({route}) => {
   const user = TaskServices.getAllData('TM_USERS')[0];
 
   const navigation = useNavigation();
-  const employee = TaskServices.getAllData('TM_EMPLOYEE').filter((item) => item.SYNC_TIME === null);
-  console.log(employee.length)
   return (
     <>
       <StatusBar backgroundColor={'#195FBA'} />

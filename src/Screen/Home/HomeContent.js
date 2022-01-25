@@ -17,6 +17,7 @@ import PermittedCard from '../../Component/PermittedCard';
 import Icon from '@expo/vector-icons/MaterialIcons';
 import {useNavigation} from '@react-navigation/native';
 import SyncNotif from '../../Component/SyncNotif';
+import TaskServices from '../../Database/TaskServices';
 
 const Dummy = [
   {
@@ -44,6 +45,11 @@ const Dummy = [
 const HomeContent = () => {
   const navigation = useNavigation();
   const [sync, setSync] = useState(true);
+  const MasterEmployee = TaskServices.getAllData('TM_EMPLOYEE');
+
+  const ListNotRegisterEmployee = useMemo(() => {
+    return MasterEmployee.filter((item) => item.REGISTER_STATUS === null);
+  }, [MasterEmployee])
 
   useEffect(() => {
     setTimeout(() => {
@@ -155,9 +161,9 @@ const HomeContent = () => {
           </View>
         </View>
         <View style={styles.bottom}>
-          <AttendanceChartCard />
+          <AttendanceChartCard onPress={() => navigation.navigate('History Attendance')} />
           <View style={styles.recognize}>
-            <RecognizeBarCard onPress={() => navigation.navigate('List Register')} />
+            <RecognizeBarCard data={ListNotRegisterEmployee} onPress={() => navigation.navigate('List Register')} />
           </View>
           <View style={styles.permittedContainer}>
             <View style={styles.permittedHeader}>
@@ -232,7 +238,7 @@ const styles = StyleSheet.create({
   bottom: {
     backgroundColor: '#F9F9F9',
     flex: 1,
-    marginTop: -35,
+    marginTop: -10,
     borderTopLeftRadius: 30,
     borderTopRightRadius: 30,
     padding: 20,

@@ -3,31 +3,22 @@ import {StyleSheet, Text, View, TouchableOpacity} from 'react-native';
 import {Fonts} from '../Utils/Fonts';
 import Icon from '@expo/vector-icons/MaterialIcons';
 
-const RecognizeBarCard = ({onPress}) => {
+const RecognizeBarCard = ({onPress, data = []}) => {
   return (
     <View style={styles.container}>
-      <View style={styles.top}>
-        <Text style={styles.title}>Pengenalan Wajah</Text>
-        <TouchableOpacity onPress={onPress} activeOpacity={0.8} style={styles.button}>
-          <Text style={styles.buttonTitle}>Lihat Semua</Text>
-        </TouchableOpacity>
+      <View style={styles.left}>
+        <Icon name={'group'} size={20} color={'#FFFFFF'} />
+        <Text style={styles.num}>{data.length}</Text>
       </View>
       <View style={styles.mid}>
-        <View style={[styles.bar, {width: '70%'}]} />
-      </View>
-      <View style={styles.bottom}>
-        <View style={styles.left}>
-          <Icon name={'people'} size={25} color={'#195FBA'} />
-          <Text style={styles.bottomTxt}>
-            <Text style={{fontFamily: Fonts.bold}}>38 </Text>
-            belum terdaftar
-          </Text>
-        </View>
-        <View style={styles.right}>
-          <Text style={styles.activeNum}>86</Text>
-          <Text style={styles.inActiveNum}> / 124</Text>
+        <Text style={styles.inActiveNum}>Belum didaftarkan</Text>
+        <View style={styles.barContainer}>
+          <View style={[styles.bar, {width: '30%'}]} />
         </View>
       </View>
+      <TouchableOpacity activeOpacity={0.8} onPress={onPress} style={styles.right}>
+        <Icon name={'chevron-right'} size={25} color={'#FFF'} />
+      </TouchableOpacity>
     </View>
   );
 };
@@ -36,10 +27,12 @@ export default RecognizeBarCard;
 
 const styles = StyleSheet.create({
   container: {
-    backgroundColor: '#FFF',
+    backgroundColor: '#195FBA',
     padding: 15,
     elevation: 0.5,
     borderRadius: 20,
+    flexDirection: 'row',
+    justifyContent: 'space-between',
   },
   top: {
     flexDirection: 'row',
@@ -59,10 +52,10 @@ const styles = StyleSheet.create({
   button: {
     paddingHorizontal: 10,
   },
-  mid: {
+  barContainer: {
     height: '5%',
     width: '100%',
-    backgroundColor: '#DADADA',
+    backgroundColor: '#C5C5C5',
     marginVertical: 15,
     borderRadius: 10,
     position: 'relative',
@@ -70,7 +63,7 @@ const styles = StyleSheet.create({
   },
   bar: {
     height: '150%',
-    backgroundColor: '#195FBA',
+    backgroundColor: '#FFF',
     position: 'absolute',
     borderRadius: 10,
   },
@@ -98,8 +91,18 @@ const styles = StyleSheet.create({
     color: '#000',
   },
   inActiveNum: {
-    fontSize: 12,
-    fontFamily: Fonts.bold,
-    color: '#DADADA',
+    fontSize: 16,
+    fontFamily: Fonts.book,
+    color: '#FFF',
   },
+  num: {
+    fontSize: 32,
+    fontFamily: Fonts.bold,
+    color: '#FFF',
+    marginHorizontal: 5,
+  },
+  mid: {
+    flex: 1,
+    marginHorizontal: 20,
+  }
 });

@@ -350,7 +350,7 @@ const PreRegisterScreen = () => {
                 {type === 1 ?
                   <View style={styles.left}>
                     <Icon name={'location-pin'} size={25} color={'#DADADA'} />
-                    <Text style={styles.formTxt}>{data === undefined ? 'Pilih Lokasi' : data?.AFD_CODE}</Text>
+                    <Text style={styles.formTxt}>{data === undefined ? 'Pilih Lokasi' : data?.LOCATION}</Text>
                   </View>
                   :
                   <View style={styles.left}>
