@@ -46,7 +46,7 @@ const HistoryAttendance = () => {
 
     const renderListCard = ({ item, index }) => {
         return (
-            <View style={styles.card}>
+            <TouchableOpacity activeOpacity={0.8} onPress={() => navigation.navigate('Detail History Attendance', {data: item})} style={styles.card}>
                 <View style={styles.top}>
                     <Text style={styles.name}>3121901993200001<Text style={styles.nik}> | John Doe</Text></Text>
                     <Icon name={'radio-button-unchecked'} size={25} color={'#FFB81C'} />
@@ -69,21 +69,21 @@ const HistoryAttendance = () => {
                         </View>
                     </View>
                     <View style={styles.buttonContainer}>
-                        <View style={styles.stateButtonLogout}>
+                        <TouchableOpacity activeOpacity={0.8} onPress={() => navigation.navigate('Attendance Out')} style={styles.stateButtonLogout}>
                             <Icon name={'logout'} size={25} color={'#FFF'} />
                             <Text style={styles.stateButtonTxt}>Pulang</Text>
-                        </View>
-                        <View style={styles.stateButtonRest}>
+                        </TouchableOpacity>
+                        <TouchableOpacity activeOpacity={0.8} onPress={() => navigation.navigate('Attendance Rest')} style={styles.stateButtonRest}>
                             <Icon name={'local-cafe'} size={25} color={'#FFF'} />
                             <Text style={styles.stateButtonTxt}>Istirahat</Text>
-                        </View>
-                        <View style={styles.stateButtonAgenda}>
+                        </TouchableOpacity>
+                        <TouchableOpacity activeOpacity={0.8} onPress={() => navigation.navigate('Leave')} style={styles.stateButtonAgenda}>
                             <Icon name={'article'} size={25} color={'#FFF'} />
                             <Text style={styles.stateButtonTxt}>Izin</Text>
-                        </View>
+                        </TouchableOpacity>
                     </View>
                 </View>
-            </View>
+            </TouchableOpacity>
         )
     }
 

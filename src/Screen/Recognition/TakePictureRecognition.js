@@ -183,6 +183,7 @@ const TakePictureRecognition = ({ route }) => {
         navigation.navigate('Preview Recognition', {
           data: {
             label: results._label,
+            accuracy: results._distance,
           },
           image: gambar,
         });

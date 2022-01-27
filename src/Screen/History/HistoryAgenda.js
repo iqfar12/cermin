@@ -54,8 +54,6 @@ const HistoryAgenda = () => {
         return res
     }, [MasterAttendance])
 
-    console.log(ListAgenda)
-
     const renderListCard = ({ item, index }) => {
         const user = MasterEmployee.find((data) => data.ID == item.EMPLOYEE_ID)
         return (

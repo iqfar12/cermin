@@ -26,6 +26,7 @@ import AttendanceRest from '../Screen/Attendance Rest/AttendanceRest';
 import PreviewAttendanceRest from '../Screen/Attendance Rest/PreviewAttendanceRest';
 import HistoryAttendance from '../Screen/History/HistoryAttendance';
 import HistoryAgenda from '../Screen/History/HistoryAgenda';
+import DetailHistoryAttendance from '../Screen/History/DetailHistoryAttendance';
 
 const StackNavigator = createNativeStackNavigator();
 
@@ -79,6 +80,10 @@ const MainStackNavigator = () => {
         <StackNavigator.Screen
           name={'History Agenda'}
           component={HistoryAgenda}
+        />
+        <StackNavigator.Screen
+          name={'Detail History Attendance'}
+          component={DetailHistoryAttendance}
         />
         <StackNavigator.Screen name={'Profile'} component={ProfileScreen} />
         <StackNavigator.Screen name={'Login'} component={LoginScreen} />

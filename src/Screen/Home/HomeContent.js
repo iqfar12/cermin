@@ -1,4 +1,4 @@
-import React, {useMemo, useState, useEffect} from 'react';
+import React, { useMemo, useState, useEffect } from 'react';
 import {
   StyleSheet,
   Text,
@@ -8,14 +8,14 @@ import {
   FlatList,
   ScrollView,
 } from 'react-native';
-import {BackgroundHome} from '../../assets';
-import {Fonts} from '../../Utils/Fonts';
-import {MonthName} from '../../Utils/DateHelper';
+import { BackgroundHome } from '../../assets';
+import { Fonts } from '../../Utils/Fonts';
+import { MonthName } from '../../Utils/DateHelper';
 import AttendanceChartCard from '../../Component/AttendanceChartCard';
 import RecognizeBarCard from '../../Component/RecognizeBarCard';
 import PermittedCard from '../../Component/PermittedCard';
 import Icon from '@expo/vector-icons/MaterialIcons';
-import {useNavigation} from '@react-navigation/native';
+import { useNavigation } from '@react-navigation/native';
 import SyncNotif from '../../Component/SyncNotif';
 import TaskServices from '../../Database/TaskServices';
 
@@ -46,6 +46,13 @@ const HomeContent = () => {
   const navigation = useNavigation();
   const [sync, setSync] = useState(true);
   const MasterEmployee = TaskServices.getAllData('TM_EMPLOYEE');
+  const MasterAttendance = TaskServices.getAllData('TR_ATTENDANCE');
+
+  const ListAgenda = useMemo(() => {
+    const res = MasterAttendance.filter((item) => item.TYPE === 'EXCUSED')
+
+    return res
+  }, [MasterAttendance])
 
   const ListNotRegisterEmployee = useMemo(() => {
     return MasterEmployee.filter((item) => item.REGISTER_STATUS == "NONE");
@@ -70,7 +77,7 @@ const HomeContent = () => {
       title: 'Masuk',
       iconColor: '#3D9F70',
       onNavigation: () => {
-        navigation.navigate('Take Picture Recognition', {online: true});
+        navigation.navigate('Take Picture Recognition', { online: true });
       },
     },
     {
@@ -94,7 +101,7 @@ const HomeContent = () => {
       title: 'Izin',
       iconColor: '#423FDA',
       onNavigation: () => {
-        navigation.navigate('Leave', {online: true});
+        navigation.navigate('Leave');
       },
     },
   ];
@@ -121,8 +128,10 @@ const HomeContent = () => {
     }, 5000);
   }, [date]);
 
-  const renderPermittedCardList = ({item, index}) => {
-    return <PermittedCard name={item.name} code={item.code} />;
+  const renderPermittedCardList = ({ item, index }) => {
+    const name = MasterEmployee.find((data) => data.ID === item.EMPLOYEE_ID)?.EMPLOYEE_FULLNAME
+    const nik = MasterEmployee.find((data) => data.ID === item.EMPLOYEE_ID)?.EMPLOYEE_NIK
+    return <PermittedCard name={name} code={nik} />;
   };
 
   const renderNavButton = (item, index) => {
@@ -176,12 +185,13 @@ const HomeContent = () => {
               </TouchableOpacity>
             </View>
             <FlatList
-              data={Dummy}
+              data={ListAgenda}
               keyExtractor={(_, index) => index.toString()}
               renderItem={renderPermittedCardList}
               horizontal={true}
               contentContainerStyle={styles.permitted}
               showsHorizontalScrollIndicator={false}
+              ListEmptyComponent={<PermittedCard name={'Tidak ada Data'} />}
             />
           </View>
           <View style={styles.navContainer}>

@@ -80,7 +80,7 @@ const LeaveScreen = () => {
         const data = {
             ID: id,
             EMPLOYEE_ID: user.ID,
-            TYPE: type,
+            TYPE: '4',
             ABSENCE_CODE: leaveType,
             DATETIME: new Date(),
             ACCURACY: null,

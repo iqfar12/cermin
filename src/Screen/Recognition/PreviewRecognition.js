@@ -13,16 +13,51 @@ import Icon from '@expo/vector-icons/MaterialIcons';
 import SubmitButton from '../../Component/SubmitButton';
 import { Fonts } from '../../Utils/Fonts';
 import TaskServices from '../../Database/TaskServices';
+import { UuidGenerator } from '../../Utils/UuidGenerator';
 
 const PreviewRecognition = ({ route }) => {
   const navigation = useNavigation();
   const { data, image } = route.params;
   const [count, setCount] = useState(10);
   const MasterEmployee = TaskServices.getAllData('TM_EMPLOYEE');
+  const MasterAbsenceCode = TaskServices.getAllData('TM_ABSENCE_TYPE');
   const Results = useMemo(() => {
     const res = MasterEmployee.find((item) => item.EMPLOYEE_NIK == data?.label);
     return res
   }, [data, MasterEmployee])
+
+  const onAttendance = async () => {
+    const id = UuidGenerator();
+    const code = MasterAbsenceCode.find((item) => item.TYPE == 'WORKED' && item.SOURCE == Results.SOURCE).CODE  
+    if (Results === undefined) {
+      navigation.navigate('Home')
+    } else {
+      // 1 = Masuk
+      // 2 = Istirahat
+      // 3 = Pulang
+      // 4 = Izin
+      const body = {
+        ID: id,
+        EMPLOYEE_ID: Results.ID,
+        TYPE: '4',
+        ABSENCE_CODE: code,
+        DATETIME: new Date(),
+        ACCURACY: data?.accuracy,
+        LATITUDE: 'double?',
+        LONGITUDE: 'double?',
+        MANUAL_INPUT: 0,
+        DESCRIPTION: 'Absen Masuk',
+        INSERT_TIME: new Date(),
+        INSERT_USER: Results.EMPLOYEE_NIK,
+        SYNC_STATUS: null,
+        SYNC_TIME: null,
+      }
+
+      await TaskServices.saveData('TR_ATTENDANCE', body);
+
+      navigation.navigate('Home')
+    }
+  }
 
   useEffect(() => {
     if (count > 0) {
@@ -30,7 +65,7 @@ const PreviewRecognition = ({ route }) => {
         setCount(count - 1)
       }, 1000)
     } else {
-      navigation.navigate('Home')
+      onAttendance();
     }
   }, [count])
   return (
