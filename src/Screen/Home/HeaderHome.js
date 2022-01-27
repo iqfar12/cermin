@@ -5,6 +5,7 @@ import {Fonts} from '../../Utils/Fonts';
 import Icon from '@expo/vector-icons/MaterialIcons';
 
 const HeaderHome = ({onSetting, onSync, User}) => {
+  const companyName = User?.COMP_NAME.split(' ').map((item) => item.split('')[0]).join('');
   return (
     <>
       <View style={styles.container}>
@@ -17,7 +18,7 @@ const HeaderHome = ({onSetting, onSync, User}) => {
               {User.NAME}
             </Text>
             <Text style={styles.name} numberOfLines={1} ellipsizeMode={'tail'}>
-              {User.COMP_NAME}
+              {companyName}
             </Text>
           </View>
         </View>

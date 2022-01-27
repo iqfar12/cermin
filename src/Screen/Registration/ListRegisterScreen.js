@@ -48,7 +48,7 @@ const ListRegisterScreen = () => {
     const MasterEmployee = TaskServices.getAllData('TM_EMPLOYEE');
     
     const ListEmployee = useMemo(() => {
-        return MasterEmployee.filter((item) => item.REGISTER_STATUS === null)
+        return MasterEmployee.filter((item) => item.REGISTER_STATUS == 'NONE')
     }, [MasterEmployee])
 
     const renderListCard = ({ item, index }) => {
@@ -61,7 +61,7 @@ const ListRegisterScreen = () => {
                 <View style={styles.cardRight}>
                     <View style={styles.location}>
                         <Icon name={'location-pin'} size={20} color={'#C5C5C5'} />
-                        <Text style={styles.locationTxt}>{item.LOCATION}</Text>
+                        <Text style={styles.locationTxt}>{item.WERKS}</Text>
                     </View>
                     <Icon name={'keyboard-arrow-right'} size={25} color={'#2F78D7'} />
                 </View>
@@ -85,7 +85,7 @@ const ListRegisterScreen = () => {
                         <Icon name={'search'} size={25} color={'#C5C5C5'} />
                         <TextInput style={styles.input} placeholder={'Cari Nama/Nik'} />
                     </View>
-                    <View style={styles.tagContainer}>
+                    {/* <View style={styles.tagContainer}>
                         <TouchableOpacity style={styles.more}>
                             <Icon name={'tune'} size={25} color={'#000'} />
                         </TouchableOpacity>
@@ -93,7 +93,7 @@ const ListRegisterScreen = () => {
                             <Text style={styles.tagTitle}>4213B</Text>
                             <Icon name={'cancel'} size={20} color={'#FFF'} />
                         </View>
-                    </View>
+                    </View> */}
                     <FlatList
                      data={ListEmployee}
                      renderItem={renderListCard}

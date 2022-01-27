@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useMemo, useState, useEffect } from 'react';
 import {
   StyleSheet,
   Text,
@@ -12,11 +12,27 @@ import { useNavigation } from '@react-navigation/native';
 import Icon from '@expo/vector-icons/MaterialIcons';
 import SubmitButton from '../../Component/SubmitButton';
 import { Fonts } from '../../Utils/Fonts';
+import TaskServices from '../../Database/TaskServices';
 
 const PreviewRecognition = ({ route }) => {
   const navigation = useNavigation();
   const { data, image } = route.params;
+  const [count, setCount] = useState(10);
+  const MasterEmployee = TaskServices.getAllData('TM_EMPLOYEE');
+  const Results = useMemo(() => {
+    const res = MasterEmployee.find((item) => item.EMPLOYEE_NIK == data?.label);
+    return res
+  }, [data, MasterEmployee])
 
+  useEffect(() => {
+    if (count > 0) {
+      setTimeout(() => {
+        setCount(count - 1)
+      }, 1000)
+    } else {
+      navigation.navigate('Home')
+    }
+  }, [count])
   return (
     <>
       <StatusBar translucent backgroundColor={'rgba(0, 0, 0, 0)'} />
@@ -31,19 +47,22 @@ const PreviewRecognition = ({ route }) => {
             </View>
           </View>
           <View style={styles.bottom}>
-            <View style={styles.infoContainer}>
-              <Text style={styles.name}>{'Melisa Soetanti'}</Text>
+            {Results !== undefined ? <View style={styles.infoContainer}>
+              <Text style={styles.name}>{Results.EMPLOYEE_FULLNAME}</Text>
               <View style={styles.midText}>
-                <Text style={styles.nik}>{'32166343266'}</Text>
+                <Text style={styles.nik}>{Results.EMPLOYEE_NIK}</Text>
                 <Icon name={'location-pin'} size={20} color={'#C5C5C5'} />
-                <Text style={styles.afd}>{'4213B'}</Text>
+                <Text style={styles.afd}>{Results.WERKS}</Text>
               </View>
               <View style={styles.type}>
                 <Text style={styles.typeTxt}>
-                  {'Employee'}
+                  {Results.TYPE == 'E' ? 'Employee' : 'Non-Employee'}
                 </Text>
               </View>
-            </View>
+            </View> :
+              <View style={styles.infoContainer}>
+                <Text style={styles.name}>Wajah Tidak Ditemukan</Text>
+              </View>}
             <View style={styles.buttonContainer}>
               <TouchableOpacity
                 activeOpacity={0.8}
@@ -53,7 +72,7 @@ const PreviewRecognition = ({ route }) => {
                 <Text style={styles.retakeTxt}>Ambil Ulang</Text>
                 <Icon name={'party-mode'} size={30} color={'#195FBA'} />
               </TouchableOpacity>
-              <SubmitButton onPress={() => {navigation.navigate('Home')}} title={'Absen'} />
+              <SubmitButton onPress={() => { navigation.navigate('Home') }} title={`Absen(${count})`} />
             </View>
           </View>
         </ScrollView>

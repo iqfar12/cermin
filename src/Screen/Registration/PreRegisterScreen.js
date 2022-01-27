@@ -89,7 +89,7 @@ const PreRegisterScreen = () => {
         return location.COMP_CODE
       }
     }
-    const data = {
+    const body = {
       ID: type === 1 ? data?.ID : id,
       TYPE: type === 1 ? 'E' : 'N',
       SOURCE: type === 1 ? data?.SOURCE : 'MANUAL',
@@ -98,8 +98,10 @@ const PreRegisterScreen = () => {
       EMPLOYEE_POSITION: type === 1 ? data?.EMPLOYEE_POSITION : null,
       EMPLOYEE_JOINDATE: type === 1 ? data?.EMPLOYEE_JOINDATE : new Date(),
       EMPLOYEE_RESIGNDATE: type === 1 ? data?.EMPLOYEE_RESIGNDATE : null,
-      REFERENCE_LOCATION: type === 1 ? data.REFERENCE_LOCATION : referenceLocation,
+      REFERENCE_LOCATION: type === 1 ? data?.REFERENCE_LOCATION : referenceLocation,
       AFD_CODE: type === 1 ? data?.AFD_CODE : locationCode(),
+      COMP_CODE: type === 1 ? data?.COMP_CODE : locationCode(),
+      WERKS: type === 1 ? data?.WERKS : locationCode(),
       REGISTER_STATUS: 'PROCESS',
       FACE_DESCRIPTOR: type === 1 ? data?.FACE_DESCRIPTOR : null,
       INSERT_TIME: new Date(),
@@ -114,8 +116,7 @@ const PreRegisterScreen = () => {
       SYNC_TIME: null,
     };
 
-    await TaskServices.saveData('TM_EMPLOYEE', data);
-    navigation.navigate('Registration Home', { data });
+    navigation.navigate('Registration Home', { data: body });
   };
 
   const onPickType = val => {
@@ -298,7 +299,7 @@ const PreRegisterScreen = () => {
           searchValue={locationSearch}
           onSearch={(val) => setLocationSearch(val)}
           titleBottomButton={'Tutup'}
-          size={0.5}
+          size={0.6}
           bottomOnPress={() => {
             setLocationModal(false)
             setLocationSearch('')
@@ -326,7 +327,7 @@ const PreRegisterScreen = () => {
           searchValue={employeeSearch}
           onSearch={(val) => setEmployeeSearch(val)}
           titleBottomButton={'Tutup'}
-          size={0.5}
+          size={0.6}
           bottomOnPress={() => {
             setEmployeeModal(false)
             setEmployeeSearch('')
@@ -399,7 +400,7 @@ const PreRegisterScreen = () => {
           </View>
           <View style={styles.formContainer}>
             <View style={styles.form}>
-              <Text style={styles.formTitle}>NIK</Text>
+              <Text style={styles.formTitle}>{type === 1 ? 'NIK' : 'No. Identitas'}</Text>
               {type === 1 ? (
                 <TouchableOpacity
                   style={[
@@ -411,7 +412,7 @@ const PreRegisterScreen = () => {
                 >
                   <View style={styles.left}>
                     <Text style={styles.formTxt}>
-                      {data === undefined ? 'Pilih Karyawan' : data?.EMPLOYEE_NIK.split('/').join('').split(' ').join('')}
+                      {data === undefined ? 'Pilih Karyawan' : data?.EMPLOYEE_NIK.split(' ').join('')}
                     </Text>
                   </View>
                   <View style={styles.right}>
@@ -423,7 +424,7 @@ const PreRegisterScreen = () => {
                     style={styles.input}
                     value={nik}
                     onChangeText={val => setNik(val)}
-                    placeholder={'NIK'}
+                    placeholder={'No. Identitas'}
                   />
                 )}
             </View>
@@ -494,7 +495,7 @@ const PreRegisterScreen = () => {
                 {type === 1 ?
                   <View style={styles.left}>
                     <Icon name={'location-pin'} size={25} color={'#DADADA'} />
-                    <Text style={styles.formTxt}>{data === undefined ? 'Pilih Lokasi' : data?.LOCATION}</Text>
+                    <Text style={styles.formTxt}>{data === undefined ? 'Pilih Lokasi' : data?.WERKS}</Text>
                   </View>
                   :
                   <View style={styles.left}>
@@ -581,7 +582,6 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontFamily: Fonts.bold,
     color: '#797676',
-    marginBottom: 10,
   },
   input: {
     borderWidth: 1,
@@ -595,7 +595,7 @@ const styles = StyleSheet.create({
     fontFamily: Fonts.book,
   },
   form: {
-    marginBottom: 25,
+    marginBottom: 20,
   },
   right: {
     flexDirection: 'row',

@@ -1,9 +1,10 @@
-import React from 'react'
+import React, { useMemo } from 'react'
 import { StyleSheet, Text, View, TouchableOpacity, TextInput, FlatList } from 'react-native'
 import { useNavigation } from '@react-navigation/native';
 import { Fonts } from '../../Utils/Fonts';
 import SubHeader from '../../Component/SubHeader';
 import Icon from '@expo/vector-icons/MaterialIcons'
+import TaskServices from '../../Database/TaskServices';
 
 const RightComponent = ({ navigation }) => {
     return (
@@ -44,18 +45,29 @@ const DummyData = [
 
 const HistoryAgenda = () => {
     const navigation = useNavigation();
+    const MasterAttendance = TaskServices.getAllData('TR_ATTENDANCE');
+    const MasterEmployee = TaskServices.getAllData('TM_EMPLOYEE');
+
+    const ListAgenda = useMemo(() => {
+        const res = MasterAttendance.filter((item) => item.TYPE === 'EXCUSED')
+        
+        return res
+    }, [MasterAttendance])
+
+    console.log(ListAgenda)
 
     const renderListCard = ({ item, index }) => {
+        const user = MasterEmployee.find((data) => data.ID == item.EMPLOYEE_ID)
         return (
             <View style={styles.card}>
                 <View style={styles.cardLeft}>
-                    <Text style={styles.name}>John Doe</Text>
-                    <Text style={styles.nik}>3013021988280001 </Text>
+                    <Text style={styles.name}>{user?.EMPLOYEE_FULLNAME}</Text>
+                    <Text style={styles.nik}>{user?.EMPLOYEE_NIK} </Text>
                 </View>
                 <View style={styles.cardRight}>
                     <View style={styles.location}>
                         <Icon name={'location-pin'} size={20} color={'#C5C5C5'} />
-                        <Text style={styles.locationTxt}>4213B</Text>
+                        <Text style={styles.locationTxt}>{user?.WERKS}</Text>
                     </View>
                     <Icon name={'radio-button-unchecked'} size={25} color={'#FFB81C'} />
                 </View>
@@ -88,7 +100,7 @@ const HistoryAgenda = () => {
                         </View>
                     </View>
                     <FlatList
-                     data={DummyData}
+                     data={ListAgenda}
                      renderItem={renderListCard}
                      keyExtractor={(_, i) => i.toString()}
                      contentContainerStyle={styles.list}

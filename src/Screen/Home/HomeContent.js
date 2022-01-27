@@ -217,7 +217,7 @@ const styles = StyleSheet.create({
     position: 'relative',
     // justifyContent: 'center',
     alignItems: 'center',
-    marginBottom: 20,
+    // marginBottom: 20,
   },
   clock: {
     position: 'absolute',
@@ -242,7 +242,7 @@ const styles = StyleSheet.create({
     borderTopLeftRadius: 30,
     borderTopRightRadius: 30,
     padding: 20,
-    paddingBottom: 35,
+    paddingBottom: 70,
   },
   permittedHeader: {
     flexDirection: 'row',

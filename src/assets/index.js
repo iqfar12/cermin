@@ -30,8 +30,12 @@ import Sync from './Sync.json';
 import ic_no_internet from './ic-no-internet.png';
 import Warning from './Warning.png';
 import Success from './Success.png';
+import Password from './Password.png';
+import Email from './Email.png';
 
 export {
+  Password,
+  Email,
   Success,
   Warning,
   ic_no_internet,

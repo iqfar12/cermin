@@ -61,6 +61,8 @@ const TM_EMPLOYEE = {
     REFERENCE_LOCATION: 'string?',
     COMP_CODE: 'string?',
     WERKS: 'string?',
+    JOB_CODE: 'string?',
+    JOB_TYPE: 'string?',
     AFD_CODE: 'string?',
     FACE_DESCRIPTOR: 'string?',
     INSERT_TIME: 'date?',
@@ -178,7 +180,7 @@ const TR_ATTENDANCE = {
   properties: {
     ID: 'string?',
     EMPLOYEE_ID: 'string?',
-    TYPE: 'int?',
+    TYPE: 'string?',
     ABSENCE_CODE: 'string?',
     DATETIME: 'date?',
     ACCURACY: 'double?',

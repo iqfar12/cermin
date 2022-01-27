@@ -8,8 +8,9 @@ import {
   TextInput,
   ScrollView,
   TouchableOpacity,
+  KeyboardAvoidingView,
 } from 'react-native';
-import {Logo} from '../../assets';
+import {Logo, Email, Password} from '../../assets';
 import {Fonts} from '../../Utils/Fonts';
 import Icon from '@expo/vector-icons/MaterialIcons';
 import {useNavigation} from '@react-navigation/native';
@@ -22,6 +23,7 @@ import LoadingModal from '../../Component/LoadingModal';
 import TaskServices from '../../Database/TaskServices';
 import {getUniqueId} from 'react-native-device-info';
 import NoConnectionModal from '../../Component/NoConnectionModal';
+import PopModal from '../../Component/PopModal';
 
 const ServerList = [
   {
@@ -54,6 +56,8 @@ const LoginScreen = () => {
   const [deviceId, setDeviceId] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [connection, setConnection] = useState(false);
+  const [emailModal, setEmailModal] = useState(false);
+  const [passwordModal, setPasswordModal] = useState(false);
 
   const postRealm = async (data, token) => {
     console.log(data);
@@ -96,10 +100,19 @@ const LoginScreen = () => {
       }
     } catch (error) {
       console.log(error, 'error get Data');
+      setIsLoading(false);
     }
   };
 
   const login = async () => {
+    if (email === '') {
+      setEmailModal(true)
+      return;
+    }
+    if (password === '') {
+      setPasswordModal(true);
+      return;
+    }
     const isConnected = await NetInfo.fetch();
     if (isConnected.isConnected) {
       setIsLoading(true);
@@ -170,6 +183,28 @@ const LoginScreen = () => {
         />
       );
     }
+    if (emailModal) {
+      return (
+        <PopModal
+          visible={emailModal}
+          onPress={() => setEmailModal(false)}
+          title={'Email Kosong!'}
+          content={'Email Tidak Boleh Kosong'}
+          image={Email}
+        />
+      )
+    }
+    if (passwordModal) {
+      return (
+        <PopModal
+          visible={passwordModal}
+          onPress={() => setPasswordModal(false)}
+          title={'Password Kosong!'}
+          content={'Password Tidak Boleh Kosong'}
+          image={Password}
+        />
+      )
+    }
   };
 
   return (
@@ -177,6 +212,7 @@ const LoginScreen = () => {
       {showModal()}
       <StatusBar backgroundColor={'#195FBA'} />
       <View style={styles.container}>
+      <KeyboardAvoidingView>
         <ScrollView
           showsVerticalScrollIndicator={false}
           contentContainerStyle={styles.scroll}
@@ -236,6 +272,7 @@ const LoginScreen = () => {
             />
           </TouchableOpacity>
         </ScrollView>
+      </KeyboardAvoidingView>
       </View>
     </>
   );
@@ -248,9 +285,10 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: '#FFF',
     paddingHorizontal: 30,
+    justifyContent: 'center',
   },
   logo: {
-    width: '75%',
+    width: '70%',
     height: undefined,
     aspectRatio: 3 / 4,
     alignItems: 'center',

@@ -92,6 +92,7 @@ const PreviewScreen = ({route}) => {
 
       await TaskServices.saveData('TR_IMAGES', body)
     });
+    await TaskServices.saveData('TM_EMPLOYEE', data);
     navigation.reset({
       index: 0,
       routes: [{name: 'PreRegister'}],

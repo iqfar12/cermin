@@ -7,6 +7,7 @@ import {
   TouchableOpacity,
   Platform,
   TextInput,
+  KeyboardAvoidingView,
 } from 'react-native';
 import Icon from 'react-native-vector-icons/MaterialIcons';
 const BottomModal = props => {
@@ -44,6 +45,7 @@ const BottomModal = props => {
               </TouchableOpacity>
             )}
             {props.search && (
+              <KeyboardAvoidingView>
               <View style={styles.search}>
                 <Icon name={'search'} size={25} color={'#748389'} />
                 <TextInput
@@ -54,6 +56,7 @@ const BottomModal = props => {
                   style={styles.searchInput}
                 />
               </View>
+              </KeyboardAvoidingView>
             )}
           </View>
           {props.children}
