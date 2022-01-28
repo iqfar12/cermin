@@ -7,8 +7,8 @@ import TaskServices from '../../Database/TaskServices';
 import { useNavigation } from '@react-navigation/native';
 import * as faceapi from 'face-api.js';
 import { requestCameraPermissionsAsync } from 'expo-camera';
-import '@tensorflow/tfjs-react-native';
-import '../../../platform';
+// import '@tensorflow/tfjs-react-native';
+// import '../../../platform';
 import fs from 'react-native-fs';
 import axios from 'axios';
 import RNFetchBlob from 'rn-fetch-blob'
@@ -207,6 +207,7 @@ const SplashScreen = () => {
   const getPermission = async () => {
     await requestCameraPermissionsAsync();
     await PermissionsAndroid.request(PermissionsAndroid.PERMISSIONS.WRITE_EXTERNAL_STORAGE)
+    await PermissionsAndroid.request(PermissionsAndroid.PERMISSIONS.ACCESS_FINE_LOCATION)
   };
 
   const loadModel = async () => {

@@ -27,11 +27,11 @@ const PreviewRecognition = ({ route }) => {
   }, [data, MasterEmployee])
 
   const onAttendance = async () => {
-    const id = UuidGenerator();
-    const code = MasterAbsenceCode.find((item) => item.TYPE == 'WORKED' && item.SOURCE == Results.SOURCE).CODE  
     if (Results === undefined) {
       navigation.navigate('Home')
     } else {
+      const id = UuidGenerator();
+      const code = MasterAbsenceCode.find((item) => item.TYPE == 'WORKED' && item.SOURCE == Results.SOURCE).CODE  
       // 1 = Masuk
       // 2 = Istirahat
       // 3 = Pulang
@@ -39,12 +39,12 @@ const PreviewRecognition = ({ route }) => {
       const body = {
         ID: id,
         EMPLOYEE_ID: Results.ID,
-        TYPE: '4',
+        TYPE: '1',
         ABSENCE_CODE: code,
         DATETIME: new Date(),
         ACCURACY: data?.accuracy,
-        LATITUDE: 'double?',
-        LONGITUDE: 'double?',
+        LATITUDE: 0.00,
+        LONGITUDE: 0.00,
         MANUAL_INPUT: 0,
         DESCRIPTION: 'Absen Masuk',
         INSERT_TIME: new Date(),

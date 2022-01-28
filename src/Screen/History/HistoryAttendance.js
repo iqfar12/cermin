@@ -1,10 +1,11 @@
-import React from 'react'
+import React, { useMemo } from 'react'
 import { StyleSheet, Text, View, TouchableOpacity, TextInput, FlatList } from 'react-native'
 import { useNavigation } from '@react-navigation/native';
 import { Fonts } from '../../Utils/Fonts';
 import SubHeader from '../../Component/SubHeader';
 import Icon from '@expo/vector-icons/MaterialIcons'
 import moment from 'moment';
+import TaskServices from '../../Database/TaskServices';
 
 const RightComponent = ({ navigation }) => {
     return (
@@ -43,32 +44,51 @@ const DummyData = [
 
 const HistoryAttendance = () => {
     const navigation = useNavigation();
+    const MasterAttendance = TaskServices.getAllData('TR_ATTENDANCE');
+    const MasterEmployee = TaskServices.getAllData('TM_EMPLOYEE');
+
+    const ListAttendance = useMemo(() => {
+        return MasterAttendance
+    }, [MasterAttendance])
 
     const renderListCard = ({ item, index }) => {
+        const user = MasterEmployee.find((data) => data.ID == item.EMPLOYEE_ID);
+        console.log(item)
+        const type = () => {
+            if (item.TYPE == '1') {
+                return 'Masuk'
+            } else if (item.TYPE == '2') {
+                return 'Istirahat'
+            } else if (item.TYPE == '3') {
+                return 'Pulang'
+            } else {
+                return 'Izin'
+            }
+        }
         return (
             <TouchableOpacity activeOpacity={0.8} onPress={() => navigation.navigate('Detail History Attendance', {data: item})} style={styles.card}>
                 <View style={styles.top}>
-                    <Text style={styles.name}>3121901993200001<Text style={styles.nik}> | John Doe</Text></Text>
+                    <Text style={styles.name}>{user?.EMPLOYEE_NIK}<Text style={styles.nik}> | {user.EMPLOYEE_FULLNAME}</Text></Text>
                     <Icon name={'radio-button-unchecked'} size={25} color={'#FFB81C'} />
                 </View>
                 <View style={styles.subTop}>
                     <View style={styles.location}>
                         <Icon name={'location-pin'} size={25} color={'#C5C5C5'} />
-                        <Text style={styles.locationTxt}>4213B</Text>
+                        <Text style={styles.locationTxt}>{user?.AFD_CODE}</Text>
                     </View>
                     <View style={styles.nameContainer}>
                         <Icon name={'assignment-ind'} size={25} color={'#BABCBE'} />
-                        <Text style={styles.nik}>John Doe</Text>
+                        <Text style={styles.nik}>{user?.EMPLOYEE_FULLNAME}</Text>
                     </View>
                 </View>
                 <View style={styles.bottom}>
                     <View style={styles.stateContainer}>
                         <View style={styles.state}>
-                            <Text style={styles.stateTitle}>Masuk</Text>
-                            <Text style={styles.stateTime}>08:15</Text>
+                            <Text style={styles.stateTitle}>{type()}</Text>
+                            <Text style={styles.stateTime}>{moment(item.DATETIME).format('HH:mm')}</Text>
                         </View>
                     </View>
-                    <View style={styles.buttonContainer}>
+                    {/* <View style={styles.buttonContainer}>
                         <TouchableOpacity activeOpacity={0.8} onPress={() => navigation.navigate('Attendance Out')} style={styles.stateButtonLogout}>
                             <Icon name={'logout'} size={25} color={'#FFF'} />
                             <Text style={styles.stateButtonTxt}>Pulang</Text>
@@ -81,7 +101,7 @@ const HistoryAttendance = () => {
                             <Icon name={'article'} size={25} color={'#FFF'} />
                             <Text style={styles.stateButtonTxt}>Izin</Text>
                         </TouchableOpacity>
-                    </View>
+                    </View> */}
                 </View>
             </TouchableOpacity>
         )
@@ -113,7 +133,7 @@ const HistoryAttendance = () => {
                         </View>
                     </View>
                     <FlatList
-                        data={DummyData}
+                        data={ListAttendance}
                         renderItem={renderListCard}
                         keyExtractor={(_, i) => i.toString()}
                         contentContainerStyle={styles.list}
