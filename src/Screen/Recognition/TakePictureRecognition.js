@@ -26,6 +26,7 @@ import { FrontFrame, FrontLine, GuideFront } from '../../assets';
 import ExpoIcon from '@expo/vector-icons/MaterialIcons';
 import { Fonts } from '../../Utils/Fonts';
 import TaskServices from '../../Database/TaskServices';
+import geolocation from '@react-native-community/geolocation';
 
 const CircleMask = () => {
   return (
@@ -61,13 +62,26 @@ const TakePictureRecognition = ({ route }) => {
   const [faceId, setFaceId] = useState(0);
   const [front, setFront] = useState(true);
   const MasterEmployee = TaskServices.getAllData('TM_EMPLOYEE');
+  const [coordinate, setCoordinate] = useState({
+    latitude: 0,
+    longitude: 0,
+  });
+
+  useEffect(() => {
+    geolocation.getCurrentPosition((res) => {
+      setCoordinate({
+        latitude: res.coords.latitude,
+        longitude: res.coords.longitude
+      })
+    }, (err) => console.log('err Location'), {
+      enableHighAccuracy: true
+    })
+  }, [isFocused])
 
   const Descriptor = useMemo(() => {
     const res = MasterEmployee.filter((item) => item.FACE_DESCRIPTOR !== null).map((item) => JSON.parse(item.FACE_DESCRIPTOR))
     return res
   }, [MasterEmployee]);
-
-  console.log(Descriptor.length)
 
   const condition4 = event => {
     const rightEye = event?.faces[0]?.rightEyeOpenProbability;
@@ -151,17 +165,22 @@ const TakePictureRecognition = ({ route }) => {
     //   _label: 'Iqfar',
     // };
     // return res;
-    await faceapi.tf.ready();
+    try {
+      await faceapi.tf.ready()
+      console.log('ready')
+      console.log(faceapi.tf.getBackend(), 'backend');
+      // const userJsonPath = fs.documentDirectory + 'User.json';
+      // const jsonString = await fs.readAsStringAsync(userJsonPath);
+      // const userData = JSON.parse(jsonString);
+      const img = faceapi.tf.util.encodeString(image, 'base64').buffer;
+      console.log('buffer')
+      const raw = new Uint8Array(img);
+      console.log('raw');
+      const imageTensor = decodeJpeg(raw);
+      console.log('tensor')
 
-    // const userJsonPath = fs.documentDirectory + 'User.json';
-    // const jsonString = await fs.readAsStringAsync(userJsonPath);
-    // const userData = JSON.parse(jsonString);
-    const img = faceapi.tf.util.encodeString(image, 'base64').buffer;
-    const raw = new Uint8Array(img);
-    const imageTensor = decodeJpeg(raw);
-
-    console.log('detecting....');
-    const detection = await faceapi
+      console.log('detecting....');
+      const detection = await faceapi
       .detectSingleFace(
         imageTensor,
         new faceapi.TinyFaceDetectorOptions({
@@ -193,6 +212,10 @@ const TakePictureRecognition = ({ route }) => {
     } else {
       unknownRedirect(gambar);
     }
+    } catch (error) {
+      unknownRedirect(gambar)
+    }
+    
   };
 
   const unknownRedirect = image => {
@@ -205,17 +228,18 @@ const TakePictureRecognition = ({ route }) => {
 
   const takePicture = async () => {
     if (!camera) return;
-    const image = await camera.takePictureAsync({ base64: true });
+    const image = await camera.takePictureAsync();
     if (image) {
       setIsLoading(true);
       const resize = { width: image.width / 5, height: image.height / 5 };
       const results = await manipulateAsync(image.uri, [{ resize }], {
         base64: true,
       });
-      // console.log(results.uri, results.height, results.width);
-      // if (online) {
-        // recognizeOnline(results);
-      // } else {
+      console.log('finishing crop image');
+      // // console.log(results.uri, results.height, results.width);
+      // // if (online) {
+      //   // recognizeOnline(results);
+      // // } else {
         await RecognitionOffline(results.base64, results);
       // }
     }
