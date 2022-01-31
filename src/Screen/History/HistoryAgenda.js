@@ -49,7 +49,7 @@ const HistoryAgenda = () => {
     const MasterEmployee = TaskServices.getAllData('TM_EMPLOYEE');
 
     const ListAgenda = useMemo(() => {
-        const res = MasterAttendance.filter((item) => item.TYPE === 'EXCUSED')
+        const res = MasterAttendance.filter((item) => item.TYPE === '4')
         
         return res
     }, [MasterAttendance])

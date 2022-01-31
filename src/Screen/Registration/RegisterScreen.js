@@ -118,9 +118,9 @@ const RegisterScreen = ({ route }) => {
     if (val === 1) {
       return FrontFrame;
     } else if (val === 2) {
-      return LeftFrame;
+      return cameraFront ? LeftFrame : RightFrame;
     } else if (val === 3) {
-      return RightFrame;
+      return cameraFront ? RightFrame : LeftFrame;
     } else if (val === 4) {
       return TopFrame;
     } else if (val === 5) {
@@ -133,9 +133,9 @@ const RegisterScreen = ({ route }) => {
     if (val === 1) {
       return 'Depan';
     } else if (val === 2) {
-      return 'Kiri';
+      return cameraFront ? 'Kiri' : 'Kanan';
     } else if (val === 3) {
-      return 'Kanan';
+      return cameraFront ? 'Kanan' : 'Kiri';
     } else if (val === 4) {
       return 'Atas';
     } else if (val === 5) {
@@ -148,9 +148,9 @@ const RegisterScreen = ({ route }) => {
     if (val === 1) {
       return FrontLine;
     } else if (val === 2) {
-      return LeftLine;
+      return cameraFront ? LeftLine : RightLine;
     } else if (val === 3) {
-      return RightLine;
+      return cameraFront ? RightLine : LeftLine;
     } else if (val === 4) {
       return TopLine;
     } else if (val === 5) {
@@ -163,9 +163,9 @@ const RegisterScreen = ({ route }) => {
     if (val === 1) {
       return GuideFront;
     } else if (val === 2) {
-      return GuideLeft;
+      return cameraFront ? GuideLeft : GuideRight;
     } else if (val === 3) {
-      return GuideRight;
+      return cameraFront ? GuideRight : GuideLeft;
     } else if (val === 4) {
       return GuideUp;
     } else if (val === 5) {

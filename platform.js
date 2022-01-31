@@ -123,9 +123,10 @@ let env = {
   Video: Video,
 };
 
+tf.enableProdMode()
 faceapi.env.setEnv(env);
+tf.setBackend('cpu');
 faceapi.tf.ENV.set('WEBGL_PACK', false);
-// faceapi.tf.setBackend('cpu');
 // faceapi.tf.env().registerFlag(
 //   'IS_REACT_NATIVE', () => navigator && navigator.product === 'ReactNative');
 // // console.log(faceapi.tf.env())

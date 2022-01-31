@@ -1,4 +1,4 @@
-import React, {useState, useEffect} from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   StyleSheet,
   Text,
@@ -10,20 +10,21 @@ import {
   TouchableOpacity,
   KeyboardAvoidingView,
 } from 'react-native';
-import {Logo, Email, Password} from '../../assets';
-import {Fonts} from '../../Utils/Fonts';
+import { Logo, Email, Password } from '../../assets';
+import { Fonts } from '../../Utils/Fonts';
 import Icon from '@expo/vector-icons/MaterialIcons';
-import {useNavigation} from '@react-navigation/native';
+import { useNavigation } from '@react-navigation/native';
 import NetInfo from '@react-native-community/netinfo';
 import * as fs from 'expo-file-system';
 import axios from 'axios';
-import {Endpoint} from '../../Utils/Endpoint';
+import { Endpoint } from '../../Utils/Endpoint';
 import MenuModal from '../../Component/MenuModal';
 import LoadingModal from '../../Component/LoadingModal';
 import TaskServices from '../../Database/TaskServices';
-import {getUniqueId} from 'react-native-device-info';
+import { getUniqueId } from 'react-native-device-info';
 import NoConnectionModal from '../../Component/NoConnectionModal';
 import PopModal from '../../Component/PopModal';
+import WarningModal from '../../Component/WarningModal';
 
 const ServerList = [
   {
@@ -58,6 +59,8 @@ const LoginScreen = () => {
   const [connection, setConnection] = useState(false);
   const [emailModal, setEmailModal] = useState(false);
   const [passwordModal, setPasswordModal] = useState(false);
+  const [failedModal, setFailedModal] = useState(false);
+  const [message, setMessage] = useState('');
 
   const postRealm = async (data, token) => {
     console.log(data);
@@ -130,8 +133,10 @@ const LoginScreen = () => {
           await getUserData(res.data.token);
         }
       } catch (error) {
+        setMessage(error.response.data.message)
         setIsLoading(false);
-        console.log(error, 'error login');
+        setFailedModal(true)
+        console.log(error.response.data.message, 'error login');
       }
     } else {
       setConnection(true);
@@ -205,6 +210,15 @@ const LoginScreen = () => {
         />
       )
     }
+    if (failedModal) {
+      return (
+        <WarningModal
+          visible={failedModal}
+          content={message}
+          onPress={() => setFailedModal(false)}
+        />
+      )
+    }
   };
 
   return (
@@ -212,67 +226,67 @@ const LoginScreen = () => {
       {showModal()}
       <StatusBar backgroundColor={'#195FBA'} />
       <View style={styles.container}>
-      <KeyboardAvoidingView>
-        <ScrollView
-          showsVerticalScrollIndicator={false}
-          contentContainerStyle={styles.scroll}
-        >
-          <View style={styles.logo}>
-            <Image source={Logo} style={styles.image} />
-          </View>
-          <Text style={styles.title}>Login Screen</Text>
-          <Text style={styles.subTitle}>Silakan Login untuk melanjutkan</Text>
-          <View style={styles.formContainer}>
-            <View style={styles.formInput}>
-              <Icon name={'person'} size={20} color={'#DADADA'} />
-              <TextInput
-                placeholder={'Email'}
-                style={styles.textInput}
-                value={email}
-                onChangeText={val => setEmail(val)}
-              />
+        <KeyboardAvoidingView>
+          <ScrollView
+            showsVerticalScrollIndicator={false}
+            contentContainerStyle={styles.scroll}
+          >
+            <View style={styles.logo}>
+              <Image source={Logo} style={styles.image} />
             </View>
-            <View style={styles.formInput}>
-              <Icon name={'lock'} size={20} color={'#DADADA'} />
-              <TextInput
-                placeholder={'Kata Sandi'}
-                secureTextEntry={hidden}
-                style={styles.textInput}
-                value={password}
-                onChangeText={val => setPassword(val)}
-              />
+            <Text style={styles.title}>Login Screen</Text>
+            <Text style={styles.subTitle}>Silakan Login untuk melanjutkan</Text>
+            <View style={styles.formContainer}>
+              <View style={styles.formInput}>
+                <Icon name={'person'} size={20} color={'#DADADA'} />
+                <TextInput
+                  placeholder={'Email'}
+                  style={styles.textInput}
+                  value={email}
+                  onChangeText={val => setEmail(val)}
+                />
+              </View>
+              <View style={styles.formInput}>
+                <Icon name={'lock'} size={20} color={'#DADADA'} />
+                <TextInput
+                  placeholder={'Kata Sandi'}
+                  secureTextEntry={hidden}
+                  style={styles.textInput}
+                  value={password}
+                  onChangeText={val => setPassword(val)}
+                />
+                <Icon
+                  name={hidden ? 'visibility' : 'visibility-off'}
+                  size={20}
+                  style={{ paddingLeft: 10 }}
+                  color={'#DADADA'}
+                  onPress={() => setHidden(!hidden)}
+                />
+              </View>
+            </View>
+            <TouchableOpacity
+              onPress={login}
+              style={styles.button}
+              activeOpacity={0.8}
+            >
+              <Text style={styles.buttonTitle}>Masuk</Text>
+            </TouchableOpacity>
+            <TouchableOpacity
+              onPress={() => setServerModal(true)}
+              activeOpacity={0.8}
+              style={styles.server}
+            >
+              <Text style={styles.modalButtonTitle}>
+                {ServerList[server].name}
+              </Text>
               <Icon
-                name={hidden ? 'visibility' : 'visibility-off'}
-                size={20}
-                style={{paddingLeft: 10}}
-                color={'#DADADA'}
-                onPress={() => setHidden(!hidden)}
+                name={serverModal ? 'keyboard-arrow-up' : 'keyboard-arrow-down'}
+                size={25}
+                color={'#195FBA'}
               />
-            </View>
-          </View>
-          <TouchableOpacity
-            onPress={login}
-            style={styles.button}
-            activeOpacity={0.8}
-          >
-            <Text style={styles.buttonTitle}>Masuk</Text>
-          </TouchableOpacity>
-          <TouchableOpacity
-            onPress={() => setServerModal(true)}
-            activeOpacity={0.8}
-            style={styles.server}
-          >
-            <Text style={styles.modalButtonTitle}>
-              {ServerList[server].name}
-            </Text>
-            <Icon
-              name={serverModal ? 'keyboard-arrow-up' : 'keyboard-arrow-down'}
-              size={25}
-              color={'#195FBA'}
-            />
-          </TouchableOpacity>
-        </ScrollView>
-      </KeyboardAvoidingView>
+            </TouchableOpacity>
+          </ScrollView>
+        </KeyboardAvoidingView>
       </View>
     </>
   );

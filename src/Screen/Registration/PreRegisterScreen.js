@@ -239,7 +239,7 @@ const PreRegisterScreen = () => {
   }
 
   const ListEmployee = useMemo(() => {
-    const res = MasterEmployee.filter((item) => item.TYPE === 'E');
+    const res = MasterEmployee.filter((item) => item.TYPE === 'E').filter((item) => item.REGISTER_STATUS == 'NONE');
 
     if (employeeSearch !== '') {
       return res.filter((item) =>

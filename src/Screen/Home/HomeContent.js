@@ -49,7 +49,7 @@ const HomeContent = () => {
   const MasterAttendance = TaskServices.getAllData('TR_ATTENDANCE');
 
   const ListAgenda = useMemo(() => {
-    const res = MasterAttendance.filter((item) => item.TYPE === 'EXCUSED')
+    const res = MasterAttendance.filter((item) => item.TYPE == '4')
 
     return res
   }, [MasterAttendance])
@@ -180,6 +180,7 @@ const HomeContent = () => {
               <TouchableOpacity
                 activeOpacity={0.8}
                 style={styles.permittedButton}
+                onPress={() => navigation.navigate('History Agenda')}
               >
                 <Text style={styles.permittedButtonTitle}>Lihat Semua</Text>
               </TouchableOpacity>

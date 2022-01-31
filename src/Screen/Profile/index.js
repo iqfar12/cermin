@@ -9,6 +9,10 @@ import TaskServices from '../../Database/TaskServices';
 import fs from 'react-native-fs';
 import * as expoFS from 'expo-file-system';
 import SuccessModal from '../../Component/SuccessModal';
+import NetInfo from '@react-native-community/netinfo';
+import NoConnectionModal from '../../Component/NoConnectionModal';
+import axios from 'axios';
+
 
 const ProfileScreen = () => {
   const navigation = useNavigation();
@@ -50,13 +54,34 @@ const ProfileScreen = () => {
   const [backupModal, setBackUpModal] = useState(false);
   const [exportModal, setExportModal] = useState(false);
   const [resetModal, setResetModal] = useState(false);
+  const [connection, setConnection] = useState(false);
+
+  console.log(user);
 
   const onLogout = async () => {
-    TaskServices.deleteAllData('TM_USERS');
-    navigation.reset({
-      index: 0,
-      routes: [{name: 'Login'}],
-    });
+    const isConnected = await NetInfo.fetch()
+    if (isConnected.isConnected) {
+      const url = user.SERVER + '/crm-msa-auth-data/auth/logout';
+      try {
+        const res = await axios.post(url, {}, {
+          headers: {
+            'Authorization': 'Bearer ' + user.ACCESS_TOKEN
+          }
+        })
+        if (res) {
+          TaskServices.deleteAllData('TM_USERS');
+          navigation.reset({
+            index: 0,
+            routes: [{name: 'Login'}],
+          });
+        }
+      } catch (error) {
+        console.log(error, 'logout');
+        setConnection(true)
+      }
+    } else {
+      setConnection(true);
+    }
   };
 
   const onBackup = async () => {
@@ -142,6 +167,9 @@ const ProfileScreen = () => {
     }
     if (resetModal) {
       return <SuccessModal title={'Reset Berhasil'} content={'Reset Database Anda Berhasil'} visible={resetModal} onPress={() => setResetModal(false)} />
+    }
+    if (connection) {
+      return <NoConnectionModal visible={connection} onClose={() => setConnection(false)} />
     }
   }
 

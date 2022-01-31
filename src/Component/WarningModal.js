@@ -4,7 +4,7 @@ import { Warning } from '../assets'
 import { Fonts } from '../Utils/Fonts'
 import SubmitButton from './SubmitButton'
 
-const WarningModal = ({visible, content, onPress}) => {
+const WarningModal = ({visible, content, onPress, title = 'TERJADI KESALAHAN'}) => {
     return (
         <Modal visible={visible} transparent={true}>
             <View style={styles.container}>
@@ -12,7 +12,7 @@ const WarningModal = ({visible, content, onPress}) => {
                     <View style={styles.logo}>
                         <Image style={styles.image} source={Warning} />
                     </View>
-                    <Text style={styles.title}>TERJADI KESALAHAN</Text>
+                    <Text style={styles.title}>{title}</Text>
                     <Text style={styles.content}>
                         {content}
                     </Text>

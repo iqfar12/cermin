@@ -31,7 +31,7 @@ const PreviewRecognition = ({ route }) => {
       navigation.navigate('Home')
     } else {
       const id = UuidGenerator();
-      const code = MasterAbsenceCode.find((item) => item.TYPE == 'WORKED' && item.SOURCE == Results.SOURCE).CODE  
+      const code = MasterAbsenceCode.find((item) => item.TYPE == 'WORKED' && item.SOURCE == Results.SOURCE)?.CODE  
       // 1 = Masuk
       // 2 = Istirahat
       // 3 = Pulang
@@ -40,11 +40,11 @@ const PreviewRecognition = ({ route }) => {
         ID: id,
         EMPLOYEE_ID: Results.ID,
         TYPE: '1',
-        ABSENCE_CODE: code,
+        ABSENCE_CODE: code || 'K',
         DATETIME: new Date(),
         ACCURACY: data?.accuracy,
-        LATITUDE: 0.00,
-        LONGITUDE: 0.00,
+        LATITUDE: data?.coord?.latitude || 0.00,
+        LONGITUDE: data?.coord?.longitude || 0.00,
         MANUAL_INPUT: 0,
         DESCRIPTION: 'Absen Masuk',
         INSERT_TIME: new Date(),

@@ -203,6 +203,7 @@ const TakePictureRecognition = ({ route }) => {
           data: {
             label: results._label,
             accuracy: results._distance,
+            coord: coordinate
           },
           image: gambar,
         });
