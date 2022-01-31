@@ -29,7 +29,7 @@ const SplashScreen = () => {
       const isFaceRecognition = await fs.exists(pathFaceRecognition);
       const isTinyExist = await fs.exists(pathTiny);
       if (!isFaceRecognition || !isLandmarkExist || !isSSDExist || !isTinyExist) {
-        await onDownloadDataModel();
+        // await onDownloadDataModel();
         await loadModel();
       } else {
         await fetchData();

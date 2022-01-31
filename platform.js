@@ -125,7 +125,7 @@ let env = {
 
 faceapi.env.setEnv(env);
 faceapi.tf.ENV.set('WEBGL_PACK', false);
-// faceapi.tf.setBackend('cpu');
+faceapi.tf.setBackend('cpu');
 // faceapi.tf.env().registerFlag(
 //   'IS_REACT_NATIVE', () => navigator && navigator.product === 'ReactNative');
 // // console.log(faceapi.tf.env())
