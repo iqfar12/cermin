@@ -1,10 +1,10 @@
-import React, {useState} from 'react';
-import {StyleSheet, Text, View, Image, TouchableOpacity} from 'react-native';
+import React, { useState } from 'react';
+import { StyleSheet, Text, View, Image, TouchableOpacity, Modal, ScrollView } from 'react-native';
 import MaterialIcons from '@expo/vector-icons/MaterialCommunityIcons';
 
-import {Sentot, Person} from '../../assets';
+import { Sentot, Person } from '../../assets';
 import Maison, { Fonts } from '../../Utils/Fonts';
-import {useNavigation} from '@react-navigation/native';
+import { useNavigation } from '@react-navigation/native';
 import TaskServices from '../../Database/TaskServices';
 import fs from 'react-native-fs';
 import * as expoFS from 'expo-file-system';
@@ -12,7 +12,6 @@ import SuccessModal from '../../Component/SuccessModal';
 import NetInfo from '@react-native-community/netinfo';
 import NoConnectionModal from '../../Component/NoConnectionModal';
 import axios from 'axios';
-
 
 const ProfileScreen = () => {
   const navigation = useNavigation();
@@ -95,7 +94,7 @@ const ProfileScreen = () => {
     // await expoFS.makeDirectoryAsync(packagePath)
     // await expoFS.makeDirectoryAsync(LocalPath)
     // await expoFS.makeDirectoryAsync(databasePath)
-      // await fs.mkdir(packagePath);
+    // await fs.mkdir(packagePath);
     // await fs.mkdir(LocalPath);
     // await fs.mkdir(databasePath);
     const backupPath =
