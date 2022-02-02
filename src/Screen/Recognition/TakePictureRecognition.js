@@ -177,7 +177,7 @@ const TakePictureRecognition = ({ route }) => {
       const raw = new Uint8Array(img);
       console.log('raw');
       const imageTensor = decodeJpeg(raw);
-      console.log('tensor')
+      console.log(imageTensor, 'tensor')
 
       console.log('detecting....');
       const detection = await faceapi
