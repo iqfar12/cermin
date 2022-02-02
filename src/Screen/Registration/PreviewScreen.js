@@ -142,7 +142,7 @@ const PreviewScreen = ({route}) => {
               </View>
               <View style={styles.type}>
                 <Text style={styles.typeTxt}>
-                  {data?.TYPE === 1 ? 'Employee' : 'Non-Employee'}
+                  {data?.TYPE == 'E' ? 'Employee' : 'Non-Employee'}
                 </Text>
               </View>
             </View>

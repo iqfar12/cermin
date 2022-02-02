@@ -1,4 +1,4 @@
-import React, { useMemo } from 'react'
+import React, { useMemo, useState } from 'react'
 import { StyleSheet, Text, View, TouchableOpacity, TextInput, FlatList } from 'react-native'
 import { useNavigation } from '@react-navigation/native';
 import { Fonts } from '../../Utils/Fonts';
@@ -46,10 +46,16 @@ const DummyData = [
 const ListRegisterScreen = () => {
     const navigation = useNavigation();
     const MasterEmployee = TaskServices.getAllData('TM_EMPLOYEE');
+    const [search, setSearch] = useState('');
     
     const ListEmployee = useMemo(() => {
-        return MasterEmployee.filter((item) => item.REGISTER_STATUS == 'NONE')
-    }, [MasterEmployee])
+        const res = MasterEmployee.filter((item) => item.REGISTER_STATUS == 'NONE')
+        if (search !== '') {
+            return res.filter((item) => item.EMPLOYEE_FULLNAME.toLowerCase().includes(search.toLowerCase()))
+        } else {
+            return res
+        }
+    }, [MasterEmployee, search])
 
     const renderListCard = ({ item, index }) => {
         return (
@@ -83,7 +89,7 @@ const ListRegisterScreen = () => {
                 <View style={styles.body}>
                     <View style={styles.search}>
                         <Icon name={'search'} size={25} color={'#C5C5C5'} />
-                        <TextInput style={styles.input} placeholder={'Cari Nama/Nik'} />
+                        <TextInput style={styles.input} value={search} onChangeText={(val) => setSearch(val)} placeholder={'Cari Nama/Nik'} />
                     </View>
                     {/* <View style={styles.tagContainer}>
                         <TouchableOpacity style={styles.more}>

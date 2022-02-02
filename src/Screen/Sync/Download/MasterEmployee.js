@@ -5,6 +5,7 @@ export const getMasterEmployee = async () => {
   const user = TaskServices.getCurrentUser();
   const dbLocal = TaskServices.getAllData('TM_EMPLOYEE');
   const url = 'http://apis-dev1.tap-agri.com/crm-msa-attendance/employee';
+  // const url = 'http://192.168.0.108:4000/employee';
 
   let downloadProgress = {
     count: 0,

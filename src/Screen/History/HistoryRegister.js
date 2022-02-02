@@ -58,7 +58,7 @@ const Dummy = [
 const HistoryRegister = () => {
   const navigation = useNavigation();
   const [menu, setMenu] = useState(0);
-  const Employee = TaskServices.getAllData('TM_EMPLOYEE').filter((item) => item.REGISTER_TIME !== null);
+  const Employee = TaskServices.getAllData('TM_EMPLOYEE').filter((item) => item.REGISTER_STATUS !== 'NONE');
 
   const Karyawan = useMemo(() => {
     return Employee.filter((item) => item.TYPE == 'E')
@@ -75,7 +75,7 @@ const HistoryRegister = () => {
       <View style={styles.card}>
         <View style={styles.topCard}>
           <View style={styles.tag}>
-            <Text style={styles.type}>{item.TYPE == 'EMP' ? 'Karyawan' : 'Non-Karyawan'}</Text>
+            <Text style={styles.type}>{item.TYPE == 'E' ? 'Karyawan' : 'Non-Karyawan'}</Text>
           </View>
           <Icon
             name={item.SYNC_TIME !== null ? 'done' : 'radio-button-unchecked'}

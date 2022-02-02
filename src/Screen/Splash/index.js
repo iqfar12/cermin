@@ -7,11 +7,12 @@ import TaskServices from '../../Database/TaskServices';
 import { useNavigation } from '@react-navigation/native';
 import * as faceapi from 'face-api.js';
 import { requestCameraPermissionsAsync } from 'expo-camera';
-// import '@tensorflow/tfjs-react-native';
+import '@tensorflow/tfjs-react-native';
 // import '../../../platform';
 import fs from 'react-native-fs';
 import axios from 'axios';
 import RNFetchBlob from 'rn-fetch-blob'
+
 
 const SplashScreen = () => {
   console.log('splash');
@@ -24,6 +25,7 @@ const SplashScreen = () => {
 
   const isReady = async () => {
     await faceapi.tf.ready().finally(async () => {
+      console.log(faceapi.tf.getBackend());
       const isSSDExist = await fs.exists(pathSsd);
       const isLandmarkExist = await fs.exists(pathFaceLandmarks);
       const isFaceRecognition = await fs.exists(pathFaceRecognition);

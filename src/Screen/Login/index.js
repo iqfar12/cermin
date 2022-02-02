@@ -78,7 +78,7 @@ const LoginScreen = () => {
       UPDATE_TIME: data.updateTime,
       UPDATE_USER: data.name,
       COMP_CODE: data.compCode,
-      COMP_NAME: data.company.compName,
+      COMP_NAME: data?.company?.compName || 'Null',
       DELETE_TIME: null,
       DELETE_USER: null,
       LAST_SYNC: null,

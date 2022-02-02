@@ -82,47 +82,54 @@ const SyncScreen = () => {
     status: 0,
   })
 
-  useEffect(() => {
-    if (!sync) {
-      setMasterAfdeling({
-        progress: 0,
-        total: 0,
-        status: 0
-      });
-      setMasterCompanies({
-        progress: 0,
-        total: 0,
-        status: 0
-      });
-      setMasterEst({
-        progress: 0,
-        total: 0,
-        status: 0
-      });
-      setMasterRegion({
-        progress: 0,
-        total: 0,
-        status: 0,
-      });
-      setMasterEmployee({
-        progress: 0,
-        total: 0,
-        status: 0
-      });
-      setUploadEmployee({
-        progress: 0,
-        total: 0,
-        status: 0,
-      })
-      setAbsenceCode({
-        progress: 0,
-        total: 0,
-        status: 0,
-      })
-    }
-  }, [sync])
+  const resetState = () => {
+    setMasterAfdeling({
+      progress: 0,
+      total: 0,
+      status: 0
+    });
+    setMasterCompanies({
+      progress: 0,
+      total: 0,
+      status: 0
+    });
+    setMasterEst({
+      progress: 0,
+      total: 0,
+      status: 0
+    });
+    setMasterRegion({
+      progress: 0,
+      total: 0,
+      status: 0,
+    });
+    setMasterEmployee({
+      progress: 0,
+      total: 0,
+      status: 0
+    });
+    setUploadEmployee({
+      progress: 0,
+      total: 0,
+      status: 0,
+    })
+    setAbsenceCode({
+      progress: 0,
+      total: 0,
+      status: 0,
+    })
+  }
 
   const syncDownload = async () => {
+    
+    await uploadSyncEmployee().then((data) => {
+      setUploadEmployee({
+        progress: data.count,
+        total: data.total,
+        status: 1
+      })
+    })
+
     // Get Master Afdeling
     await getMasterAfdeling().then(data => {
       setMasterAfdeling({
@@ -176,6 +183,12 @@ const SyncScreen = () => {
         status: 1,
       })
     })
+
+    await updateUserSync();
+    setTimeout(() => {
+      setSync(false);
+      setLoop(false);
+    }, 3000)
   };
 
   const onUpload = async () => {
@@ -191,17 +204,13 @@ const SyncScreen = () => {
   const onSync = async () => {
     const isConnected = await NetInfo.fetch();
     if (isConnected.isConnected) {
+      resetState()
       setLoop(true);
       setSync(true);
       animation.play();
-      await onUpload().then(async () => {
-        await syncDownload()
-      })
-      await updateUserSync();
-      setTimeout(() => {
-        setSync(false);
-        setLoop(false);
-      }, 3000)
+      // onUpload().finally(() => {
+      await syncDownload()
+      // })
     } else {
       setConnection(true);
     }

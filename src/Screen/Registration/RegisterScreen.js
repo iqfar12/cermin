@@ -133,9 +133,9 @@ const RegisterScreen = ({ route }) => {
     if (val === 1) {
       return 'Depan';
     } else if (val === 2) {
-      return cameraFront ? 'Kiri' : 'Kanan';
+      return 'Kiri';
     } else if (val === 3) {
-      return cameraFront ? 'Kanan' : 'Kiri';
+      return 'Kanan';
     } else if (val === 4) {
       return 'Atas';
     } else if (val === 5) {
