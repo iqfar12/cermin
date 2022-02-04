@@ -173,11 +173,8 @@ const TakePictureRecognition = ({ route }) => {
       // const jsonString = await fs.readAsStringAsync(userJsonPath);
       // const userData = JSON.parse(jsonString);
       const img = faceapi.tf.util.encodeString(image, 'base64').buffer;
-      console.log('buffer')
       const raw = new Uint8Array(img);
-      console.log('raw');
       const imageTensor = decodeJpeg(raw);
-      console.log(imageTensor, 'tensor')
 
       console.log('detecting....');
       const detection = await faceapi

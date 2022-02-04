@@ -14,7 +14,7 @@ export const getMasterEmployee = async () => {
 
   const getData = async (page = 1) => {
     try {
-      const res = await axios.get(url + `?page=${page}&join=faceDescriptor`, {
+      const res = await axios.get(url + `?page=${page}&join=faceDescriptor&filter=type||$eq||E`, {
         headers: {
           Authorization: 'Bearer ' + user.ACCESS_TOKEN,
         },

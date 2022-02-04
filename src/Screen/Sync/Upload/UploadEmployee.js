@@ -15,7 +15,7 @@ export const uploadSyncEmployee = async () => {
 
     if (dbLocal.length > 0) {
         await Promise.all(
-            dbLocal.map( async (item) => {
+            dbLocal.map(async (item) => {
                 let formData = new FormData();
                 const images = MasterImages.filter((data) => data.MODEL_ID == item.ID);
                 images.forEach((item, index) => {
@@ -31,31 +31,33 @@ export const uploadSyncEmployee = async () => {
                     formData.append('employeeNik', item.EMPLOYEE_NIK)
                     formData.append('employeeFullname', item.EMPLOYEE_FULLNAME)
                     formData.append('afdCode', item.AFD_CODE)
+                    formData.append('compCode', item.COMP_CODE)
+                    formData.append('werks', item.WERKS)
                 }
                 console.log(formData, 'body')
                 try {
-                   const res = await axios.post(url, formData, {
-                       headers: {
-                           'Authorization': 'Bearer ' + user.ACCESS_TOKEN,
-                           'Content-Type': 'multipart/form-data'
-                       }
-                   });
-                   if (res) {
-                       console.log(res.data, 'res upload')
-    
-                       uploadCount = {
-                           ...uploadCount,
-                           count: uploadCount.count + 1
-                       }
-    
-                       const data = {
-                           ID: item.ID,
-                           SYNC_TIME: new Date(),
-                           SYNC_STATUS: 1,
-                       }
-    
-                       TaskServices.saveData('TM_EMPLOYEE', data)
-                   }
+                    const res = await axios.post(url, formData, {
+                        headers: {
+                            'Authorization': 'Bearer ' + user.ACCESS_TOKEN,
+                            'Content-Type': 'multipart/form-data'
+                        }
+                    });
+                    if (res) {
+                        console.log(res.data, 'res upload')
+
+                        uploadCount = {
+                            ...uploadCount,
+                            count: uploadCount.count + 1
+                        }
+
+                        const data = {
+                            ID: item.ID,
+                            SYNC_TIME: new Date(),
+                            SYNC_STATUS: 1,
+                        }
+
+                     TaskServices.saveData('TM_EMPLOYEE', data)
+                    }
                 } catch (error) {
                     console.log(error.response, 'error register')
                 }

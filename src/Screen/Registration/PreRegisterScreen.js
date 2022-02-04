@@ -82,11 +82,26 @@ const PreRegisterScreen = () => {
     const id = UuidGenerator();
     const locationCode = () => {
       if (referenceLocation == 'Afdeling') {
-        return location.AFD_CODE_GIS
+        const body = {
+          afdeling: location.AFD_CODE_GIS,
+          company: location.COMP_CODE,
+          werks: location.WERKS
+        }
+        return body
       } else if (referenceLocation == 'Estate') {
-        return location.EST_CODE
+        const body = {
+          afdeling: null,
+          company: location.COMP_CODE,
+          werks: location.WERKS
+        }
+        return body
       } else {
-        return location.COMP_CODE
+        const body = {
+          afdeling: null,
+          company: location.COMP_CODE,
+          werks: null
+        }
+        return body
       }
     }
     const body = {
@@ -99,9 +114,9 @@ const PreRegisterScreen = () => {
       EMPLOYEE_JOINDATE: type === 1 ? data?.EMPLOYEE_JOINDATE : new Date(),
       EMPLOYEE_RESIGNDATE: type === 1 ? data?.EMPLOYEE_RESIGNDATE : null,
       REFERENCE_LOCATION: type === 1 ? data?.REFERENCE_LOCATION : referenceLocation,
-      AFD_CODE: type === 1 ? data?.AFD_CODE : locationCode(),
-      COMP_CODE: type === 1 ? data?.COMP_CODE : locationCode(),
-      WERKS: type === 1 ? data?.WERKS : locationCode(),
+      AFD_CODE: type === 1 ? data?.AFD_CODE : locationCode().afdeling,
+      COMP_CODE: type === 1 ? data?.COMP_CODE : locationCode().company,
+      WERKS: type === 1 ? data?.WERKS : locationCode().werks,
       REGISTER_STATUS: 'PROCESS',
       FACE_DESCRIPTOR: type === 1 ? data?.FACE_DESCRIPTOR : null,
       INSERT_TIME: new Date(),

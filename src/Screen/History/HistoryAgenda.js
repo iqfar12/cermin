@@ -1,4 +1,4 @@
-import React, { useMemo } from 'react'
+import React, { useMemo, useState } from 'react'
 import { StyleSheet, Text, View, TouchableOpacity, TextInput, FlatList } from 'react-native'
 import { useNavigation } from '@react-navigation/native';
 import { Fonts } from '../../Utils/Fonts';
@@ -47,12 +47,16 @@ const HistoryAgenda = () => {
     const navigation = useNavigation();
     const MasterAttendance = TaskServices.getAllData('TR_ATTENDANCE');
     const MasterEmployee = TaskServices.getAllData('TM_EMPLOYEE');
+    const [search, setSearch] = useState('');
 
     const ListAgenda = useMemo(() => {
         const res = MasterAttendance.filter((item) => item.TYPE === '4')
-        
-        return res
-    }, [MasterAttendance])
+        if (search !== '') {
+            return res.filter((item) => item.EMPLOYEE_FULLNAME.toLowerCase().includes(search.toLowerCase()) || item.EMPLOYEE_NIK.toLowerCase().includes(search.toLowerCase()))
+        } else {
+            return res
+        }
+    }, [MasterAttendance, search])
 
     const renderListCard = ({ item, index }) => {
         const user = MasterEmployee.find((data) => data.ID == item.EMPLOYEE_ID)
@@ -86,9 +90,9 @@ const HistoryAgenda = () => {
                 <View style={styles.body}>
                     <View style={styles.search}>
                         <Icon name={'search'} size={25} color={'#C5C5C5'} />
-                        <TextInput style={styles.input} placeholder={'Cari Nama/Nik'} />
+                        <TextInput style={styles.input} value={search} onChangeText={(val) => setSearch(val)} placeholder={'Cari Nama/Nik'} />
                     </View>
-                    <View style={styles.tagContainer}>
+                    {/* <View style={styles.tagContainer}>
                         <TouchableOpacity style={styles.more}>
                             <Icon name={'tune'} size={25} color={'#000'} />
                         </TouchableOpacity>
@@ -96,7 +100,7 @@ const HistoryAgenda = () => {
                             <Text style={styles.tagTitle}>4213B</Text>
                             <Icon name={'cancel'} size={20} color={'#FFF'} />
                         </View>
-                    </View>
+                    </View> */}
                     <FlatList
                      data={ListAgenda}
                      renderItem={renderListCard}

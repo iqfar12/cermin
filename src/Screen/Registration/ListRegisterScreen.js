@@ -1,6 +1,6 @@
 import React, { useMemo, useState } from 'react'
 import { StyleSheet, Text, View, TouchableOpacity, TextInput, FlatList } from 'react-native'
-import { useNavigation } from '@react-navigation/native';
+import { useNavigation, useIsFocused } from '@react-navigation/native';
 import { Fonts } from '../../Utils/Fonts';
 import SubHeader from '../../Component/SubHeader';
 import Icon from '@expo/vector-icons/MaterialIcons'
@@ -47,6 +47,7 @@ const ListRegisterScreen = () => {
     const navigation = useNavigation();
     const MasterEmployee = TaskServices.getAllData('TM_EMPLOYEE');
     const [search, setSearch] = useState('');
+    const isFocused = useIsFocused();
     
     const ListEmployee = useMemo(() => {
         const res = MasterEmployee.filter((item) => item.REGISTER_STATUS == 'NONE')
@@ -55,11 +56,42 @@ const ListRegisterScreen = () => {
         } else {
             return res
         }
-    }, [MasterEmployee, search])
+    }, [MasterEmployee, search, isFocused])
+
+    const onRegister = async (data) => {       
+        const body = {
+          ID: data?.ID,
+          TYPE: 'E',
+          SOURCE: data?.SOURCE,
+          EMPLOYEE_NIK: data?.EMPLOYEE_NIK.split(' ').join(''),
+          EMPLOYEE_FULLNAME: data?.EMPLOYEE_FULLNAME,
+          EMPLOYEE_POSITION: data?.EMPLOYEE_POSITION,
+          EMPLOYEE_JOINDATE: data?.EMPLOYEE_JOINDATE,
+          EMPLOYEE_RESIGNDATE: data?.EMPLOYEE_RESIGNDATE,
+          REFERENCE_LOCATION: data?.REFERENCE_LOCATION,
+          AFD_CODE: data?.AFD_CODE,
+          COMP_CODE: data?.COMP_CODE,
+          WERKS: data?.WERKS,
+          REGISTER_STATUS: 'PROCESS',
+          FACE_DESCRIPTOR: data?.FACE_DESCRIPTOR,
+          INSERT_TIME: new Date(),
+          INSERT_USER: data?.INSERT_USER,
+          REGISTER_TIME: new Date(),
+          REGISTER_USER: data?.EMPLOYEE_NIK.split(' ').join(''),
+          UPDATE_TIME: new Date(),
+          UPDATE_USER: data?.EMPLOYEE_NIK.split(' ').join(''),
+          DELETE_TIME: null,
+          DELETE_USER: null,
+          SYNC_STATUS: null,
+          SYNC_TIME: null,
+        };
+    
+        navigation.navigate('Registration', { screen: 'Registration Home', params: { data: body } });
+      };
 
     const renderListCard = ({ item, index }) => {
         return (
-            <View style={styles.card}>
+            <TouchableOpacity activeOpacity={0.8} onPress={() => onRegister(item)} style={styles.card}>
                 <View style={styles.cardLeft}>
                     <Text style={styles.name}>{item.EMPLOYEE_FULLNAME}</Text>
                     <Text style={styles.nik}>{item.EMPLOYEE_NIK} </Text>
@@ -71,7 +103,7 @@ const ListRegisterScreen = () => {
                     </View>
                     <Icon name={'keyboard-arrow-right'} size={25} color={'#2F78D7'} />
                 </View>
-            </View>
+            </TouchableOpacity>
         )
     }
 
