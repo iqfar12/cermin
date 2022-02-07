@@ -32,8 +32,10 @@ import Warning from './Warning.png';
 import Success from './Success.png';
 import Password from './Password.png';
 import Email from './Email.png';
+import NotSync from './ic-no-data.png';
 
 export {
+  NotSync,
   Password,
   Email,
   Success,

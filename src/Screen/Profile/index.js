@@ -12,6 +12,7 @@ import SuccessModal from '../../Component/SuccessModal';
 import NetInfo from '@react-native-community/netinfo';
 import NoConnectionModal from '../../Component/NoConnectionModal';
 import axios from 'axios';
+import NotSyncModal from '../../Component/NotSyncModal';
 
 const ProfileScreen = () => {
   const navigation = useNavigation();
@@ -55,6 +56,7 @@ const ProfileScreen = () => {
   const [resetModal, setResetModal] = useState(false);
   const [connection, setConnection] = useState(false);
   const MasterEmployee = TaskServices.getAllData('TM_EMPLOYEE');
+  const [syncModal, setSyncModal] = useState(false);
 
   const NotSync = useMemo(() => {
     return MasterEmployee.filter((item) => item.SYNC_TIME === null).length
@@ -62,6 +64,10 @@ const ProfileScreen = () => {
 
   const onLogout = async () => {
     const isConnected = await NetInfo.fetch()
+    if (NotSync) {
+      setSyncModal(true);
+      return;
+    }
     if (isConnected.isConnected) {
       const url = user.SERVER + '/crm-msa-auth-data/auth/logout';
       try {
@@ -180,6 +186,12 @@ const ProfileScreen = () => {
     }
     if (connection) {
       return <NoConnectionModal visible={connection} onClose={() => setConnection(false)} />
+    }
+    if (syncModal) {
+      return <NotSyncModal visible={syncModal} content={'Harap Lakukan Sync Terlebih Dahulu sebelum Logout'} title={'Anda belum Sync'} onPress={() => {
+        setSyncModal(false);
+        navigation.navigate('Sync');
+      }} />
     }
   }
 
