@@ -262,10 +262,10 @@ const SplashScreen = () => {
 
   const checkLogin = async () => {
     console.log(user, 'user');
-    if (user === undefined) {
-      navigation.replace('Login');
-    } else {
+    if (user !== undefined && user.ACCESS_TOKEN !== null) {
       navigation.replace('Home');
+    } else {
+      navigation.replace('Login');
     }
   };
 

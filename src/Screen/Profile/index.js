@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import { StyleSheet, Text, View, Image, TouchableOpacity, Modal, ScrollView } from 'react-native';
 import MaterialIcons from '@expo/vector-icons/MaterialCommunityIcons';
 
@@ -54,8 +54,11 @@ const ProfileScreen = () => {
   const [exportModal, setExportModal] = useState(false);
   const [resetModal, setResetModal] = useState(false);
   const [connection, setConnection] = useState(false);
+  const MasterEmployee = TaskServices.getAllData('TM_EMPLOYEE');
 
-  console.log(user);
+  const NotSync = useMemo(() => {
+    return MasterEmployee.filter((item) => item.SYNC_TIME === null).length
+  }, [MasterEmployee])
 
   const onLogout = async () => {
     const isConnected = await NetInfo.fetch()
@@ -68,7 +71,15 @@ const ProfileScreen = () => {
           }
         })
         if (res) {
-          TaskServices.deleteAllData('TM_USERS');
+          if (NotSync === 0) {
+            TaskServices.deleteAllData('TM_USERS');
+          } else {
+            const data = {
+              ID: user.ID,
+              ACCESS_TOKEN: null
+            }
+            TaskServices.saveData('TM_USERS', data)
+          }
           navigation.reset({
             index: 0,
             routes: [{name: 'Login'}],

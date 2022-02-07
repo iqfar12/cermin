@@ -109,7 +109,7 @@ const LeaveScreen = () => {
                     }}
                     title={'Pilih User'}
                     search={true}
-                    searchPlaceholder={'Cari User'}
+                    searchPlaceholder={'Cari Nama/Nik'}
                     searchValue={userSearch}
                     onSearch={(val) => setUserSearch(val)}
                     titleBottomButton={'Tutup'}

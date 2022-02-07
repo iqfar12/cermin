@@ -25,6 +25,7 @@ import { getMasterRegion } from './Download/MasterRegion';
 import { getMasterEmployee } from './Download/MasterEmployee';
 import { uploadSyncEmployee } from './Upload/UploadEmployee';
 import { AbsenceCode } from './Download/AbsenceCode';
+import { getModel } from './Download/MasterModel';
 
 const Percentage = ({ value = 0 }) => {
   return (
@@ -81,6 +82,11 @@ const SyncScreen = () => {
     total: 0,
     status: 0,
   })
+  const [model, setModel] = useState({
+    progress: 0,
+    total: 0,
+    status: 0
+  })
 
   const resetState = () => {
     setMasterAfdeling({
@@ -118,15 +124,29 @@ const SyncScreen = () => {
       total: 0,
       status: 0,
     })
+    setModel({
+      progress: 0,
+      total: 0,
+      status: 0,
+    })
   }
 
   const syncDownload = async () => {
-    
+
     await uploadSyncEmployee().then((data) => {
       setUploadEmployee({
         progress: data.count,
         total: data.total,
         status: 1
+      })
+    })
+
+    // Get Model
+    await getModel().then((data) => {
+      setModel({
+        progress: data.count,
+        total: data.total,
+        status: 1,
       })
     })
 
@@ -244,8 +264,8 @@ const SyncScreen = () => {
   };
 
   const ValuePercentage = useMemo(() => {
-    const total = masterAfdeling.status + masterCompanies.status + masterEmployee.status + masterEst.status + masterRegion.status + uploadEmployee.status + absenceCode.status
-    return Math.floor((total / 7) * 100)
+    const total = masterAfdeling.status + masterCompanies.status + masterEmployee.status + masterEst.status + masterRegion.status + uploadEmployee.status + absenceCode.status + model.status
+    return Math.floor((total / 8) * 100)
   }, [
     masterAfdeling,
     masterCompanies,
@@ -253,7 +273,8 @@ const SyncScreen = () => {
     masterEst,
     masterRegion,
     uploadEmployee,
-    absenceCode
+    absenceCode,
+    model
   ])
 
   return (
@@ -317,6 +338,12 @@ const SyncScreen = () => {
 
           <View style={styles.section}>
             <Text style={styles.sectionTitle}>Download Data</Text>
+            <ProgressSyncBar
+              title={'Master Model'}
+              total={model.total}
+              progress={model.progress}
+              sync={sync}
+            />
             <ProgressSyncBar
               title={'Master Afdeling'}
               total={masterAfdeling.total}

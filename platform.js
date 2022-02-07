@@ -11,7 +11,7 @@ import Canvas, {
   ImageData,
   CanvasRenderingContext2D,
 } from 'react-native-canvas';
-import '@tensorflow/tfjs-backend-wasm';
+import '@tensorflow/tfjs-react-native';
 
 
 function parseHeaders(rawHeaders) {

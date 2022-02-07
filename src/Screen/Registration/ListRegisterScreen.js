@@ -48,15 +48,31 @@ const ListRegisterScreen = () => {
     const MasterEmployee = TaskServices.getAllData('TM_EMPLOYEE');
     const [search, setSearch] = useState('');
     const isFocused = useIsFocused();
-    
+    const user = TaskServices.getCurrentUser();
+
     const ListEmployee = useMemo(() => {
+        const location = user.LOCATION.split(',');
         const res = MasterEmployee.filter((item) => item.REGISTER_STATUS == 'NONE')
-        if (search !== '') {
-            return res.filter((item) => item.EMPLOYEE_FULLNAME.toLowerCase().includes(search.toLowerCase()))
+        let data = res;
+        if (user.REFERENCE_LOCATION == 'AFD') {
+            data = res.filter((item) => location.includes(item.AFD_CODE))
+        } else if (user.REFERENCE_LOCATION == 'BA') {
+            data = res.filter((item) => location.includes(item.WERKS))
+        } else if (user.REFERENCE_LOCATION == 'COMPANY') {
+            data = res.filter((item) => location.includes(item.COMP_CODE))
         } else {
-            return res
+            // TODO: HO Need Filter!!
+            data = res
+        }
+
+        if (search !== '') {
+            return data.filter((item) => item.EMPLOYEE_FULLNAME.toLowerCase().includes(search.toLowerCase()))
+        } else {
+            return data
         }
     }, [MasterEmployee, search, isFocused])
+
+    console.log(ListEmployee[0]);
 
     const onRegister = async (data) => {       
         const body = {
@@ -75,11 +91,11 @@ const ListRegisterScreen = () => {
           REGISTER_STATUS: 'PROCESS',
           FACE_DESCRIPTOR: data?.FACE_DESCRIPTOR,
           INSERT_TIME: new Date(),
-          INSERT_USER: data?.INSERT_USER,
+          INSERT_USER: user?.USER_NAME,
           REGISTER_TIME: new Date(),
-          REGISTER_USER: data?.EMPLOYEE_NIK.split(' ').join(''),
+          REGISTER_USER: user.USER_NAME,
           UPDATE_TIME: new Date(),
-          UPDATE_USER: data?.EMPLOYEE_NIK.split(' ').join(''),
+          UPDATE_USER: user.USER_NAME,
           DELETE_TIME: null,
           DELETE_USER: null,
           SYNC_STATUS: null,

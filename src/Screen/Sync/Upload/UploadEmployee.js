@@ -19,11 +19,13 @@ export const uploadSyncEmployee = async () => {
                 let formData = new FormData();
                 const images = MasterImages.filter((data) => data.MODEL_ID == item.ID);
                 images.forEach((item, index) => {
-                    formData.append('images', {
-                        uri: `file://${item.URL}`,
-                        name: `${item.FILE_NAME}_${index}.jpeg`,
-                        type: 'image/jpeg'
-                    })
+                    if (index < 4) {
+                        formData.append('images', {
+                            uri: `file://${item.URL}`,
+                            name: `${item.FILE_NAME}_${index}.jpeg`,
+                            type: 'image/jpeg'
+                        })
+                    }
                 })
                 if (item.TYPE == 'E') {
                     formData.append('id', item.ID)

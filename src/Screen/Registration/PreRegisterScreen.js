@@ -48,13 +48,16 @@ const ReferenceLocation = [
   {
     value: 'Afdeling',
     name: 'Afdeling',
+    level: 1,
   },
   {
     value: 'Estate',
     name: 'Estate',
+    level: 2,
   }, {
     value: 'Company',
     name: 'Company',
+    level: 3,
   },
 ]
 
@@ -120,11 +123,11 @@ const PreRegisterScreen = () => {
       REGISTER_STATUS: 'PROCESS',
       FACE_DESCRIPTOR: type === 1 ? data?.FACE_DESCRIPTOR : null,
       INSERT_TIME: new Date(),
-      INSERT_USER: type === 1 ? data?.INSERT_USER : user.NAME,
+      INSERT_USER: type === 1 ? data?.INSERT_USER : user.USER_NAME,
       REGISTER_TIME: new Date(),
-      REGISTER_USER: name,
+      REGISTER_USER: user.USER_NAME,
       UPDATE_TIME: new Date(),
-      UPDATE_USER: user.NAME,
+      UPDATE_USER: user.USER_NAME,
       DELETE_TIME: null,
       DELETE_USER: null,
       SYNC_STATUS: null,
@@ -155,7 +158,7 @@ const PreRegisterScreen = () => {
       if (referenceLocation == 'Afdeling') {
         return item.AFD_CODE_GIS
       } else if (referenceLocation == 'Estate') {
-        return item.EST_CODE
+        return item.WERKS
       } else {
         return item.COMP_CODE
       }
@@ -205,41 +208,77 @@ const PreRegisterScreen = () => {
 
   const ListAfdeling = useMemo(() => {
     const res = MasterAfdeling.map((item) => item).sort((a, b) => parseInt(a.COMP_CODE, 10) - parseInt(b.COMP_CODE, 10))
+    const location = user.LOCATION.split(',');
+    let data = res;
+    if (user.REFERENCE_LOCATION == 'AFD') {
+      data = res.filter((item) => location.includes(item.AFD_CODE_GIS))
+    } else if (user.REFERENCE_LOCATION == 'BA') {
+      data = res.filter((item) => location.includes(item.WERKS))
+    } else if (user.REFERENCE_LOCATION == 'COMPANY') {
+      data = res.filter((item) => location.includes(item.COMP_CODE))
+    } else {
+      // TODO: HO Need Filter!!
+      data = res
+    }
     if (locationSearch !== '') {
-      return res.filter((item) =>
+      return data.filter((item) =>
         item.AFD_CODE_GIS.toLowerCase().includes(locationSearch.toLocaleLowerCase()) ||
         item.COMP_CODE.includes(locationSearch) ||
         item.EST_CODE.includes(locationSearch)
       )
     } else {
-      return res
+      return data
     }
   }, [MasterAfdeling, locationSearch])
 
   const ListEstate = useMemo(() => {
     const res = MasterEstate.map((item) => item).sort((a, b) => parseInt(a.COMP_CODE, 10) - parseInt(b.COMP_CODE, 10))
+    const location = user.LOCATION.split(',')
+    let data = res;
+    if (user.REFERENCE_LOCATION == 'AFD') {
+      data = res.filter((item) => location.map((item) => item.substr(0, 4)).includes(item.WERKS))
+    } else if (user.REFERENCE_LOCATION == 'BA') {
+      data = res.filter((item) => location.includes(item.WERKS))
+    } else if (user.REFERENCE_LOCATION == 'COMPANY') {
+      data = res.filter((item) => location.includes(item.COMP_CODE))
+    } else {
+      // TODO: HO Need Filter!!
+      data = res
+    }
     if (locationSearch !== '') {
-      return res.filter((item) =>
+      return data.filter((item) =>
         item.EST_NAME.toLowerCase().includes(locationSearch.toLocaleLowerCase()) ||
         item.COMP_CODE.includes(locationSearch) ||
         item.EST_CODE.includes(locationSearch) ||
         item.WERKS.includes(locationSearch)
       )
     } else {
-      return res
+      return data
     }
   }, [MasterEstate, locationSearch])
 
   const ListCompany = useMemo(() => {
     const res = MasterCompany.map((item) => item).sort((a, b) => parseInt(a.COMP_CODE, 10) - parseInt(b.COMP_CODE, 10))
+    const location = user.LOCATION.split(',')
+    let data = res;
+    if (user.REFERENCE_LOCATION == 'AFD') {
+      data = res.filter((item) => location.map((item) => item.substr(0, 2)).includes(item.COMP_CODE))
+    } else if (user.REFERENCE_LOCATION == 'BA') {
+      data = res.filter((item) => location.map((item) => item.substr(0, 2)).includes(item.COMP_CODE))
+    } else if (user.REFERENCE_LOCATION == 'COMPANY') {
+      data = res.filter((item) => location.includes(item.COMP_CODE))
+    } else {
+      // TODO: HO Need Filter!!
+      data = res
+    }
     if (locationSearch !== '') {
-      return res.filter((item) =>
+      return data.filter((item) =>
         item.COMP_NAME.toLowerCase().includes(locationSearch.toLocaleLowerCase()) ||
         item.COMP_CODE.includes(locationSearch) ||
         item.REGION_CODE.includes(locationSearch)
       )
     } else {
-      return res
+      return data
     }
   }, [MasterCompany, locationSearch])
 
@@ -255,13 +294,25 @@ const PreRegisterScreen = () => {
 
   const ListEmployee = useMemo(() => {
     const res = MasterEmployee.filter((item) => item.TYPE === 'E').filter((item) => item.REGISTER_STATUS == 'NONE');
+    const location = user.LOCATION.split(',');
+    let data = res;
+    if (user.REFERENCE_LOCATION == 'AFD') {
+      data = res.filter((item) => location.includes(item.AFD_CODE))
+    } else if (user.REFERENCE_LOCATION == 'BA') {
+      data = res.filter((item) => location.includes(item.WERKS))
+    } else if (user.REFERENCE_LOCATION == 'COMPANY') {
+      data = res.filter((item) => location.includes(item.COMP_CODE))
+    } else {
+      // TODO: HO Need Filter!!
+      data = res
+    }
 
     if (employeeSearch !== '') {
-      return res.filter((item) =>
+      return data.filter((item) =>
         item.EMPLOYEE_NIK.split(' ').join('').includes(employeeSearch) ||
         item.EMPLOYEE_FULLNAME.toLowerCase().includes(employeeSearch.toLowerCase()))
     } else {
-      return res;
+      return data;
     }
   }, [MasterEmployee, employeeSearch])
 
@@ -284,9 +335,18 @@ const PreRegisterScreen = () => {
       );
     }
     if (referenceModal) {
+      const level = () => {
+        if (user.REFERENCE_LOCATION == 'AFD') {
+          return 1
+        } else if (user.REFERENCE_LOCATION == 'BA') {
+          return 2
+        } else {
+          return 3
+        }
+      }
       return (
         <MenuModal onClose={() => setReferenceModal(false)} visible={referenceModal}>
-          {ReferenceLocation.map((item, index) => (
+          {ReferenceLocation.filter((item) => item.level <= level()).map((item, index) => (
             <TouchableOpacity
               onPress={() => onPickReference(item.value)}
               key={index}

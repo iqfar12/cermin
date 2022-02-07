@@ -855,18 +855,24 @@ const RegisterScreen = ({ route }) => {
             <Text style={styles.stepTxt}>Pastikan mata melihat kamera</Text>
           </View>
         </View>
-        {isFocused && !isLoading ?(
+        {isFocused && !isLoading ? (
           <View style={styles.wrapper}>
-              <RNCamera
-                style={styles.preview}
-                ref={ref => setCamera(ref)}
-                type={cameraFront ? 'front' : 'back'}
-                autoFocus={'on'}
-              />
-              <Image style={styles.frame} source={Frame()} />
-              <Image style={styles.line} source={Line()} />
+            <RNCamera
+              style={styles.preview}
+              ref={ref => setCamera(ref)}
+              type={cameraFront ? 'front' : 'back'}
+              autoFocus={'on'}
+            />
+            <Image style={styles.frame} source={Frame()} />
+            <Image style={styles.line} source={Line()} />
           </View>
-        ) : null}
+        ) : <View style={styles.wrapper}>
+            <View
+              style={styles.preview}
+            />
+            <Image style={styles.frame} source={Frame()} />
+            <Image style={styles.line} source={Line()} />
+          </View>}
         <View style={styles.cameraContainer}>
           <View activeOpacity={0.8} style={styles.switchCamera}>
             <Icon

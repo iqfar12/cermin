@@ -24,8 +24,7 @@ const NoConnectionModal = ({onClose, visible}) => {
             <Image source={ic_no_internet} style={styles.image} />
           </View>
           <Text style={styles.message}>
-            Tidak ada Koneksi {'\n'}Harap Nyalakan Koneksi Internet untuk
-            Melanjutkan
+            Tidak ada Koneksi {'\n'}Oops, check koneksi internet mu dulu ya.
           </Text>
           <SubmitButton title={'Oke'} onPress={onClose} />
         </View>

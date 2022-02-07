@@ -61,6 +61,7 @@ const LoginScreen = () => {
   const [passwordModal, setPasswordModal] = useState(false);
   const [failedModal, setFailedModal] = useState(false);
   const [message, setMessage] = useState('');
+  const user = TaskServices.getCurrentUser();
 
   const postRealm = async (data, token) => {
     console.log(data);
@@ -108,7 +109,7 @@ const LoginScreen = () => {
   };
 
   const login = async () => {
-    if (email === '') {
+    if (email === '' && user === undefined) {
       setEmailModal(true)
       return;
     }
@@ -121,7 +122,7 @@ const LoginScreen = () => {
       setIsLoading(true);
       try {
         const body = {
-          username: email,
+          username: user === undefined ? email : user.USER_NAME,
           password: password,
           deviceId: deviceId,
         };
@@ -133,10 +134,17 @@ const LoginScreen = () => {
           await getUserData(res.data.token);
         }
       } catch (error) {
-        setMessage(error.response.data.message)
-        setIsLoading(false);
-        setFailedModal(true)
-        console.log(error.response.data.message, 'error login');
+        if (error.response) {
+          setMessage(error.response.data.message || 'Server Error')
+          setIsLoading(false);
+          setFailedModal(true)
+          console.log(error, 'error login');
+        } else {
+          setMessage('Error Server');
+          setIsLoading(false);
+          setFailedModal(true)
+          console.log(error, 'error login');
+        }
       }
     } else {
       setConnection(true);
@@ -239,12 +247,14 @@ const LoginScreen = () => {
             <View style={styles.formContainer}>
               <View style={styles.formInput}>
                 <Icon name={'person'} size={20} color={'#DADADA'} />
-                <TextInput
+                {user === undefined ? <TextInput
                   placeholder={'Email'}
                   style={styles.textInput}
                   value={email}
                   onChangeText={val => setEmail(val)}
-                />
+                /> :
+                  <Text style={[styles.textInput, { paddingVertical: 4 }]}>{user.USER_NAME}</Text>
+                }
               </View>
               <View style={styles.formInput}>
                 <Icon name={'lock'} size={20} color={'#DADADA'} />

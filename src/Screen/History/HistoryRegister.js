@@ -59,16 +59,17 @@ const HistoryRegister = () => {
   const navigation = useNavigation();
   const [menu, setMenu] = useState(0);
   const Employee = TaskServices.getAllData('TM_EMPLOYEE').filter((item) => item.REGISTER_STATUS !== 'NONE');
+  const user = TaskServices.getCurrentUser();
 
   const Karyawan = useMemo(() => {
-    return Employee.filter((item) => item.TYPE == 'E')
+    return Employee.filter((item) => item.TYPE == 'E' && item.REGISTER_USER == user.USER_NAME)
   }, [Employee])
 
   const NonKaryawan = useMemo(() => {
-    return Employee.filter((item) => item.TYPE == 'N');
+    return Employee.filter((item) => item.TYPE == 'N' && item.REGISTER_USER == user.USER_NAME);
   }, [Employee])
 
-  console.log(NonKaryawan);
+  console.log(TaskServices.getCurrentUser());
 
   const renderListCard = ({item, index}) => {
     return (

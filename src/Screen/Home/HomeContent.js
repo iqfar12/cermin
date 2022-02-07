@@ -47,6 +47,7 @@ const HomeContent = () => {
   const [sync, setSync] = useState(true);
   const MasterEmployee = TaskServices.getAllData('TM_EMPLOYEE');
   const MasterAttendance = TaskServices.getAllData('TR_ATTENDANCE');
+  const user = TaskServices.getCurrentUser();
 
   const ListAgenda = useMemo(() => {
     const res = MasterAttendance.filter((item) => item.TYPE == '4')
@@ -55,7 +56,20 @@ const HomeContent = () => {
   }, [MasterAttendance])
 
   const ListNotRegisterEmployee = useMemo(() => {
-    return MasterEmployee.filter((item) => item.REGISTER_STATUS == "NONE");
+    const res = MasterEmployee.filter((item) => item.REGISTER_STATUS == "NONE");
+    const location = user.LOCATION.split(',');
+    let data = res;
+    if (user.REFERENCE_LOCATION == 'AFD') {
+      data = res.filter((item) => location.includes(item.AFD_CODE))
+    } else if (user.REFERENCE_LOCATION == 'BA') {
+      data = res.filter((item) => location.includes(item.WERKS))
+    } else if (user.REFERENCE_LOCATION == 'COMPANY') {
+      data = res.filter((item) => location.includes(item.COMP_CODE))
+    } else {
+      // TODO: HO Need Filter!!
+      data = res
+    }
+    return data
   }, [MasterEmployee])
 
   useEffect(() => {
