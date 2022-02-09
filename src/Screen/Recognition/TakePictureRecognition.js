@@ -196,6 +196,7 @@ const TakePictureRecognition = ({ route }) => {
       console.log(results);
       if (results._label != 'unknown') {
         setIsLoading(false);
+        console.log(results);
         navigation.navigate('Preview Recognition', {
           data: {
             label: results._label,

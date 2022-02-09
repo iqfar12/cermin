@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import {
   StyleSheet,
   Text,
@@ -25,6 +25,9 @@ import { shuffleArr } from '../../Utils/Shuffle';
 import { FrontFrame, FrontLine, GuideFront } from '../../assets';
 import ExpoIcon from '@expo/vector-icons/MaterialIcons';
 import { Fonts } from '../../Utils/Fonts';
+import TaskServices from '../../Database/TaskServices';
+import geolocation from '@react-native-community/geolocation';
+
 
 const CircleMask = () => {
   return (
@@ -59,6 +62,27 @@ const TakePictureLeave = ({ route }) => {
   const [step, setStep] = useState(shuffleArr());
   const [faceId, setFaceId] = useState(0);
   const [front, setFront] = useState(true);
+  const [coordinate, setCoordinate] = useState({
+    latitude: 0,
+    longitude: 0,
+  });
+  const MasterEmployee = TaskServices.getAllData('TM_EMPLOYEE');
+
+  useEffect(() => {
+    geolocation.getCurrentPosition((res) => {
+      setCoordinate({
+        latitude: res.coords.latitude,
+        longitude: res.coords.longitude
+      })
+    }, (err) => console.log('err Location'), {
+      enableHighAccuracy: true
+    })
+  }, [isFocused])
+
+  const Descriptor = useMemo(() => {
+    const res = MasterEmployee.filter((item) => item.FACE_DESCRIPTOR !== null).map((item) => JSON.parse(item.FACE_DESCRIPTOR))
+    return res
+  }, [MasterEmployee]);
 
   const condition4 = event => {
     const rightEye = event?.faces[0]?.rightEyeOpenProbability;
@@ -144,8 +168,6 @@ const TakePictureLeave = ({ route }) => {
     // return res;
     await faceapi.tf.ready();
 
-    const userJsonPath = fs.documentDirectory + 'User.json';
-    const jsonString = await fs.readAsStringAsync(userJsonPath);
     const userData = JSON.parse(jsonString);
     const img = faceapi.tf.util.encodeString(image, 'base64').buffer;
     const raw = new Uint8Array(img);
@@ -163,7 +185,7 @@ const TakePictureLeave = ({ route }) => {
       .withFaceLandmarks()
       .withFaceDescriptor();
     if (detection) {
-      const descriptors = userData.map(item =>
+      const descriptors = Descriptor.map(item =>
         faceapi.LabeledFaceDescriptors.fromJSON(item),
       );
       const faceMatcher = new faceapi.FaceMatcher(descriptors, 0.43);
@@ -174,6 +196,8 @@ const TakePictureLeave = ({ route }) => {
         navigation.navigate('Preview Picture Leave', {
           data: {
             label: results._label,
+            accuracy: results._distance,
+            coord: {latitude: coordinate.latitude, longitude: coordinate.longitude}
           },
           image: gambar,
         });

@@ -6,11 +6,42 @@ export const getMasterEmployee = async () => {
   const dbLocal = TaskServices.getAllData('TM_EMPLOYEE');
   const url = 'http://apis-dev1.tap-agri.com/crm-msa-attendance/employee';
   // const url = 'http://192.168.0.108:4000/employee';
+  const duplicate_url = 'http://apis-dev1.tap-agri.com/crm-msa-attendance/employee-invalid'
 
   let downloadProgress = {
     count: 0,
     total: dbLocal.length,
   };
+
+  const getDuplicate = async (page = 1) => {
+    try {
+      const res = await axios.get(duplicate_url + `?join=employee&page=${page}`, {
+        headers: {
+          Authorization: 'Bearer ' + user.ACCESS_TOKEN
+        }
+      })
+      if (res) {
+        if (res.data.data.length > 0) {
+          Promise.all(
+            res.data.data.map((item) => {
+              const data = {
+                ID: item.id,
+                EMPLOYEE_ID: item.employeeId,
+                STATUS: item.registerStatus,
+                DESCRIPTION: item.description,
+                EMPLOYEE_NIK: item.employeeNik,
+                IMAGES: item.images,
+              }
+
+              TaskServices.saveData('T_DUPLICATE', data)
+            })
+          )
+        }
+      }
+    } catch (error) {
+      console.log(error, 'error');
+    }
+  }
 
   const getData = async (page = 1) => {
     try {
@@ -43,7 +74,7 @@ export const getMasterEmployee = async () => {
                 INSERT_USER: item.insertUser,
                 REGISTER_STATUS: item.registerStatus,
                 REGISTER_TIME: item.registerTime,
-                REGISTER_USER: item.registerUser,
+                // REGISTER_USER: item.registerUser,
                 UPDATE_TIME: item.updateTime,
                 UPDATE_USER: item.updateUser,
                 DELETE_TIME: item.deleteTime,
@@ -69,6 +100,22 @@ export const getMasterEmployee = async () => {
     } catch (error) {
       console.log(error, 'error');
     }
+  }
+
+  try {
+    const count = await axios.get(duplicate_url, {
+      headers: {
+        Authorization: 'Bearer ' + user.ACCESS_TOKEN
+      }
+    })
+    if (count) {
+      const totalPage = count.data.pageCount
+      for (let i = 0; i <= totalPage; i++) {
+        await getDuplicate(i)
+      }
+    }
+  } catch (error) {
+    console.log(error, 'error')
   }
 
   try {

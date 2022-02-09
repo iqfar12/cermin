@@ -441,6 +441,22 @@ const PreRegisterScreen = () => {
     }
   }
 
+  const dataLocation = () => {
+    if (data) {
+      if (data.REFERENCE_LOCATION == 'AFD') {
+        return data.AFD_CODE
+      } else if (data.REFERENCE_LOCATION == 'BA') {
+        const res = MasterEstate.find((item) => item.WERKS == data.WERKS)
+        return res?.EST_NAME
+      } else {
+        const res = MasterCompany.find((item) => item.COMP_CODE == data.COMP_CODE)
+        return res?.COMP_NAME
+      } 
+    } else {
+      return 'Lokasi Kosong'
+    }
+  }
+
   return (
     <>
       {showModal()}
@@ -570,7 +586,7 @@ const PreRegisterScreen = () => {
                 {type === 1 ?
                   <View style={styles.left}>
                     <Icon name={'location-pin'} size={25} color={'#DADADA'} />
-                    <Text style={styles.formTxt}>{data === undefined ? 'Pilih Lokasi' : data?.WERKS}</Text>
+                    <Text style={styles.formTxt}>{data === undefined ? 'Pilih Lokasi' : dataLocation()}</Text>
                   </View>
                   :
                   <View style={styles.left}>

@@ -195,7 +195,7 @@ const AttendanceOut = ({ route }) => {
           data: {
             label: results._label,
             accuracy: results._distance,
-            coord: {latitude: 0, longitude: 0}
+            coord: {latitude: coordinate.latitude, longitude: coordinate.longitude}
           },
           image: gambar,
         });

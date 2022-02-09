@@ -78,6 +78,19 @@ const TM_EMPLOYEE = {
   },
 };
 
+const T_DUPLICATE = {
+  name: 'T_DUPLICATE',
+  primaryKey: 'ID',
+  properties: {
+    ID: 'string?',
+    EMPLOYEE_ID: 'string?',
+    STATUS: 'string?',
+    DESCRIPTION: 'string?',
+    EMPLOYEE_NIK: 'string?',
+    IMAGES: 'string?',
+  }
+}
+
 const TM_AFD = {
   name: 'TM_AFD',
   primaryKey: 'AFD_CODE_GIS',
@@ -240,6 +253,7 @@ export default {
   TR_ATTENDANCE,
   TR_IMAGES,
   TR_NOTIFICATION,
+  T_DUPLICATE,
 
   SCHEMA_VERSION,
 };

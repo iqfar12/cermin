@@ -69,8 +69,6 @@ const HistoryRegister = () => {
     return Employee.filter((item) => item.TYPE == 'N' && item.REGISTER_USER == user.USER_NAME);
   }, [Employee])
 
-  console.log(TaskServices.getCurrentUser());
-
   const renderListCard = ({item, index}) => {
     return (
       <View style={styles.card}>

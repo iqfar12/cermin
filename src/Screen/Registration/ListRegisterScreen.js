@@ -49,8 +49,10 @@ const ListRegisterScreen = () => {
     const [search, setSearch] = useState('');
     const isFocused = useIsFocused();
     const user = TaskServices.getCurrentUser();
-
+    const DuplicateEmployee = TaskServices.getAllData('T_DUPLICATE');
+    
     const ListEmployee = useMemo(() => {
+        const duplicateId = DuplicateEmployee.map((item) => item.EMPLOYEE_ID);
         const location = user.LOCATION.split(',');
         const res = MasterEmployee.filter((item) => item.REGISTER_STATUS == 'NONE')
         let data = res;
@@ -71,8 +73,6 @@ const ListRegisterScreen = () => {
             return data
         }
     }, [MasterEmployee, search, isFocused])
-
-    console.log(ListEmployee[0]);
 
     const onRegister = async (data) => {       
         const body = {

@@ -107,7 +107,7 @@ const PreviewAttendanceOut = ({ route }) => {
                 <Text style={styles.retakeTxt}>Ambil Ulang</Text>
                 <Icon name={'party-mode'} size={30} color={'#F2443A'} />
               </TouchableOpacity>
-              <SubmitButton backgroundColor={'#F2443A'} onPress={() => { navigation.navigate('Home') }} title={`Absen Keluar(${count})`} />
+              <SubmitButton backgroundColor={'#F2443A'} onPress={onAttendance} title={`Absen Keluar(${count})`} />
             </View>
           </View>
         </ScrollView>

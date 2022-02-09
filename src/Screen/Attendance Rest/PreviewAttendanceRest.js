@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import {
   StyleSheet,
   Text,
@@ -12,10 +12,62 @@ import { useNavigation } from '@react-navigation/native';
 import Icon from '@expo/vector-icons/MaterialIcons';
 import SubmitButton from '../../Component/SubmitButton';
 import { Fonts } from '../../Utils/Fonts';
+import TaskServices from '../../Database/TaskServices';
+import { UuidGenerator } from '../../Utils/UuidGenerator';
 
 const PreviewAttendanceRest = ({ route }) => {
   const navigation = useNavigation();
   const { data, image } = route.params;
+  const [count, setCount] = useState(10);
+  const MasterEmployee = TaskServices.getAllData('TM_EMPLOYEE');
+  const MasterAbsenceCode = TaskServices.getAllData('TM_ABSENCE_TYPE');
+  const Results = useMemo(() => {
+    const res = MasterEmployee.find((item) => item.EMPLOYEE_NIK == data?.label);
+    return res
+  }, [data, MasterEmployee])
+
+  const onAttendance = async () => {
+    if (Results === undefined) {
+      navigation.navigate('Home')
+    } else {
+      const id = UuidGenerator();
+      const code = MasterAbsenceCode.find((item) => item.TYPE == 'WORKED' && item.SOURCE == Results.SOURCE)?.CODE
+      // 1 = Masuk
+      // 2 = Istirahat
+      // 3 = Pulang
+      // 4 = Izin
+      const body = {
+        ID: id,
+        EMPLOYEE_ID: Results.ID,
+        TYPE: '2',
+        ABSENCE_CODE: code || 'K',
+        DATETIME: new Date(),
+        ACCURACY: data?.accuracy,
+        LATITUDE: data?.coord?.latitude || 0.00,
+        LONGITUDE: data?.coord?.longitude || 0.00,
+        MANUAL_INPUT: 0,
+        DESCRIPTION: 'Absen Istirahat',
+        INSERT_TIME: new Date(),
+        INSERT_USER: Results.EMPLOYEE_NIK,
+        SYNC_STATUS: null,
+        SYNC_TIME: null,
+      }
+
+      await TaskServices.saveData('TR_ATTENDANCE', body);
+
+      navigation.navigate('Home')
+    }
+  }
+
+  useEffect(() => {
+    if (count > 0) {
+      setTimeout(() => {
+        setCount(count - 1)
+      }, 1000)
+    } else {
+      onAttendance();
+    }
+  }, [count])
 
   return (
     <>
@@ -31,19 +83,22 @@ const PreviewAttendanceRest = ({ route }) => {
             </View>
           </View>
           <View style={styles.bottom}>
-            <View style={styles.infoContainer}>
-              <Text style={styles.name}>{'Melisa Soetanti'}</Text>
+          {Results !== undefined ? <View style={styles.infoContainer}>
+              <Text style={styles.name}>{Results.EMPLOYEE_FULLNAME}</Text>
               <View style={styles.midText}>
-                <Text style={styles.nik}>{'32166343266'}</Text>
+                <Text style={styles.nik}>{Results.EMPLOYEE_NIK}</Text>
                 <Icon name={'location-pin'} size={20} color={'#C5C5C5'} />
-                <Text style={styles.afd}>{'4213B'}</Text>
+                <Text style={styles.afd}>{Results.WERKS}</Text>
               </View>
               <View style={styles.type}>
                 <Text style={styles.typeTxt}>
-                  {'Employee'}
+                  {Results.TYPE == 'E' ? 'Employee' : 'Non-Employee'}
                 </Text>
               </View>
-            </View>
+            </View> :
+              <View style={styles.infoContainer}>
+                <Text style={styles.name}>Wajah Tidak Ditemukan</Text>
+              </View>}
             <View style={styles.buttonContainer}>
               <TouchableOpacity
                 activeOpacity={0.8}
@@ -53,7 +108,7 @@ const PreviewAttendanceRest = ({ route }) => {
                 <Text style={styles.retakeTxt}>Ambil Ulang</Text>
                 <Icon name={'party-mode'} size={30} color={'#FFB81C'} />
               </TouchableOpacity>
-              <SubmitButton backgroundColor={'#FFB81C'} onPress={() => {navigation.navigate('Home')}} title={'Absen Istirahat'} />
+              <SubmitButton backgroundColor={'#FFB81C'} onPress={onAttendance} title={`Absen Istirahat(${count})`} />
             </View>
           </View>
         </ScrollView>

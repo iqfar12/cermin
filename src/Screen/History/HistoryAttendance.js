@@ -1,4 +1,4 @@
-import React, { useMemo } from 'react'
+import React, { useMemo, useState } from 'react'
 import { StyleSheet, Text, View, TouchableOpacity, TextInput, FlatList } from 'react-native'
 import { useNavigation } from '@react-navigation/native';
 import { Fonts } from '../../Utils/Fonts';
@@ -46,10 +46,20 @@ const HistoryAttendance = () => {
     const navigation = useNavigation();
     const MasterAttendance = TaskServices.getAllData('TR_ATTENDANCE');
     const MasterEmployee = TaskServices.getAllData('TM_EMPLOYEE');
+    const [search, setSearch] = useState('');
 
     const ListAttendance = useMemo(() => {
-        return MasterAttendance
-    }, [MasterAttendance])
+        const res = MasterAttendance.map((item) => {
+            const user = MasterEmployee.find((data) => data.ID == item.EMPLOYEE_ID);
+            item.name = user.EMPLOYEE_FULLNAME
+            item.nik = user.EMPLOYEE_NIK.split('/').join('')
+            return item
+        })
+        if (search !== '') {
+            return res.filter((item) => item.name.toLowerCase().includes(search.toLowerCase()) || item.nik.toLowerCase().includes(search.toLowerCase()))
+        }
+        return res
+    }, [MasterAttendance, search])
 
     const renderListCard = ({ item, index }) => {
         const user = MasterEmployee.find((data) => data.ID == item.EMPLOYEE_ID);
@@ -68,7 +78,7 @@ const HistoryAttendance = () => {
         return (
             <TouchableOpacity activeOpacity={0.8} onPress={() => navigation.navigate('Detail History Attendance', {data: item})} style={styles.card}>
                 <View style={styles.top}>
-                    <Text style={styles.name}>{user?.EMPLOYEE_NIK}<Text style={styles.nik}> | {user.EMPLOYEE_FULLNAME}</Text></Text>
+                    <Text style={styles.name}>{user?.EMPLOYEE_NIK}<Text style={styles.nik}> | {user?.EMPLOYEE_FULLNAME}</Text></Text>
                     <Icon name={'radio-button-unchecked'} size={25} color={'#FFB81C'} />
                 </View>
                 <View style={styles.subTop}>
@@ -121,9 +131,9 @@ const HistoryAttendance = () => {
                 <View style={styles.body}>
                     <View style={styles.search}>
                         <Icon name={'search'} size={25} color={'#C5C5C5'} />
-                        <TextInput style={styles.input} placeholder={'Cari Nama/Nik'} />
+                        <TextInput onChangeText={(val) => setSearch(val)} value={search} style={styles.input} placeholder={'Cari Nama/Nik'} />
                     </View>
-                    <View style={styles.tagContainer}>
+                    {/* <View style={styles.tagContainer}>
                         <TouchableOpacity style={styles.more}>
                             <Icon name={'tune'} size={25} color={'#000'} />
                         </TouchableOpacity>
@@ -131,7 +141,7 @@ const HistoryAttendance = () => {
                             <Text style={styles.tagTitle}>Absen Lengkap</Text>
                             <Icon name={'cancel'} size={20} color={'#FFF'} />
                         </View>
-                    </View>
+                    </View> */}
                     <FlatList
                         data={ListAttendance}
                         renderItem={renderListCard}

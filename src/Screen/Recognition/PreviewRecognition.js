@@ -107,7 +107,7 @@ const PreviewRecognition = ({ route }) => {
                 <Text style={styles.retakeTxt}>Ambil Ulang</Text>
                 <Icon name={'party-mode'} size={30} color={'#195FBA'} />
               </TouchableOpacity>
-              <SubmitButton onPress={() => { navigation.navigate('Home') }} title={`Absen(${count})`} />
+              <SubmitButton onPress={onAttendance} title={`Absen(${count})`} />
             </View>
           </View>
         </ScrollView>

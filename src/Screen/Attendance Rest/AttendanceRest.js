@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import {
   StyleSheet,
   Text,
@@ -25,6 +25,8 @@ import { shuffleArr } from '../../Utils/Shuffle';
 import { FrontFrame, FrontLine, GuideFront } from '../../assets';
 import ExpoIcon from '@expo/vector-icons/MaterialIcons';
 import { Fonts } from '../../Utils/Fonts';
+import geolocation from '@react-native-community/geolocation';
+import TaskServices from '../../Database/TaskServices';
 
 const CircleMask = () => {
   return (
@@ -59,6 +61,28 @@ const AttendanceRest = ({ route }) => {
   const [step, setStep] = useState(shuffleArr());
   const [faceId, setFaceId] = useState(0);
   const [front, setFront] = useState(true);
+  const [coordinate, setCoordinate] = useState({
+    latitude: 0,
+    longitude: 0,
+  });
+  const MasterEmployee = TaskServices.getAllData('TM_EMPLOYEE');
+
+  useEffect(() => {
+    geolocation.getCurrentPosition((res) => {
+      setCoordinate({
+        latitude: res.coords.latitude,
+        longitude: res.coords.longitude
+      })
+    }, (err) => console.log('err Location'), {
+      enableHighAccuracy: true
+    })
+  }, [isFocused])
+
+  const Descriptor = useMemo(() => {
+    const res = MasterEmployee.filter((item) => item.FACE_DESCRIPTOR !== null).map((item) => JSON.parse(item.FACE_DESCRIPTOR))
+    return res
+  }, [MasterEmployee]);
+
 
   const condition4 = event => {
     const rightEye = event?.faces[0]?.rightEyeOpenProbability;
@@ -144,9 +168,6 @@ const AttendanceRest = ({ route }) => {
     // return res;
     await faceapi.tf.ready();
 
-    const userJsonPath = fs.documentDirectory + 'User.json';
-    const jsonString = await fs.readAsStringAsync(userJsonPath);
-    const userData = JSON.parse(jsonString);
     const img = faceapi.tf.util.encodeString(image, 'base64').buffer;
     const raw = new Uint8Array(img);
     const imageTensor = decodeJpeg(raw);
@@ -163,7 +184,7 @@ const AttendanceRest = ({ route }) => {
       .withFaceLandmarks()
       .withFaceDescriptor();
     if (detection) {
-      const descriptors = userData.map(item =>
+      const descriptors = Descriptor.map(item =>
         faceapi.LabeledFaceDescriptors.fromJSON(item),
       );
       const faceMatcher = new faceapi.FaceMatcher(descriptors, 0.43);
@@ -174,6 +195,8 @@ const AttendanceRest = ({ route }) => {
         navigation.navigate('Preview Attendance Rest', {
           data: {
             label: results._label,
+            accuracy: results._distance,
+            coord: {latitude: coordinate.latitude, longitude: coordinate.longitude}
           },
           image: gambar,
         });
@@ -204,9 +227,9 @@ const AttendanceRest = ({ route }) => {
       });
       // console.log(results.uri, results.height, results.width);
     //   if (online) {
-        recognizeOnline(results);
+        // recognizeOnline(results);
     //   } else {
-    //     await RecognitionOffline(results.base64, results);
+        await RecognitionOffline(results.base64, results);
     //   }
     }
   };
