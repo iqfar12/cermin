@@ -4,8 +4,8 @@ import axios from "axios";
 export const uploadSyncEmployee = async () => {
     const dbLocal = TaskServices.getAllData('TM_EMPLOYEE').filter((item) => item.SYNC_TIME === null);
     const user = TaskServices.getCurrentUser();
-    const url = 'http://apis-dev1.tap-agri.com/crm-msa-attendance/employee/register';
-    // const url = 'http://192.168.0.108:4000/employee/register';
+    const url = 'https://apis-dev1.tap-agri.com/crm-msa-attendance/employee/register';
+    // const url = 'https://192.168.0.108:4000/employee/register';
     const MasterImages = TaskServices.getAllData('TR_IMAGES')
 
     let uploadCount = {

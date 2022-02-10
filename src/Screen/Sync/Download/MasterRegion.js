@@ -4,7 +4,7 @@ import axios from 'axios';
 export const getMasterRegion = async () => {
   const user = TaskServices.getCurrentUser();
   const dbLocal = TaskServices.getAllData('TM_REGION');
-  const url = 'http://apis-dev1.tap-agri.com/crm-msa-attendance/region';
+  const url = 'https://apis-dev1.tap-agri.com/crm-msa-attendance/region';
 
   let downloadProgress = {
     count: 0,
@@ -12,7 +12,7 @@ export const getMasterRegion = async () => {
   };
 
   try {
-    const res = await axios.get(url, {
+    const res = await axios.get(url + '?sync=true', {
       headers: {
         Authorization: 'Bearer ' + user.ACCESS_TOKEN,
       },

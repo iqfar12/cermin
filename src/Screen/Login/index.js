@@ -30,20 +30,20 @@ const ServerList = [
   {
     // Production
     name: 'Production',
-    url: 'http://192.168.100.40:3000/auth/login',
-    baseUrl: 'http://apis-dev1.tap-agri.com',
+    url: 'https://192.168.100.40:3000/auth/login',
+    baseUrl: 'https://apis-dev1.tap-agri.com',
   },
   {
     // QA
     name: 'QA',
-    url: 'http://192.168.100.40:3000/auth/login',
-    baseUrl: 'http://apis-dev1.tap-agri.com',
+    url: 'https://192.168.100.40:3000/auth/login',
+    baseUrl: 'https://apis-dev1.tap-agri.com',
   },
   {
     // DEV
     name: 'Development',
-    url: 'http://apis-dev1.tap-agri.com/crm-msa-auth-data/',
-    baseUrl: 'http://apis-dev1.tap-agri.com',
+    url: 'https://apis-dev1.tap-agri.com/crm-msa-auth-data/',
+    baseUrl: 'https://apis-dev1.tap-agri.com',
   },
 ];
 
@@ -98,7 +98,8 @@ const LoginScreen = () => {
         },
       });
       if (res) {
-        await postRealm(res.data.user, token);
+        // console.log(res.data)
+        await postRealm(res.data, token);
         setIsLoading(false);
         navigation.replace('Home');
       }

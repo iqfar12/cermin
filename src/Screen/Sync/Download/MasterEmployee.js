@@ -4,9 +4,9 @@ import axios from 'axios';
 export const getMasterEmployee = async () => {
   const user = TaskServices.getCurrentUser();
   const dbLocal = TaskServices.getAllData('TM_EMPLOYEE');
-  const url = 'http://apis-dev1.tap-agri.com/crm-msa-attendance/employee';
-  // const url = 'http://192.168.0.108:4000/employee';
-  const duplicate_url = 'http://apis-dev1.tap-agri.com/crm-msa-attendance/employee-invalid'
+  const url = 'https://apis-dev1.tap-agri.com/crm-msa-attendance/employee';
+  // const url = 'https://192.168.0.108:4000/employee';
+  const duplicate_url = 'https://apis-dev1.tap-agri.com/crm-msa-attendance/employee-invalid'
 
   let downloadProgress = {
     count: 0,
@@ -45,7 +45,7 @@ export const getMasterEmployee = async () => {
 
   const getData = async (page = 1) => {
     try {
-      const res = await axios.get(url + `?page=${page}&join=faceDescriptor&filter=type||$eq||E`, {
+      const res = await axios.get(url + `?page=${page}&join=faceDescriptor&filter=type||$eq||E&sync=true`, {
         headers: {
           Authorization: 'Bearer ' + user.ACCESS_TOKEN,
         },

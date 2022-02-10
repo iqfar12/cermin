@@ -4,7 +4,7 @@ import axios from 'axios';
 export const getMasterEst = async () => {
   const user = TaskServices.getCurrentUser();
   const dbLocal = TaskServices.getAllData('TM_EST');
-  const url = 'http://apis-dev1.tap-agri.com/crm-msa-attendance/estate';
+  const url = 'https://apis-dev1.tap-agri.com/crm-msa-attendance/estate';
 
   let downloadProgress = {
     count: 0,
@@ -12,7 +12,7 @@ export const getMasterEst = async () => {
   };
 
   try {
-    const res = await axios.get(url, {
+    const res = await axios.get(url + '?sync=true', {
       headers: {
         Authorization: 'Bearer ' + user.ACCESS_TOKEN,
       },

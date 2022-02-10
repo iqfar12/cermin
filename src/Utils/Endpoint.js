@@ -1,5 +1,5 @@
 const baseURl = 'https://faces.infinitec.id';
-// const baseURl = 'http://192.168.1.14:3000';
+// const baseURl = 'https://192.168.1.14:3000';
 
 export const Endpoint = {
   Register: baseURl + '/faces/train/binary',

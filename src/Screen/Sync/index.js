@@ -26,6 +26,7 @@ import { getMasterEmployee } from './Download/MasterEmployee';
 import { uploadSyncEmployee } from './Upload/UploadEmployee';
 import { AbsenceCode } from './Download/AbsenceCode';
 import { getModel } from './Download/MasterModel';
+import axios from 'axios';
 
 const Percentage = ({ value = 0 }) => {
   return (
@@ -39,6 +40,7 @@ const Percentage = ({ value = 0 }) => {
 
 const SyncScreen = () => {
   const navigation = useNavigation();
+  const user = TaskServices.getCurrentUser();
   const [sync, setSync] = useState(false);
   const [masterDataset, setMasterDataset] = useState({
     progress: 0,
@@ -133,14 +135,6 @@ const SyncScreen = () => {
 
   const syncDownload = async () => {
 
-    await uploadSyncEmployee().then((data) => {
-      setUploadEmployee({
-        progress: data.count,
-        total: data.total,
-        status: 1
-      })
-    })
-
     // Get Model
     await getModel().then((data) => {
       setModel({
@@ -204,7 +198,7 @@ const SyncScreen = () => {
       })
     })
 
-    await updateUserSync();
+    await postSync();
     setTimeout(() => {
       setSync(false);
       setLoop(false);
@@ -221,6 +215,23 @@ const SyncScreen = () => {
     })
   }
 
+  const postSync = async () => {
+    const url = user.SERVER + '/crm-msa-auth-data/auth/sync'
+    try {
+      const res = await axios.post(url, {}, {
+        headers: {
+          Authorization: 'Bearer ' + user.ACCESS_TOKEN
+        }
+      })
+      if (res) {
+        console.log(res.data);
+        await updateUserSync(res.data.token);
+      }
+    } catch (error) {
+      console.log(error, 'error');
+    }
+  }
+
   const onSync = async () => {
     const isConnected = await NetInfo.fetch();
     if (isConnected.isConnected) {
@@ -228,19 +239,20 @@ const SyncScreen = () => {
       setLoop(true);
       setSync(true);
       animation.play();
-      // onUpload().finally(() => {
-      await syncDownload()
-      // })
+      await onUpload().finally(async () => {
+        await syncDownload()
+      })
     } else {
       setConnection(true);
     }
   };
 
-  const updateUserSync = async () => {
+  const updateUserSync = async (token) => {
     const user = TaskServices.getCurrentUser();
     const data = {
       ID: user.ID,
       LAST_SYNC: new Date(),
+      ACCESS_TOKEN: token
     };
 
     await TaskServices.saveData('TM_USERS', data);

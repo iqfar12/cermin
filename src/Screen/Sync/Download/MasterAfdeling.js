@@ -3,7 +3,7 @@ import TaskServices from '../../../Database/TaskServices';
 
 export const getMasterAfdeling = async () => {
   const user = TaskServices.getCurrentUser();
-  const url = 'http://apis-dev1.tap-agri.com/crm-msa-attendance/afdeling';
+  const url = 'https://apis-dev1.tap-agri.com/crm-msa-attendance/afdeling';
   const dbLocal = TaskServices.getAllData('TM_AFD');
 
   let downloadProgress = {
@@ -13,7 +13,7 @@ export const getMasterAfdeling = async () => {
 
   const getData = async (page = 1) => {
     try {
-      const res = await axios.get(url + `?page=${page}`, {
+      const res = await axios.get(url + `?page=${page}&sync=true`, {
         headers: {
           Authorization: 'Bearer ' + user.ACCESS_TOKEN,
         },
