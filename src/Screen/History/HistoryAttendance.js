@@ -1,132 +1,191 @@
 import React, { useMemo, useState } from 'react'
-import { StyleSheet, Text, View, TouchableOpacity, TextInput, FlatList } from 'react-native'
+import { StyleSheet, Text, View, TouchableOpacity, TextInput, FlatList, Platform } from 'react-native'
 import { useNavigation } from '@react-navigation/native';
 import { Fonts } from '../../Utils/Fonts';
 import SubHeader from '../../Component/SubHeader';
 import Icon from '@expo/vector-icons/MaterialIcons'
 import moment from 'moment';
 import TaskServices from '../../Database/TaskServices';
+import { dateConverter } from '../../Utils/DateConverter';
+import DateTimePicker from '@react-native-community/datetimepicker';
 
-const RightComponent = ({ navigation }) => {
+const RightComponent = ({ onPress, date }) => {
     return (
-        <View
-            style={styles.right}
-        >
-            <Text style={styles.rightTxt}>{moment(new Date()).format('DD/MM/YYYY')}</Text>
+        <TouchableOpacity onPress={onPress} activeOpacity={0.8} style={styles.right}>
+            <Text style={styles.rightTxt}>{moment(date).format('DD/MM/YYYY')}</Text>
             <Icon name={'calendar-today'} size={25} color={'#FFF'} />
-        </View>
+        </TouchableOpacity>
     );
 };
-
-const DummyData = [
-    {
-        id: 0,
-    },
-    {
-        id: 0,
-    },
-    {
-        id: 0,
-    },
-    {
-        id: 0,
-    },
-    {
-        id: 0,
-    },
-    {
-        id: 0,
-    },
-    {
-        id: 0,
-    },
-]
 
 const HistoryAttendance = () => {
     const navigation = useNavigation();
     const MasterAttendance = TaskServices.getAllData('TR_ATTENDANCE');
     const MasterEmployee = TaskServices.getAllData('TM_EMPLOYEE');
     const [search, setSearch] = useState('');
+    const [date, setDate] = useState(new Date());
+    const [showDate, setShowDate] = useState(false);
+    const user = TaskServices.getCurrentUser();
 
     const ListAttendance = useMemo(() => {
         const res = MasterAttendance.map((item) => {
             const user = MasterEmployee.find((data) => data.ID == item.EMPLOYEE_ID);
             item.name = user.EMPLOYEE_FULLNAME
-            item.nik = user.EMPLOYEE_NIK.split('/').join('')
+            item.nik = user.EMPLOYEE_NIK
+            item.location = user.AFD_CODE;
             return item
+        }).filter((item) => {
+            const absenDate = dateConverter(item.DATETIME);
+            const dateNow = dateConverter(date);
+            return absenDate === dateNow
         })
         if (search !== '') {
             return res.filter((item) => item.name.toLowerCase().includes(search.toLowerCase()) || item.nik.toLowerCase().includes(search.toLowerCase()))
         }
         return res
-    }, [MasterAttendance, search])
+    }, [MasterAttendance, search, date])
+
+    const GroupingListMember = useMemo(() => {
+        const group = ListAttendance.reduce(function (r, a) {
+            r[a.EMPLOYEE_ID] = r[a.EMPLOYEE_ID] || [];
+            r[a.EMPLOYEE_ID].push(a);
+            return r;
+        }, Object.create(null));
+        const res = Object.values(group).map((item) => {
+            const attendanceIn = item.find((item) => item.TYPE == '1');
+            const attendanceOut = item.find((item) => item.TYPE == '3');
+            const rest = item.find((item) => item.TYPE == '2');
+            const agenda = item.find((item) => item.TYPE == '4');
+
+            return {
+                NAME: item[0].name,
+                LOCATION: item[0].location,
+                NIK: item[0].nik,
+                EMPLOYEE_ID: item[0].EMPLOYEE_ID,
+                ATTENDANCE_IN: attendanceIn !== undefined ? attendanceIn.DATETIME : null,
+                ATTENDANCE_OUT: attendanceOut !== undefined ? attendanceOut.DATETIME : null,
+                REST: rest !== undefined ? rest.DATETIME : null,
+                AGENDA: agenda !== undefined ? agenda.DATETIME : null,
+            }
+        });
+        return res
+    }, [ListAttendance]);
+
+    const ListEmployee = useMemo(() => {
+        const res = MasterEmployee.filter((item) => item.TYPE === 'E').filter((item) => item.REGISTER_STATUS == 'NONE');
+        const location = user.LOCATION.split(',');
+        let data = res;
+        if (user.REFERENCE_LOCATION == 'AFD') {
+            data = res.filter((item) => location.includes(item.AFD_CODE))
+        } else if (user.REFERENCE_LOCATION == 'BA') {
+            data = res.filter((item) => location.includes(item.WERKS))
+        } else if (user.REFERENCE_LOCATION == 'COMPANY') {
+            data = res.filter((item) => location.includes(item.COMP_CODE))
+        } else {
+            // TODO: HO Need Filter!!
+            data = res
+        }
+
+        return data;
+    }, [MasterEmployee, user])
 
     const renderListCard = ({ item, index }) => {
-        const user = MasterEmployee.find((data) => data.ID == item.EMPLOYEE_ID);
-        console.log(item)
-        const type = () => {
-            if (item.TYPE == '1') {
-                return 'Masuk'
-            } else if (item.TYPE == '2') {
-                return 'Istirahat'
-            } else if (item.TYPE == '3') {
-                return 'Pulang'
-            } else {
-                return 'Izin'
-            }
-        }
+        // const user = MasterEmployee.find((data) => data.ID == item.EMPLOYEE_ID);
+        // const type = () => {
+        //     if (item.TYPE == '1') {
+        //         return 'Masuk'
+        //     } else if (item.TYPE == '2') {
+        //         return 'Istirahat'
+        //     } else if (item.TYPE == '3') {
+        //         return 'Pulang'
+        //     } else {
+        //         return 'Izin'
+        //     }
+        // }
         return (
-            <TouchableOpacity activeOpacity={0.8} onPress={() => navigation.navigate('Detail History Attendance', {data: item})} style={styles.card}>
+            <TouchableOpacity activeOpacity={0.8} onPress={() => navigation.navigate('Detail History Attendance', { id: item.EMPLOYEE_ID })} style={styles.card}>
                 <View style={styles.top}>
-                    <Text style={styles.name}>{user?.EMPLOYEE_NIK}<Text style={styles.nik}> | {user?.EMPLOYEE_FULLNAME}</Text></Text>
+                    <Text style={styles.name}>{item.NIK}<Text style={styles.nik}> | {item.NAME}</Text></Text>
                     <Icon name={'radio-button-unchecked'} size={25} color={'#FFB81C'} />
                 </View>
                 <View style={styles.subTop}>
                     <View style={styles.location}>
                         <Icon name={'location-pin'} size={25} color={'#C5C5C5'} />
-                        <Text style={styles.locationTxt}>{user?.AFD_CODE}</Text>
+                        <Text style={styles.locationTxt}>{item.LOCATION}</Text>
                     </View>
                     <View style={styles.nameContainer}>
                         <Icon name={'assignment-ind'} size={25} color={'#BABCBE'} />
-                        <Text style={styles.nik}>{user?.EMPLOYEE_FULLNAME}</Text>
+                        <Text style={styles.nik}>{item.NAME}</Text>
                     </View>
                 </View>
                 <View style={styles.bottom}>
                     <View style={styles.stateContainer}>
-                        <View style={styles.state}>
-                            <Text style={styles.stateTitle}>{type()}</Text>
-                            <Text style={styles.stateTime}>{moment(item.DATETIME).format('HH:mm')}</Text>
-                        </View>
+                        {item.ATTENDANCE_IN !== null &&
+                            <View style={styles.state}>
+                                <Text style={styles.stateTitle}>{'Masuk'}</Text>
+                                <Text style={styles.stateTime}>{moment(item.ATTENDANCE_IN).format('HH:mm')}</Text>
+                            </View>
+                        }
+                        {item.ATTENDANCE_OUT !== null &&
+                            <View style={styles.state}>
+                                <Text style={styles.stateTitle}>{'Pulang'}</Text>
+                                <Text style={styles.stateTime}>{moment(item.ATTENDANCE_OUT).format('HH:mm')}</Text>
+                            </View>
+                        }
+                        {item.REST !== null &&
+                            <View style={styles.state}>
+                                <Text style={styles.stateTitle}>{'Istirahat'}</Text>
+                                <Text style={styles.stateTime}>{moment(item.REST).format('HH:mm')}</Text>
+                            </View>
+                        }
                     </View>
-                    {/* <View style={styles.buttonContainer}>
-                        <TouchableOpacity activeOpacity={0.8} onPress={() => navigation.navigate('Attendance Out')} style={styles.stateButtonLogout}>
-                            <Icon name={'logout'} size={25} color={'#FFF'} />
-                            <Text style={styles.stateButtonTxt}>Pulang</Text>
-                        </TouchableOpacity>
-                        <TouchableOpacity activeOpacity={0.8} onPress={() => navigation.navigate('Attendance Rest')} style={styles.stateButtonRest}>
-                            <Icon name={'local-cafe'} size={25} color={'#FFF'} />
-                            <Text style={styles.stateButtonTxt}>Istirahat</Text>
-                        </TouchableOpacity>
-                        <TouchableOpacity activeOpacity={0.8} onPress={() => navigation.navigate('Leave')} style={styles.stateButtonAgenda}>
-                            <Icon name={'article'} size={25} color={'#FFF'} />
-                            <Text style={styles.stateButtonTxt}>Izin</Text>
-                        </TouchableOpacity>
-                    </View> */}
+                    <View style={styles.buttonContainer}>
+                        {item.ATTENDANCE_IN === null &&
+                            <TouchableOpacity activeOpacity={0.8} onPress={() =>  navigation.navigate('Take Picture Recognition')} style={styles.stateButtonLogout}>
+                                <Icon name={'login'} size={25} color={'#FFF'} />
+                                <Text style={styles.stateButtonTxt}>Masuk</Text>
+                            </TouchableOpacity>
+                        }
+                        {item.ATTENDANCE_OUT === null &&
+                            <TouchableOpacity activeOpacity={0.8} onPress={() => navigation.navigate('Attendance Out')} style={styles.stateButtonLogout}>
+                                <Icon name={'logout'} size={25} color={'#FFF'} />
+                                <Text style={styles.stateButtonTxt}>Pulang</Text>
+                            </TouchableOpacity>
+                        }
+                        {item.REST === null &&
+                            <TouchableOpacity activeOpacity={0.8} onPress={() => navigation.navigate('Attendance Rest')} style={styles.stateButtonRest}>
+                                <Icon name={'local-cafe'} size={25} color={'#FFF'} />
+                                <Text style={styles.stateButtonTxt}>Istirahat</Text>
+                            </TouchableOpacity>
+                        }
+                        {item.AGENDA === null &&
+                            <TouchableOpacity activeOpacity={0.8} onPress={() => navigation.navigate('Leave')} style={styles.stateButtonAgenda}>
+                                <Icon name={'article'} size={25} color={'#FFF'} />
+                                <Text style={styles.stateButtonTxt}>Izin</Text>
+                            </TouchableOpacity>
+                        }
+                    </View>
                 </View>
             </TouchableOpacity>
         )
     }
 
+    const onDateChange = (event, selectedDate) => {
+        const currentDate = selectedDate || new Date();
+        setShowDate(Platform.OS === 'ios');
+        setDate(currentDate);
+    }
+
     return (
         <View style={styles.wrapper}>
             <SubHeader
-                right={<RightComponent navigation={navigation} />}
+                right={<RightComponent onPress={() => setShowDate(true)} date={date} />}
                 onBack={() => navigation.goBack()}
                 title={'Kembali'}
             />
             <View style={styles.container}>
                 <View style={styles.header}>
-                    <Text style={styles.headerTitle}>Jumlah Absen (38<Text style={{ color: '#C5C5C5', fontFamily: Fonts.book }}>/100</Text>)</Text>
+                    <Text style={styles.headerTitle}>Jumlah Absen ({GroupingListMember.length}<Text style={{ color: '#C5C5C5', fontFamily: Fonts.book }}>/{ListEmployee.length}</Text>)</Text>
                 </View>
                 <View style={styles.body}>
                     <View style={styles.search}>
@@ -143,12 +202,20 @@ const HistoryAttendance = () => {
                         </View>
                     </View> */}
                     <FlatList
-                        data={ListAttendance}
+                        data={GroupingListMember}
                         renderItem={renderListCard}
                         keyExtractor={(_, i) => i.toString()}
                         contentContainerStyle={styles.list}
                         showsVerticalScrollIndicator={false}
                     />
+                    {showDate && (
+                        <DateTimePicker
+                            value={date}
+                            mode={'date'}
+                            display="default"
+                            onChange={onDateChange}
+                        />
+                    )}
                 </View>
             </View>
         </View>
@@ -313,37 +380,30 @@ const styles = StyleSheet.create({
         backgroundColor: '#DC1B0F',
         alignItems: 'center',
         justifyContent: 'center',
-        padding: 8,
+        paddingVertical: 8,
         borderTopLeftRadius: 10,
         borderBottomLeftRadius: 10,
         borderTopRightRadius: 3,
         borderBottomRightRadius: 3,
         marginRight: 5,
-        width: '25%',
+        paddingHorizontal: 10,
     },
     stateButtonRest: {
         backgroundColor: '#FFB81C',
         alignItems: 'center',
         justifyContent: 'center',
         padding: 8,
-        borderTopLeftRadius: 10,
-        borderBottomLeftRadius: 10,
-        borderTopRightRadius: 3,
-        borderBottomRightRadius: 3,
         marginRight: 5,
-        width: '25%'
     },
     stateButtonAgenda: {
         backgroundColor: '#423FDA',
         alignItems: 'center',
         justifyContent: 'center',
-        padding: 8,
-        borderTopLeftRadius: 10,
-        borderBottomLeftRadius: 10,
+        paddingVertical: 8,
         borderTopRightRadius: 3,
         borderBottomRightRadius: 3,
         marginRight: 5,
-        width: '25%',
+        paddingHorizontal: 18,
     },
     bottom: {
         flexDirection: 'row',
@@ -362,5 +422,10 @@ const styles = StyleSheet.create({
         fontSize: 12,
         fontFamily: Fonts.bold,
         color: '#FFF'
+    },
+    stateContainer: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        justifyContent: 'space-around'
     }
 })

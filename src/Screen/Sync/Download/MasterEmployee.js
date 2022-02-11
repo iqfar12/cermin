@@ -44,11 +44,19 @@ export const getMasterEmployee = async () => {
   }
 
   const getData = async (page = 1) => {
+    let params = new URLSearchParams();
+    params.append('page', page);
+    params.append('join', 'faceDescriptor');
+    params.append('filter', 'type||$eq||E');
+    if (user.LAST_SYNC !== null) {
+      params.append('sync', true);
+    }
     try {
-      const res = await axios.get(url + `?page=${page}&join=faceDescriptor&filter=type||$eq||E&sync=true`, {
+      const res = await axios.get(url, {
         headers: {
           Authorization: 'Bearer ' + user.ACCESS_TOKEN,
         },
+        params: params
       });
       if (res) {
         if (res.data.data.length > 0) {

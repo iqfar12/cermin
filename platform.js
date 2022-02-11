@@ -9,9 +9,9 @@ import Video from 'react-native-video';
 import Canvas, {
   Image,
   ImageData,
-  CanvasRenderingContext2D,
 } from 'react-native-canvas';
 import '@tensorflow/tfjs-react-native';
+import CanvasRenderingContext2D from 'react-native-canvas/dist/CanvasRenderingContext2D';
 
 
 function parseHeaders(rawHeaders) {

@@ -12,11 +12,17 @@ export const getMasterAfdeling = async () => {
   };
 
   const getData = async (page = 1) => {
+    let params = new URLSearchParams();
+    params.append('page', page);
+    if (user.LAST_SYNC !== null) {
+      params.append('sync', true);
+    }
     try {
-      const res = await axios.get(url + `?page=${page}&sync=true`, {
+      const res = await axios.get(url, {
         headers: {
           Authorization: 'Bearer ' + user.ACCESS_TOKEN,
         },
+        params: params,
       });
       if (res) {
         if (res.data.data.length > 0) {

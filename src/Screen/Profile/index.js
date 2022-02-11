@@ -210,6 +210,11 @@ const ProfileScreen = () => {
     TM_DATA.forEach(async item => {
       TaskServices.deleteAllData(item);
     });
+    const data = {
+      ID: user.ID,
+      LAST_SYNC: null
+    }
+    await TaskServices.saveData('TM_USERS', data)
     setResetModal(true);
   };
 
@@ -222,7 +227,7 @@ const ProfileScreen = () => {
           <Text style={styles.username}>{user.NAME}</Text>
           <Text style={styles.companyname}>{user.COMP_NAME}</Text>
           <View style={styles.rolecontainer}>
-            <Text style={styles.role}>Admin</Text>
+            <Text style={styles.role}>{user?.ROLE_NAME}</Text>
           </View>
         </View>
       </View>
@@ -268,8 +273,8 @@ const styles = StyleSheet.create({
     paddingTop: 4,
   },
   rolecontainer: {
-    height: 35,
-    width: 77,
+    paddingVertical: 10,
+    paddingHorizontal: 20,
     backgroundColor: '#D7EAFE',
     justifyContent: 'center',
     alignItems: 'center',

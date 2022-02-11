@@ -4,18 +4,24 @@ import axios from 'axios';
 export const AbsenceCode = async () => {
     const user = TaskServices.getCurrentUser();
     const dbLocal = TaskServices.getAllData('TM_ABSENCE_TYPE');
-    const url = 'https://apis-dev1.tap-agri.com/crm-msa-attendance/absences?page=1&limit=1000&sync=true';
+    const url = 'https://apis-dev1.tap-agri.com/crm-msa-attendance/absences';
 
     let downloadProgress = {
         count: 0,
         total: dbLocal.length,
     };
-
     try {
+        let params = new URLSearchParams();
+        params.append('page', 1);
+        params.append('limit', '1000');
+        if (user.LAST_SYNC !== null) {
+            params.append('sync', true);
+        }
         const res = await axios.get(url, {
             headers: {
                 Authorization: 'Bearer ' + user.ACCESS_TOKEN,
             },
+            params: params,
         });
         if (res) {
             if (res.data.data.length > 0) {

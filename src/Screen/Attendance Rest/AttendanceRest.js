@@ -196,7 +196,7 @@ const AttendanceRest = ({ route }) => {
           data: {
             label: results._label,
             accuracy: results._distance,
-            coord: {latitude: coordinate.latitude, longitude: coordinate.longitude}
+            coord: { latitude: coordinate.latitude, longitude: coordinate.longitude }
           },
           image: gambar,
         });
@@ -226,11 +226,11 @@ const AttendanceRest = ({ route }) => {
         base64: true,
       });
       // console.log(results.uri, results.height, results.width);
-    //   if (online) {
-        // recognizeOnline(results);
-    //   } else {
-        await RecognitionOffline(results.base64, results);
-    //   }
+      //   if (online) {
+      // recognizeOnline(results);
+      //   } else {
+      await RecognitionOffline(results.base64, results);
+      //   }
     }
   };
 
@@ -284,7 +284,7 @@ const AttendanceRest = ({ route }) => {
   };
 
   return (
-    <View style={{flex: 1}}>
+    <View style={{ flex: 1 }}>
       {showModal()}
       <StatusBar backgroundColor={'#FFB81C'} />
       <View style={styles.container}>
@@ -296,7 +296,9 @@ const AttendanceRest = ({ route }) => {
             style={styles.back}
             onPress={() => navigation.goBack()}
           />
-          <Text style={styles.title}>Kembali</Text>
+          <TouchableOpacity activeOpacity={0.8} onPress={() => navigation.goBack()}>
+            <Text style={styles.title}>Kembali</Text>
+          </TouchableOpacity>
           <ExpoIcon
             name={'photo-camera'}
             size={25}
@@ -332,7 +334,7 @@ const AttendanceRest = ({ route }) => {
         ) : null}
         <View style={styles.body}>
           <View style={styles.hintImage}>
-              <Image style={styles.image} source={GuideFront} />
+            <Image style={styles.image} source={GuideFront} />
           </View>
           <Text style={styles.subTitle}>
             {wording(step[motionCount])}

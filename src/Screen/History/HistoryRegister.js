@@ -1,8 +1,8 @@
-import React, {useState, useMemo} from 'react';
-import {StyleSheet, Text, View, TouchableOpacity, FlatList} from 'react-native';
+import React, { useState, useMemo } from 'react';
+import { StyleSheet, Text, View, TouchableOpacity, FlatList } from 'react-native';
 import SubHeader from '../../Component/SubHeader';
-import {useNavigation} from '@react-navigation/native';
-import {Fonts} from '../../Utils/Fonts';
+import { useNavigation } from '@react-navigation/native';
+import { Fonts } from '../../Utils/Fonts';
 import moment from 'moment';
 import Icon from '@expo/vector-icons/MaterialIcons';
 import TaskServices from '../../Database/TaskServices';
@@ -69,13 +69,14 @@ const HistoryRegister = () => {
     return Employee.filter((item) => item.TYPE == 'N' && item.REGISTER_USER == user.USER_NAME);
   }, [Employee])
 
-  const renderListCard = ({item, index}) => {
+  const renderListCard = ({ item, index }) => {
     return (
       <View style={styles.card}>
         <View style={styles.topCard}>
-          <View style={styles.tag}>
+          <Text numberOfLines={1} ellipsizeMode={'tail'} style={styles.name}>{item.EMPLOYEE_FULLNAME}</Text>
+          {/* <View style={styles.tag}>
             <Text style={styles.type}>{item.TYPE == 'E' ? 'Karyawan' : 'Non-Karyawan'}</Text>
-          </View>
+          </View> */}
           <Icon
             name={item.SYNC_TIME !== null ? 'done' : 'radio-button-unchecked'}
             size={25}
@@ -84,7 +85,6 @@ const HistoryRegister = () => {
         </View>
         <View style={styles.bottomCard}>
           <Text style={styles.nik}>{item.EMPLOYEE_NIK?.split('')?.filter(item => item != ' ')?.join('')}</Text>
-          <Text numberOfLines={1} ellipsizeMode={'tail'} style={styles.name}> | {item.EMPLOYEE_FULLNAME}</Text>
         </View>
       </View>
     );
@@ -206,7 +206,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
-    marginBottom: 12,
+    marginBottom: 5,
   },
   tag: {
     backgroundColor: '#D7E6F9',
@@ -222,12 +222,12 @@ const styles = StyleSheet.create({
   },
   nik: {
     fontSize: 16,
-    fontFamily: Fonts.bold,
+    fontFamily: Fonts.book,
     color: '#6C6C6C',
   },
   name: {
     fontSize: 16,
-    fontFamily: Fonts.book,
+    fontFamily: Fonts.bold,
     color: '#6C6C6C',
     width: '55%'
   },

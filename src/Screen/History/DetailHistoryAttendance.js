@@ -7,54 +7,51 @@ import moment from 'moment';
 import Icon from '@expo/vector-icons/MaterialIcons';
 import TaskServices from '../../Database/TaskServices';
 
-const Dummy = [
-    {
-        name: 'John Doe',
-        nik: '3013021988280001',
-        status: true,
-    },
-    {
-        name: 'John Doe',
-        nik: '3013021988280001',
-        status: true,
-    },
-    {
-        name: 'John Doe',
-        nik: '3013021988280001',
-        status: true,
-    },
-    {
-        name: 'John Doe',
-        nik: '3013021988280001',
-        status: true,
-    },
-    {
-        name: 'John Doe',
-        nik: '3013021988280001',
-        status: false,
-    },
-    {
-        name: 'John Doe',
-        nik: '3013021988280001',
-        status: false,
-    },
-];
-
-const DetailHistoryAttendance = () => {
+const DetailHistoryAttendance = ({route}) => {
+    const {id} = route.params;
     const navigation = useNavigation();
     const [menu, setMenu] = useState(0);
     const Employee = TaskServices.getAllData('TM_EMPLOYEE')
+    const MasterAttendance = TaskServices.getAllData('TR_ATTENDANCE');
 
     const Karyawan = useMemo(() => {
-        return Employee
+        return Employee.find((item) => item.ID == id);
     }, [Employee])
 
+    const ListAttendance = useMemo(() => {
+        return MasterAttendance.filter((item) => item.EMPLOYEE_ID == id);
+    }, [MasterAttendance])
+
+    console.log(ListAttendance);
+
     const renderListCard = ({ item, index }) => {
+        const type = () => {
+            if (item.TYPE == '1') {
+                return 'login'
+            } else if (item.TYPE == '2') {
+                return 'local-cafe'
+            } else if (item.TYPE == '3') {
+                return 'logout'
+            } else {
+                return `article`
+            }
+        }
+        const color = () => {
+            if (item.TYPE == '1') {
+                return '#3D9F70'
+            } else if (item.TYPE == '2') {
+                return '#FFB81C'
+            } else if (item.TYPE == '3') {
+                return '#DC1B0F'
+            } else {
+                return '#423FDA'
+            }
+        }
         return (
             <View style={styles.card}>
-                <Text style={styles.time}>{moment(new Date()).format('HH:mm')}</Text>
-                <Icon name={'logout'} size={30} color={'#DC1B0F'} />
-                <Text style={styles.text}>Absen Pulang</Text>
+                <Text style={styles.time}>{moment(item.DATETIME).format('HH:mm')}</Text>
+                <Icon name={type()} size={30} color={color()} />
+                <Text style={styles.text}>{item.DESCRIPTION}</Text>
             </View>
         );
     };
@@ -63,11 +60,11 @@ const DetailHistoryAttendance = () => {
         <>
             <SubHeader title={'Kembali'} onBack={() => navigation.goBack()} />
             <View style={styles.header}>
-                <Text style={styles.headerTitle}>3121901993200001</Text>
+                <Text style={styles.headerTitle}>{Karyawan?.EMPLOYEE_NIK}</Text>
                 <View style={styles.SubHeaderContainer}>
                     <Icon name={'location-pin'} size={25} color={'#FFF'} />
-                    <Text style={styles.location}>4321B</Text>
-                    <Text style={styles.nameHeader}>John Doe</Text>
+                    <Text style={styles.location}>{Karyawan?.AFD_CODE}</Text>
+                    <Text style={styles.nameHeader}>{Karyawan?.EMPLOYEE_FULLNAME}</Text>
                 </View>
             </View>
             <View style={styles.container}>
@@ -78,7 +75,7 @@ const DetailHistoryAttendance = () => {
                     <View style={styles.content}>
                         <View style={styles.bar} />
                         <FlatList
-                            data={Dummy}
+                            data={ListAttendance}
                             renderItem={renderListCard}
                             keyExtractor={(_, i) => i.toString()}
                             showsVerticalScrollIndicator={false}

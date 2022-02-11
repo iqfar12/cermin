@@ -71,7 +71,7 @@ const LoginScreen = () => {
       ACCESS_TOKEN: token,
       NAME: data.name,
       JOB_DESC: data.jobDesc,
-      ROLE_NAME: data.roleId,
+      ROLE_NAME: data?.role?.name,
       REFERENCE_LOCATION: data.referenceLocation,
       LOCATION: data.location,
       INSERT_TIME: data.insertTime,

@@ -1,9 +1,9 @@
 import React from 'react';
-import {StyleSheet, Text, View, TouchableOpacity} from 'react-native';
+import { StyleSheet, Text, View, TouchableOpacity } from 'react-native';
 import Icon from '@expo/vector-icons/MaterialIcons';
-import {Fonts} from '../Utils/Fonts';
+import { Fonts } from '../Utils/Fonts';
 
-const SubHeader = ({title, onBack, right}) => {
+const SubHeader = ({ title, onBack, right }) => {
   return (
     <View style={styles.container}>
       <TouchableOpacity
@@ -12,8 +12,8 @@ const SubHeader = ({title, onBack, right}) => {
         style={styles.back}
       >
         <Icon name={'chevron-left'} size={25} color={'#FFF'} />
+        <Text style={styles.title}>{title}</Text>
       </TouchableOpacity>
-      <Text style={styles.title}>{title}</Text>
       {right && right}
     </View>
   );
@@ -34,4 +34,8 @@ const styles = StyleSheet.create({
     color: '#FFF',
     marginLeft: 20,
   },
+  back: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  }
 });

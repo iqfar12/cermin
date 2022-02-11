@@ -32,9 +32,15 @@ export const uploadSyncEmployee = async () => {
                 } else {
                     formData.append('employeeNik', item.EMPLOYEE_NIK)
                     formData.append('employeeFullname', item.EMPLOYEE_FULLNAME)
-                    formData.append('afdCode', item.AFD_CODE)
-                    formData.append('compCode', item.COMP_CODE)
-                    formData.append('werks', item.WERKS)
+                    if (item.AFD_CODE !== null) {
+                        formData.append('afdCode', item.AFD_CODE)
+                    }
+                    if (item.COMP_CODE !== null) {
+                        formData.append('compCode', item.COMP_CODE)
+                    }
+                    if (item.WERKS !== null) {
+                        formData.append('werks', item.WERKS)
+                    }
                 }
                 console.log(formData, 'body')
                 try {

@@ -9,7 +9,7 @@ const RecognizeBarCard = ({onPress, data = []}) => {
   const isRegister = Math.floor((data.length / MasterEmployee.length) * 100);
   const percentage = 100 - isRegister;
   return (
-    <View style={styles.container}>
+    <TouchableOpacity activeOpacity={0.8} onPress={onPress} style={styles.container}>
       <View style={styles.left}>
         <Icon name={'group'} size={20} color={'#FFFFFF'} />
         <Text style={styles.num}>{data.length}</Text>
@@ -20,10 +20,10 @@ const RecognizeBarCard = ({onPress, data = []}) => {
           <View style={[styles.bar, {width: `${percentage}%`}]} />
         </View>
       </View>
-      <TouchableOpacity activeOpacity={0.8} onPress={onPress} style={styles.right}>
+      <View style={styles.right}>
         <Icon name={'chevron-right'} size={25} color={'#FFF'} />
-      </TouchableOpacity>
-    </View>
+      </View>
+    </TouchableOpacity>
   );
 };
 

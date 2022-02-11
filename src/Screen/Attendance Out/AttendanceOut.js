@@ -295,7 +295,9 @@ const AttendanceOut = ({ route }) => {
             style={styles.back}
             onPress={() => navigation.goBack()}
           />
-          <Text style={styles.title}>Kembali</Text>
+          <TouchableOpacity activeOpacity={0.8} onPress={() => navigation.goBack()}>
+            <Text style={styles.title}>Kembali</Text>
+          </TouchableOpacity>
           <ExpoIcon
             name={'photo-camera'}
             size={25}

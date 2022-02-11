@@ -12,7 +12,7 @@ const TM_USERS = {
     ACCESS_TOKEN: 'string?',
     NAME: 'string?',
     JOB_DESC: 'string?',
-    ROLE_NAME: 'int?',
+    ROLE_NAME: 'string?',
     COMP_CODE: 'string?',
     COMP_NAME: 'string?',
     REFERENCE_LOCATION: 'string?',

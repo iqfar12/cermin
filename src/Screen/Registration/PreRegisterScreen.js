@@ -328,7 +328,7 @@ const PreRegisterScreen = () => {
               style={styles.modalButton}
             >
               <Text style={styles.modalButtonTitle}>{item.name}</Text>
-              <Icon name={'adjust'} size={25} color={'#195FBA'} />
+              <Icon name={'adjust'} size={25} color={type === item.value ? '#195FBA' : '#DADADA'} />
             </TouchableOpacity>
           ))}
         </MenuModal>
@@ -354,7 +354,7 @@ const PreRegisterScreen = () => {
               style={styles.modalButton}
             >
               <Text style={styles.modalButtonTitle}>{item.name}</Text>
-              <Icon name={'adjust'} size={25} color={'#195FBA'} />
+              <Icon name={'adjust'} size={25} color={referenceLocation === item.value ? '#195FBA' : '#DADADA'} />
             </TouchableOpacity>
           ))}
         </MenuModal>
@@ -531,7 +531,7 @@ const PreRegisterScreen = () => {
                   activeOpacity={1}
                 >
                   <View style={styles.left}>
-                    <Text style={styles.formTxt}>
+                    <Text style={[styles.formTxt, data === undefined && {color: '#C5C5C5'}]}>
                       {data === undefined ? 'Nama Karyawan' : data?.EMPLOYEE_FULLNAME}
                     </Text>
                   </View>
@@ -559,7 +559,7 @@ const PreRegisterScreen = () => {
                 {type === 1 ?
                   <View style={styles.left}>
                     <Icon name={'location-pin'} size={25} color={'#DADADA'} />
-                    <Text style={styles.formTxt}>{data === undefined ? 'Pilih Referensi Lokasi' : data?.REFERENCE_LOCATION}</Text>
+                    <Text style={[styles.formTxt, data === undefined && {color: '#C5C5C5'}]}>{data === undefined ? 'Pilih Referensi Lokasi' : data?.REFERENCE_LOCATION}</Text>
                   </View>
                   :
                   <View style={styles.left}>
@@ -586,7 +586,7 @@ const PreRegisterScreen = () => {
                 {type === 1 ?
                   <View style={styles.left}>
                     <Icon name={'location-pin'} size={25} color={'#DADADA'} />
-                    <Text style={styles.formTxt}>{data === undefined ? 'Pilih Lokasi' : dataLocation()}</Text>
+                    <Text style={[styles.formTxt, data === undefined && {color: '#C5C5C5'}]}>{data === undefined ? 'Pilih Lokasi' : dataLocation()}</Text>
                   </View>
                   :
                   <View style={styles.left}>

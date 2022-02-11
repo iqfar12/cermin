@@ -140,7 +140,6 @@ const TakePictureRecognition = ({ route }) => {
 
   useEffect(() => {
     if (motionCount > 3) {
-      console.log(motionCount, 'motion');
       takePicture();
     }
   }, [motionCount]);
@@ -167,11 +166,6 @@ const TakePictureRecognition = ({ route }) => {
     // return res;
     try {
       await faceapi.tf.ready()
-      console.log('ready')
-      console.log(faceapi.tf.getBackend(), 'backend');
-      // const userJsonPath = fs.documentDirectory + 'User.json';
-      // const jsonString = await fs.readAsStringAsync(userJsonPath);
-      // const userData = JSON.parse(jsonString);
       const img = faceapi.tf.util.encodeString(image, 'base64').buffer;
       const raw = new Uint8Array(img);
       const imageTensor = decodeJpeg(raw);
@@ -234,7 +228,6 @@ const TakePictureRecognition = ({ route }) => {
       const results = await manipulateAsync(image.uri, [{ resize }], {
         base64: true,
       });
-      console.log('finishing crop image');
       // // console.log(results.uri, results.height, results.width);
       // // if (online) {
       //   // recognizeOnline(results);
@@ -247,37 +240,6 @@ const TakePictureRecognition = ({ route }) => {
   const showModal = () => {
     if (isLoading) {
       return <LoadingModal />;
-    }
-  };
-
-  const recognizeOnline = async image => {
-    let formData = new FormData();
-    formData.append('image', {
-      uri: image.uri,
-      type: 'image/jpeg',
-      name: 'images.jpg',
-    });
-
-    try {
-      const res = await axios.post(Endpoint.Recognize, formData, {
-        headers: {
-          Accept: 'multipart/form-data',
-          'Content-Type': 'multipart/form-data',
-        },
-      });
-      if (res) {
-        console.log(res.data);
-        navigation.navigate('Preview Recognition', {
-          data: res.data,
-          image: image,
-        });
-      }
-    } catch (error) {
-      console.log(error.response, 'error');
-      navigation.navigate('Preview Recognition', {
-        data: undefined,
-        image: image,
-      });
     }
   };
 
@@ -306,7 +268,9 @@ const TakePictureRecognition = ({ route }) => {
             style={styles.back}
             onPress={() => navigation.goBack()}
           />
-          <Text style={styles.title}>Kembali</Text>
+          <TouchableOpacity activeOpacity={0.8} onPress={() => navigation.goBack()}>
+            <Text style={styles.title}>Kembali</Text>
+          </TouchableOpacity>
           <ExpoIcon
             name={'photo-camera'}
             size={25}

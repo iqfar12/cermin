@@ -12,10 +12,15 @@ export const getMasterRegion = async () => {
   };
 
   try {
-    const res = await axios.get(url + '?sync=true', {
+    let params = new URLSearchParams();
+    if (user.LAST_SYNC !== null) {
+      params.append('sync', true);
+    }
+    const res = await axios.get(url, {
       headers: {
         Authorization: 'Bearer ' + user.ACCESS_TOKEN,
       },
+      params: params,
     });
     if (res) {
       if (res.data.data.length > 0) {
