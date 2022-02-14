@@ -19,10 +19,10 @@ export const shuffleArr = (arr = [0, 1, 2, 3]) => {
     return array;
   }
 
-  let tmp = arr[arr.length - 1];
-  let slices = arr.slice(0, 3);
-  let res = shuffle(slices);
-  res[res.length] = tmp;
+  // let tmp = arr[arr.length - 1];
+  // let slices = arr.slice(0, 3);
+  let res = shuffle(arr);
+  // res[res.length] = tmp;
   return res;
 };
 

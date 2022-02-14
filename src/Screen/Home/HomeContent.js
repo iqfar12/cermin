@@ -267,7 +267,7 @@ const styles = StyleSheet.create({
     borderTopLeftRadius: 30,
     borderTopRightRadius: 30,
     padding: 20,
-    paddingBottom: 70,
+    paddingBottom: 80,
   },
   permittedHeader: {
     flexDirection: 'row',
@@ -291,7 +291,7 @@ const styles = StyleSheet.create({
     color: '#2F78D7',
   },
   permittedContainer: {
-    marginVertical: 20,
+    marginBottom: 20,
   },
   navContainer: {
     backgroundColor: '#FFF',

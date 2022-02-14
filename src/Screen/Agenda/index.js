@@ -1,5 +1,5 @@
 import React, { useState, useMemo } from "react";
-import { View, Text, StyleSheet, TouchableOpacity, FlatList, TextInput } from "react-native";
+import { View, Text, StyleSheet, TouchableOpacity, FlatList, TextInput, ScrollView } from "react-native";
 import { useNavigation } from '@react-navigation/native';
 import Icon from '@expo/vector-icons/MaterialIcons'
 
@@ -165,56 +165,58 @@ const LeaveScreen = () => {
                     title={'Kembali'}
                 />
             </View>
-            <View style={styles.Title}>
-                <Text style={styles.TextTitle}>Surat Izin</Text>
-                <Text style={styles.TextSubTitle}>Isi keterangan berikut untuk memberikan izin</Text>
-            </View>
-            <View style={styles.AccountContainer}>
-                <Text style={styles.AccountTitle}>Pilih Akun</Text>
-                <TouchableOpacity activeOpacity={0.8} onPress={() => setUserModal(true)} style={styles.TouchAccount}>
-                    <Icon name="person" size={24} color="#C5C5C5" />
-                    <View style={styles.ContentContainer}>
-                        <Text style={styles.TextContent} numberOfLines={1} ellipsizeMode={'tail'}>{user ? user.EMPLOYEE_NIK : 'Pilih User'} <Text style={styles.TextSubContent}>{user ? `| ${user.EMPLOYEE_FULLNAME}` : ''}</Text></Text>
-                    </View>
-                    <Icon name="arrow-drop-down" size={24} color="#6C6C6C" />
-                </TouchableOpacity>
-            </View>
-            <View style={styles.ContainerLeaveType}>
-                <Text style={styles.LeaveTitle}>Lokasi</Text>
-                <TouchableOpacity style={styles.LeaveContent}>
-                    <Icon name="location-pin" size={24} color="#C5C5C5" />
-                    <View style={styles.ContainerTextLeave}>
-                        <Text style={styles.TextLeave}>{user ? user.WERKS : 'Lokasi'}</Text>
-                    </View>
-                    <Icon name="arrow-drop-down" size={24} color="#6C6C6C" />
-                </TouchableOpacity>
-                <Text style={styles.LeaveTitle}>Jenis Izin</Text>
-                <TouchableOpacity activeOpacity={0.8} onPress={() => setTypeModal(true)} style={styles.LeaveContent}>
-                    <View style={styles.ContainerTextLeave}>
-                        <Text style={styles.TextLeave}>{MasterAbsenceType.find((item) => item.CODE === leaveType)?.DESCRIPTION || 'Pilih Jenis Izin'}</Text>
-                    </View>
-                    <Icon name="arrow-drop-down" size={24} color="#6C6C6C" />
-                </TouchableOpacity>
-                <Text style={styles.LeaveTitle}>Keterangan</Text>
-                <View style={styles.inputContainer}>
-                    <TextInput
-                        placeholder={'Alasan Izin'}
-                        value={descrip}
-                        onChangeText={(val) => setDescrip(val)}
-                        style={styles.input} />
+            <ScrollView contentContainerStyle={styles.scroll}>
+                <View style={styles.Title}>
+                    <Text style={styles.TextTitle}>Surat Izin</Text>
+                    <Text style={styles.TextSubTitle}>Isi keterangan berikut untuk memberikan izin</Text>
                 </View>
-                {/* <TouchableOpacity style={styles.LeaveContent}>
+                <View style={styles.AccountContainer}>
+                    <Text style={styles.AccountTitle}>Pilih Akun</Text>
+                    <TouchableOpacity activeOpacity={0.8} onPress={() => setUserModal(true)} style={styles.TouchAccount}>
+                        <Icon name="person" size={24} color="#C5C5C5" />
+                        <View style={styles.ContentContainer}>
+                            <Text style={styles.TextContent} numberOfLines={1} ellipsizeMode={'tail'}>{user ? user.EMPLOYEE_NIK : 'Pilih User'} <Text style={styles.TextSubContent}>{user ? `| ${user.EMPLOYEE_FULLNAME}` : ''}</Text></Text>
+                        </View>
+                        <Icon name="arrow-drop-down" size={24} color="#6C6C6C" />
+                    </TouchableOpacity>
+                </View>
+                <View style={styles.ContainerLeaveType}>
+                    <Text style={styles.LeaveTitle}>Lokasi</Text>
+                    <TouchableOpacity style={styles.LeaveContent}>
+                        <Icon name="location-pin" size={24} color="#C5C5C5" />
+                        <View style={styles.ContainerTextLeave}>
+                            <Text style={styles.TextLeave}>{user ? user.WERKS : 'Lokasi'}</Text>
+                        </View>
+                        <Icon name="arrow-drop-down" size={24} color="#6C6C6C" />
+                    </TouchableOpacity>
+                    <Text style={styles.LeaveTitle}>Jenis Izin</Text>
+                    <TouchableOpacity activeOpacity={0.8} onPress={() => setTypeModal(true)} style={styles.LeaveContent}>
+                        <View style={styles.ContainerTextLeave}>
+                            <Text style={styles.TextLeave}>{MasterAbsenceType.find((item) => item.CODE === leaveType)?.DESCRIPTION || 'Pilih Jenis Izin'}</Text>
+                        </View>
+                        <Icon name="arrow-drop-down" size={24} color="#6C6C6C" />
+                    </TouchableOpacity>
+                    <Text style={styles.LeaveTitle}>Keterangan</Text>
+                    <View style={styles.inputContainer}>
+                        <TextInput
+                            placeholder={'Alasan Izin'}
+                            value={descrip}
+                            onChangeText={(val) => setDescrip(val)}
+                            style={styles.input} />
+                    </View>
+                    {/* <TouchableOpacity style={styles.LeaveContent}>
                     <View style={styles.ContainerTextLeave}>
                         <Text style={styles.TextLeave}>Sakit Perut</Text>
                     </View>
                     <Icon name="arrow-drop-down" size={24} color="#6C6C6C" />
                 </TouchableOpacity> */}
-            </View>
-            <View style={styles.ButtonContainer}>
-                <TouchableOpacity disabled={onDisabled()} activeOpacity={0.8} onPress={onLeave} style={[styles.TouchButton, onDisabled() && { backgroundColor: '#C5C5C5' }]}>
-                    <Text style={styles.TextButton}>Berikan Izin</Text>
-                </TouchableOpacity>
-            </View>
+                </View>
+                <View style={styles.ButtonContainer}>
+                    <TouchableOpacity disabled={onDisabled()} activeOpacity={0.8} onPress={onLeave} style={[styles.TouchButton, onDisabled() && { backgroundColor: '#C5C5C5' }]}>
+                        <Text style={styles.TextButton}>Berikan Izin</Text>
+                    </TouchableOpacity>
+                </View>
+            </ScrollView>
         </View>
     )
 }
@@ -241,7 +243,7 @@ const styles = StyleSheet.create({
         marginRight: 10,
     },
     Title: {
-        flex: 1,
+        paddingVertical: 20,
         borderBottomWidth: 1,
         borderBottomColor: '#C5C5C5',
         justifyContent: 'center'
@@ -258,7 +260,7 @@ const styles = StyleSheet.create({
         color: '#6C6C6C'
     },
     AccountContainer: {
-        flex: 1,
+        paddingVertical: 20,
         borderBottomWidth: 1,
         borderBottomColor: '#C5C5C5',
         justifyContent: 'center',
@@ -292,16 +294,17 @@ const styles = StyleSheet.create({
         color: '#383636'
     },
     ContainerLeaveType: {
-        flex: 2,
-        justifyContent: 'space-evenly'
+        paddingVertical: 10,
     },
     LeaveTitle: {
         fontFamily: Fonts.bold,
         fontSize: 16,
         marginHorizontal: 40,
-        color: '#6C6C6C'
+        color: '#6C6C6C',
+        paddingBottom: 10,
     },
     LeaveContent: {
+        marginBottom: 15,
         flexDirection: 'row',
         alignItems: 'center',
         justifyContent: 'space-evenly',
@@ -318,9 +321,9 @@ const styles = StyleSheet.create({
         fontFamily: Fonts.book
     },
     ButtonContainer: {
-        flex: 1,
         justifyContent: 'center',
-        alignItems: 'center'
+        alignItems: 'center',
+        marginVertical: 20,
     },
     TouchButton: {
         paddingVertical: 16,
@@ -364,6 +367,9 @@ const styles = StyleSheet.create({
         fontSize: 16,
         color: '#000',
         fontFamily: Fonts.book,
+    },
+    scroll: {
+        paddingBottom: 20,
     }
 })
 

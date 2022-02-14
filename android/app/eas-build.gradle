@@ -34,7 +34,7 @@ tasks.whenTaskAdded {
   isEasBuildConfigured = true;
 
   android.signingConfigs.release {
-    def credentialsJson = rootProject.file("../credentials.json");
+    def credentialsJson = rootProject.file("./credentials.json");
 
     if (credentialsJson.exists()) {
       if (storeFile && !System.getenv("EAS_BUILD")) {

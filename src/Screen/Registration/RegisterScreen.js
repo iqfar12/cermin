@@ -42,6 +42,7 @@ import Icon from '@expo/vector-icons/MaterialIcons';
 import { shuffleAllArray } from '../../Utils/Shuffle';
 import SoundPlayer from 'react-native-sound-player';
 import WarningModal from '../../Component/WarningModal';
+import { decodeJpeg } from '@tensorflow/tfjs-react-native';
 
 const RegisterScreen = ({ route }) => {
   const [camera, setCamera] = useState();
@@ -263,166 +264,268 @@ const RegisterScreen = ({ route }) => {
 
   const detectUp = async image => {
     try {
-      const res = await FaceDetector.detectFacesAsync(image.uri, {
-        mode: FaceDetector.FaceDetectorMode.fast,
-        detectLandmarks: FaceDetector.FaceDetectorLandmarks.none,
-        runClassifications: FaceDetector.FaceDetectorClassifications.none,
-      });
-      if (res.faces.length > 0) {
-        const { bounds } = res.faces[0];
-        const { origin, size } = bounds;
-        const crop = {
-          originX: origin.x,
-          originY: origin.y,
-          height: size.height,
-          width: size.width,
-        };
-        const resize = { width: 160, height: 160 };
+      const res = await faceapi.detectSingleFace(image,
+        new faceapi.TinyFaceDetectorOptions({ inputSize: 416, scoreThreshold: 0.4 })
+      ).withFaceLandmarks()
+      if (res) {
+        const eye_right = getMeanPosition(res.landmarks.getRightEye());
+        const eye_left = getMeanPosition(res.landmarks.getLeftEye());
+        const nose = getMeanPosition(res.landmarks.getNose());
+        const mouth = getMeanPosition(res.landmarks.getMouth());
+        const jaw = getTop(res.landmarks.getJawOutline());
 
-        const result = await manipulateAsync(image.uri, [{ crop }, { resize }]);
-        const corner = await FaceDetector.detectFacesAsync(result.uri, {
-          mode: FaceDetector.FaceDetectorMode.fast,
-          detectLandmarks: FaceDetector.FaceDetectorLandmarks.none,
-          runClassifications: FaceDetector.FaceDetectorClassifications.none,
-        });
-        const jaw = corner.faces[0].BOTTOM_MOUTH.y;
-        if (jaw <= 136) {
-          // Top
-          console.log('top');
-          return { valid: true, message: 'Correct' };
+        const rx = (jaw - mouth[1]) / res.detection.box.height + 0.5;
+        const ry =
+          (eye_left[0] + (eye_right[0] - eye_left[0]) / 2 - nose[0]) /
+          res.detection.box.width;
+        if (rx > 0.2) {
+          return { valid: true, message: 'Correct' }
         } else {
-          return { valid: false, message: 'Posisi Salah' };
+          return { valid: false, message: 'Posisi Kurang Tepat' }
         }
       } else {
         return { valid: false, message: 'No Face Detected' };
       }
     } catch (error) {
       console.log(error, 'error');
-      return { valid: false, message: 'Error Image' };
+      return {
+        valid: false, message: 'Error Image'
+      }
     }
+    // try {
+    //   const res = await FaceDetector.detectFacesAsync(image.uri, {
+    //     mode: FaceDetector.FaceDetectorMode.fast,
+    //     detectLandmarks: FaceDetector.FaceDetectorLandmarks.none,
+    //     runClassifications: FaceDetector.FaceDetectorClassifications.none,
+    //   });
+    //   if (res.faces.length > 0) {
+    //     const { bounds } = res.faces[0];
+    //     const { origin, size } = bounds;
+    //     const crop = {
+    //       originX: origin.x,
+    //       originY: origin.y,
+    //       height: size.height,
+    //       width: size.width,
+    //     };
+    //     const resize = { width: 160, height: 160 };
+
+    //     const result = await manipulateAsync(image.uri, [{ crop }, { resize }]);
+    //     const corner = await FaceDetector.detectFacesAsync(result.uri, {
+    //       mode: FaceDetector.FaceDetectorMode.fast,
+    //       detectLandmarks: FaceDetector.FaceDetectorLandmarks.none,
+    //       runClassifications: FaceDetector.FaceDetectorClassifications.none,
+    //     });
+    //     const jaw = corner.faces[0].BOTTOM_MOUTH.y;
+    //     if (jaw <= 136) {
+    //       // Top
+    //       console.log('top');
+    //       return { valid: true, message: 'Correct' };
+    //     } else {
+    //       return { valid: false, message: 'Posisi Salah' };
+    //     }
+    //   } else {
+    //     return { valid: false, message: 'No Face Detected' };
+    //   }
+    // } catch (error) {
+    //   console.log(error, 'error');
+    //   return { valid: false, message: 'Error Image' };
+    // }
   };
 
   const detectFront = async image => {
     try {
-      const res = await FaceDetector.detectFacesAsync(image.uri, {
-        mode: FaceDetector.FaceDetectorMode.fast,
-        detectLandmarks: FaceDetector.FaceDetectorLandmarks.none,
-        runClassifications: FaceDetector.FaceDetectorClassifications.none,
-      });
-      if (res.faces.length > 0) {
-        const { bounds } = res.faces[0];
-        const { origin, size } = bounds;
-        const crop = {
-          originX: origin.x,
-          originY: origin.y,
-          height: size.height,
-          width: size.width,
-        };
-        const resize = { width: 160, height: 160 };
-
-        const result = await manipulateAsync(image.uri, [{ crop }, { resize }]);
-        const corner = await FaceDetector.detectFacesAsync(result.uri, {
-          mode: FaceDetector.FaceDetectorMode.fast,
-          detectLandmarks: FaceDetector.FaceDetectorLandmarks.none,
-          runClassifications: FaceDetector.FaceDetectorClassifications.none,
-        });
-        const { x, y } = corner.faces[0].NOSE_BASE;
-        if (x <= 85 && x >= 70) {
-          // Center
-          console.log('center');
-          return { valid: true, message: 'Correct' };
-        } else {
-          return { valid: false, message: 'Posisi Salah' };
-        }
+      const res = await faceapi.detectSingleFace(image,
+        new faceapi.TinyFaceDetectorOptions({ inputSize: 416, scoreThreshold: 0.4 })
+      ).withFaceLandmarks()
+      if (res) {
+        return { valid: true, message: 'Correct' }
       } else {
         return { valid: false, message: 'No Face Detected' };
       }
     } catch (error) {
       console.log(error, 'error');
-      return { valid: false, message: 'Error Image' };
+      return {
+        valid: false, message: 'Error Image'
+      }
     }
+    // try {
+    //   const res = await FaceDetector.detectFacesAsync(image.uri, {
+    //     mode: FaceDetector.FaceDetectorMode.fast,
+    //     detectLandmarks: FaceDetector.FaceDetectorLandmarks.none,
+    //     runClassifications: FaceDetector.FaceDetectorClassifications.none,
+    //   });
+    //   if (res.faces.length > 0) {
+    //     const { bounds } = res.faces[0];
+    //     const { origin, size } = bounds;
+    //     const crop = {
+    //       originX: origin.x,
+    //       originY: origin.y,
+    //       height: size.height,
+    //       width: size.width,
+    //     };
+    //     const resize = { width: 160, height: 160 };
+
+    //     const result = await manipulateAsync(image.uri, [{ crop }, { resize }]);
+    //     const corner = await FaceDetector.detectFacesAsync(result.uri, {
+    //       mode: FaceDetector.FaceDetectorMode.fast,
+    //       detectLandmarks: FaceDetector.FaceDetectorLandmarks.none,
+    //       runClassifications: FaceDetector.FaceDetectorClassifications.none,
+    //     });
+    //     const { x, y } = corner.faces[0].NOSE_BASE;
+    //     if (x <= 85 && x >= 70) {
+    //       // Center
+    //       console.log('center');
+    //       return { valid: true, message: 'Correct' };
+    //     } else {
+    //       return { valid: false, message: 'Posisi Salah' };
+    //     }
+    //   } else {
+    //     return { valid: false, message: 'No Face Detected' };
+    //   }
+    // } catch (error) {
+    // console.log(error, 'error');
+    // return { valid: false, message: 'Error Image' };
+    // }
   };
 
   const detectLeft = async image => {
     try {
-      const res = await FaceDetector.detectFacesAsync(image.uri, {
-        mode: FaceDetector.FaceDetectorMode.fast,
-        detectLandmarks: FaceDetector.FaceDetectorLandmarks.none,
-        runClassifications: FaceDetector.FaceDetectorClassifications.none,
-      });
-      if (res.faces.length > 0) {
-        const { bounds } = res.faces[0];
-        const { origin, size } = bounds;
-        const crop = {
-          originX: origin.x,
-          originY: origin.y,
-          height: size.height,
-          width: size.width,
-        };
-        const resize = { width: 160, height: 160 };
+      const res = await faceapi.detectSingleFace(image,
+        new faceapi.TinyFaceDetectorOptions({ inputSize: 416, scoreThreshold: 0.4 })
+      ).withFaceLandmarks()
+      if (res) {
+        const eye_right = getMeanPosition(res.landmarks.getRightEye());
+        const eye_left = getMeanPosition(res.landmarks.getLeftEye());
+        const nose = getMeanPosition(res.landmarks.getNose());
+        const mouth = getMeanPosition(res.landmarks.getMouth());
+        const jaw = getTop(res.landmarks.getJawOutline());
 
-        const result = await manipulateAsync(image.uri, [{ crop }, { resize }]);
-        const corner = await FaceDetector.detectFacesAsync(result.uri, {
-          mode: FaceDetector.FaceDetectorMode.fast,
-          detectLandmarks: FaceDetector.FaceDetectorLandmarks.none,
-          runClassifications: FaceDetector.FaceDetectorClassifications.none,
-        });
-        const { x, y } = corner.faces[0].NOSE_BASE;
-        if (x >= 90) {
-          // Left
-          console.log('left');
-          return { valid: true, message: 'Correct' };
+        const rx = (jaw - mouth[1]) / res.detection.box.height + 0.5;
+        const ry =
+          (eye_left[0] + (eye_right[0] - eye_left[0]) / 2 - nose[0]) /
+          res.detection.box.width;
+        if (ry > -0.04) {
+          return { valid: true, message: 'Correct' }
         } else {
-          return { valid: false, message: 'Posisi Salah' };
+          return { valid: false, message: 'Posisi Kurang Tepat' }
         }
       } else {
         return { valid: false, message: 'No Face Detected' };
       }
     } catch (error) {
       console.log(error, 'error');
-      return { valid: false, message: 'Error Image' };
+      return {
+        valid: false, message: 'Error Image'
+      }
     }
+    // try {
+    //   const res = await FaceDetector.detectFacesAsync(image.uri, {
+    //     mode: FaceDetector.FaceDetectorMode.fast,
+    //     detectLandmarks: FaceDetector.FaceDetectorLandmarks.none,
+    //     runClassifications: FaceDetector.FaceDetectorClassifications.none,
+    //   });
+    //   if (res.faces.length > 0) {
+    //     const { bounds } = res.faces[0];
+    //     const { origin, size } = bounds;
+    //     const crop = {
+    //       originX: origin.x,
+    //       originY: origin.y,
+    //       height: size.height,
+    //       width: size.width,
+    //     };
+    //     const resize = { width: 160, height: 160 };
+
+    //     const result = await manipulateAsync(image.uri, [{ crop }, { resize }]);
+    //     const corner = await FaceDetector.detectFacesAsync(result.uri, {
+    //       mode: FaceDetector.FaceDetectorMode.fast,
+    //       detectLandmarks: FaceDetector.FaceDetectorLandmarks.none,
+    //       runClassifications: FaceDetector.FaceDetectorClassifications.none,
+    //     });
+    //     const { x, y } = corner.faces[0].NOSE_BASE;
+    //     if (x >= 90) {
+    //       // Left
+    //       console.log('left');
+    //       return { valid: true, message: 'Correct' };
+    //     } else {
+    //       return { valid: false, message: 'Posisi Salah' };
+    //     }
+    //   } else {
+    //     return { valid: false, message: 'No Face Detected' };
+    //   }
+    // } catch (error) {
+    //   console.log(error, 'error');
+    //   return { valid: false, message: 'Error Image' };
+    // }
   };
 
   const detectRight = async image => {
     try {
-      const res = await FaceDetector.detectFacesAsync(image.uri, {
-        mode: FaceDetector.FaceDetectorMode.fast,
-        detectLandmarks: FaceDetector.FaceDetectorLandmarks.none,
-        runClassifications: FaceDetector.FaceDetectorClassifications.none,
-      });
-      if (res.faces.length > 0) {
-        const { bounds } = res.faces[0];
-        const { origin, size } = bounds;
-        const crop = {
-          originX: origin.x,
-          originY: origin.y,
-          height: size.height,
-          width: size.width,
-        };
-        const resize = { width: 160, height: 160 };
+      const res = await faceapi.detectSingleFace(image,
+        new faceapi.TinyFaceDetectorOptions({ inputSize: 416, scoreThreshold: 0.4 })
+      ).withFaceLandmarks();
+      if (res) {
+        const eye_right = getMeanPosition(res.landmarks.getRightEye());
+        const eye_left = getMeanPosition(res.landmarks.getLeftEye());
+        const nose = getMeanPosition(res.landmarks.getNose());
+        const mouth = getMeanPosition(res.landmarks.getMouth());
+        const jaw = getTop(res.landmarks.getJawOutline());
 
-        const result = await manipulateAsync(image.uri, [{ crop }, { resize }]);
-        const corner = await FaceDetector.detectFacesAsync(result.uri, {
-          mode: FaceDetector.FaceDetectorMode.fast,
-          detectLandmarks: FaceDetector.FaceDetectorLandmarks.none,
-          runClassifications: FaceDetector.FaceDetectorClassifications.none,
-        });
-        const { x, y } = corner.faces[0].NOSE_BASE;
-        if (x <= 65) {
-          // Right
-          console.log('right');
-          return { valid: true, message: 'Correct' };
+        const rx = (jaw - mouth[1]) / res.detection.box.height + 0.5;
+        const ry =
+          (eye_left[0] + (eye_right[0] - eye_left[0]) / 2 - nose[0]) /
+          res.detection.box.width;
+        if (ry > 0.04) {
+          return { valid: true, message: 'Correct' }
         } else {
-          return { valid: false, message: 'Posisi Salah' };
+          return { valid: false, message: 'Posisi Kurang Tepat' }
         }
       } else {
         return { valid: false, message: 'No Face Detected' };
       }
     } catch (error) {
       console.log(error, 'error');
-      return { valid: false, message: 'Error Image' };
+      return {
+        valid: false, message: 'Error Image'
+      }
     }
+    // try {
+    //   const res = await FaceDetector.detectFacesAsync(image.uri, {
+    //     mode: FaceDetector.FaceDetectorMode.fast,
+    //     detectLandmarks: FaceDetector.FaceDetectorLandmarks.none,
+    //     runClassifications: FaceDetector.FaceDetectorClassifications.none,
+    //   });
+    //   if (res.faces.length > 0) {
+    //     const { bounds } = res.faces[0];
+    //     const { origin, size } = bounds;
+    //     const crop = {
+    //       originX: origin.x,
+    //       originY: origin.y,
+    //       height: size.height,
+    //       width: size.width,
+    //     };
+    //     const resize = { width: 160, height: 160 };
+
+    //     const result = await manipulateAsync(image.uri, [{ crop }, { resize }]);
+    //     const corner = await FaceDetector.detectFacesAsync(result.uri, {
+    //       mode: FaceDetector.FaceDetectorMode.fast,
+    //       detectLandmarks: FaceDetector.FaceDetectorLandmarks.none,
+    //       runClassifications: FaceDetector.FaceDetectorClassifications.none,
+    //     });
+    //     const { x, y } = corner.faces[0].NOSE_BASE;
+    //     if (x <= 65) {
+    //       // Right
+    //       console.log('right');
+    //       return { valid: true, message: 'Correct' };
+    //     } else {
+    //       return { valid: false, message: 'Posisi Salah' };
+    //     }
+    //   } else {
+    //     return { valid: false, message: 'No Face Detected' };
+    //   }
+    // } catch (error) {
+    //   console.log(error, 'error');
+    //   return { valid: false, message: 'Error Image' };
+    // }
   };
 
   const detectCorner = async image => {
@@ -535,18 +638,24 @@ const RegisterScreen = ({ route }) => {
     try {
       const resize = await manipulateAsync(image.uri, [
         { resize: { width: 768, height: 1024 } },
-      ]);
+      ], { base64: true });
+
+      await faceapi.tf.ready();
+      const img = faceapi.tf.util.encodeString(resize.base64, 'base64').buffer;
+      const raw = new Uint8Array(img);
+      const imageTensor = decodeJpeg(raw)
+
       let position = undefined;
       //   await RNFS.copyFile(mobilenet.uri, pathMobilenet);
       const val = RandomPhase[step];
       if (val === 1) {
-        position = await detectFront(image);
+        position = await detectFront(imageTensor);
       } else if (val === 2) {
-        position = await detectLeft(image);
+        position = await detectLeft(imageTensor);
       } else if (val === 3) {
-        position = await detectRight(image);
+        position = await detectRight(imageTensor);
       } else {
-        position = await detectUp(image);
+        position = await detectUp(imageTensor);
       }
       if (position !== undefined && position.valid) {
         // const result = await manipulateAsync(resize.uri, [
@@ -1042,7 +1151,8 @@ const styles = StyleSheet.create({
   },
   stepContainer: {
     flexDirection: 'row',
-    padding: 15,
+    paddingBottom: 15,
+    paddingHorizontal: 15,
     backgroundColor: '#195FBA',
     alignItems: 'center',
   },
@@ -1053,14 +1163,14 @@ const styles = StyleSheet.create({
   },
   left: {
     backgroundColor: '#FFF',
-    width: '20%',
+    width: '18%',
     height: undefined,
     aspectRatio: 1 / 1,
     justifyContent: 'center',
     alignItems: 'center',
     marginRight: 15,
     borderRadius: 10,
-    padding: 10,
+    padding: 5,
   },
   switchCamera: {
     padding: 10,

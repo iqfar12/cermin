@@ -119,14 +119,16 @@ const TakePictureRecognition = ({ route }) => {
 
   const onFacesDetected = event => {
     let val = step[motionCount];
-    if (val === 0) {
-      condition1(event);
-    } else if (val === 1) {
-      condition2(event);
-    } else if (val === 2) {
-      condition3(event);
-    } else {
-      condition4(event);
+    if (motionCount === 0) {
+      if (val === 0) {
+        condition1(event);
+      } else if (val === 1) {
+        condition2(event);
+      } else if (val === 2) {
+        condition3(event);
+      } else {
+        condition4(event);
+      }
     }
 
     const faceID = event?.faces[0]?.faceID;
@@ -139,8 +141,10 @@ const TakePictureRecognition = ({ route }) => {
   };
 
   useEffect(() => {
-    if (motionCount > 3) {
-      takePicture();
+    if (motionCount > 0) {
+      setTimeout(() => {
+        takePicture();
+      }, 1500)
     }
   }, [motionCount]);
 
@@ -309,7 +313,7 @@ const TakePictureRecognition = ({ route }) => {
               <Image style={styles.image} source={GuideFront} />
           </View>
           <Text style={styles.subTitle}>
-            {wording(step[motionCount])}
+            {motionCount > 0 ? 'Lihat Ke Arah Kamera' : wording(step[motionCount])}
           </Text>
         </View>
       </View>

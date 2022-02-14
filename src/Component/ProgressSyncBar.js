@@ -13,7 +13,7 @@ const ProgressSyncBar = ({title, progress, total, sync}) => {
         </View>
         <View style={styles.corner}>
           <Text style={{marginRight: 7}}>
-            <Text style={styles.progressTxt}>{sync ? progress : 0}</Text>
+            <Text style={styles.progressTxt}>{progress}</Text>
             <Text style={sync ? styles.name : styles.progressTxt}>
               /{total}
             </Text>

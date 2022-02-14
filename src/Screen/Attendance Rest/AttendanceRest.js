@@ -83,7 +83,6 @@ const AttendanceRest = ({ route }) => {
     return res
   }, [MasterEmployee]);
 
-
   const condition4 = event => {
     const rightEye = event?.faces[0]?.rightEyeOpenProbability;
     const leftEye = event?.faces[0]?.leftEyeOpenProbability;
@@ -140,9 +139,10 @@ const AttendanceRest = ({ route }) => {
   };
 
   useEffect(() => {
-    if (motionCount > 3) {
-      console.log(motionCount, 'motion');
-      takePicture();
+    if (motionCount > 0) {
+      setTimeout(() => {
+        takePicture();
+      }, 1500)
     }
   }, [motionCount]);
 
@@ -166,44 +166,49 @@ const AttendanceRest = ({ route }) => {
     //   _label: 'Iqfar',
     // };
     // return res;
-    await faceapi.tf.ready();
+    try {
 
-    const img = faceapi.tf.util.encodeString(image, 'base64').buffer;
-    const raw = new Uint8Array(img);
-    const imageTensor = decodeJpeg(raw);
+      await faceapi.tf.ready();
 
-    console.log('detecting....');
-    const detection = await faceapi
-      .detectSingleFace(
-        imageTensor,
-        new faceapi.TinyFaceDetectorOptions({
-          inputSize: 416,
-          scoreThreshold: 0.43,
-        }),
-      )
-      .withFaceLandmarks()
-      .withFaceDescriptor();
-    if (detection) {
-      const descriptors = Descriptor.map(item =>
-        faceapi.LabeledFaceDescriptors.fromJSON(item),
-      );
-      const faceMatcher = new faceapi.FaceMatcher(descriptors, 0.43);
-      const results = faceMatcher.findBestMatch(detection.descriptor);
-      console.log(results);
-      if (results._label != 'unknown') {
-        setIsLoading(false);
-        navigation.navigate('Preview Attendance Rest', {
-          data: {
-            label: results._label,
-            accuracy: results._distance,
-            coord: { latitude: coordinate.latitude, longitude: coordinate.longitude }
-          },
-          image: gambar,
-        });
+      const img = faceapi.tf.util.encodeString(image, 'base64').buffer;
+      const raw = new Uint8Array(img);
+      const imageTensor = decodeJpeg(raw);
+
+      console.log('detecting....');
+      const detection = await faceapi
+        .detectSingleFace(
+          imageTensor,
+          new faceapi.TinyFaceDetectorOptions({
+            inputSize: 416,
+            scoreThreshold: 0.43,
+          }),
+        )
+        .withFaceLandmarks()
+        .withFaceDescriptor();
+      if (detection) {
+        const descriptors = Descriptor.map(item =>
+          faceapi.LabeledFaceDescriptors.fromJSON(item),
+        );
+        const faceMatcher = new faceapi.FaceMatcher(descriptors, 0.43);
+        const results = faceMatcher.findBestMatch(detection.descriptor);
+        console.log(results);
+        if (results._label != 'unknown') {
+          setIsLoading(false);
+          navigation.navigate('Preview Attendance Rest', {
+            data: {
+              label: results._label,
+              accuracy: results._distance,
+              coord: { latitude: coordinate.latitude, longitude: coordinate.longitude }
+            },
+            image: gambar,
+          });
+        } else {
+          unknownRedirect(gambar);
+        }
       } else {
         unknownRedirect(gambar);
       }
-    } else {
+    } catch (error) {
       unknownRedirect(gambar);
     }
   };
@@ -337,7 +342,7 @@ const AttendanceRest = ({ route }) => {
             <Image style={styles.image} source={GuideFront} />
           </View>
           <Text style={styles.subTitle}>
-            {wording(step[motionCount])}
+            {motionCount > 0 ? 'Lihat Ke Arah Kamera' : wording(step[motionCount])}
           </Text>
         </View>
       </View>

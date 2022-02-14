@@ -1,12 +1,29 @@
-import React from 'react';
+import React, { useMemo } from 'react';
 import {StyleSheet, Text, View, TouchableOpacity} from 'react-native';
 import {Fonts} from '../Utils/Fonts';
 import Icon from '@expo/vector-icons/MaterialIcons';
 import TaskServices from '../Database/TaskServices';
 
 const RecognizeBarCard = ({onPress, data = []}) => {
+  const user = TaskServices.getCurrentUser();
   const MasterEmployee = TaskServices.getAllData('TM_EMPLOYEE');
-  const isRegister = Math.floor((data.length / MasterEmployee.length) * 100);
+  const ListEmployee = useMemo(() => {
+    const res = MasterEmployee
+    const location = user.LOCATION.split(',');
+    let data = res;
+    if (user.REFERENCE_LOCATION == 'AFD') {
+      data = res.filter((item) => location.includes(item.AFD_CODE))
+    } else if (user.REFERENCE_LOCATION == 'BA') {
+      data = res.filter((item) => location.includes(item.WERKS))
+    } else if (user.REFERENCE_LOCATION == 'COMPANY') {
+      data = res.filter((item) => location.includes(item.COMP_CODE))
+    } else {
+      // TODO: HO Need Filter!!
+      data = res
+    }
+    return data
+  }, [MasterEmployee])
+  const isRegister = Math.floor((data.length / ListEmployee.length) * 100);
   const percentage = 100 - isRegister;
   return (
     <TouchableOpacity activeOpacity={0.8} onPress={onPress} style={styles.container}>

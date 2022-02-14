@@ -294,18 +294,18 @@ const SyncScreen = () => {
       {showModal()}
       <StatusBar backgroundColor={'#0E5CBE'} />
       <View style={styles.container}>
+        <View style={styles.header}>
+          <Icon
+            name={'arrow-left'}
+            size={25}
+            color={'#F0F2F2'}
+            style={styles.back}
+            onPress={() => navigation.goBack()}
+          />
+          <Text style={styles.headerTitle}>Sinkronisasi Data</Text>
+        </View>
+        <SyncNotif />
         <ScrollView style={styles.scroll}>
-          <View style={styles.header}>
-            <Icon
-              name={'arrow-left'}
-              size={25}
-              color={'#F0F2F2'}
-              style={styles.back}
-              onPress={() => navigation.goBack()}
-            />
-            <Text style={styles.headerTitle}>Sinkronisasi Data</Text>
-          </View>
-          <SyncNotif />
           <View style={styles.syncContainer}>
             <LottieView
               ref={ref => setAnimation(ref)}
