@@ -6,68 +6,40 @@ import { Fonts } from '../../Utils/Fonts';
 import moment from 'moment';
 import Icon from '@expo/vector-icons/MaterialIcons';
 import TaskServices from '../../Database/TaskServices';
-
-const Dummy = [
-  {
-    name: 'John Doe',
-    nik: '3013021988280001',
-    status: true,
-  },
-  {
-    name: 'John Doe',
-    nik: '3013021988280001',
-    status: true,
-  },
-  {
-    name: 'John Doe',
-    nik: '3013021988280001',
-    status: true,
-  },
-  {
-    name: 'John Doe',
-    nik: '3013021988280001',
-    status: true,
-  },
-  {
-    name: 'John Doe',
-    nik: '3013021988280001',
-    status: false,
-  },
-  {
-    name: 'John Doe',
-    nik: '3013021988280001',
-    status: false,
-  },
-  {
-    name: 'John Doe',
-    nik: '3013021988280001',
-    status: false,
-  },
-  {
-    name: 'John Doe',
-    nik: '3013021988280001',
-    status: false,
-  },
-  {
-    name: 'John Doe',
-    nik: '3013021988280001',
-    status: false,
-  },
-];
+import DateTimePicker from '@react-native-community/datetimepicker';
+import { dateConverter } from '../../Utils/DateConverter';
 
 const HistoryRegister = () => {
   const navigation = useNavigation();
   const [menu, setMenu] = useState(0);
   const Employee = TaskServices.getAllData('TM_EMPLOYEE').filter((item) => item.REGISTER_STATUS !== 'NONE');
   const user = TaskServices.getCurrentUser();
+  const [date, setDate] = useState(new Date());
+  const [dateModal, setDateModal] = useState(false);
+
+  const onDateChange = (event, selectedDate) => {
+    const currentDate = selectedDate || new Date();
+    setDateModal(Platform.OS === 'ios');
+    setDate(currentDate);
+  }
 
   const Karyawan = useMemo(() => {
-    return Employee.filter((item) => item.TYPE == 'E' && item.REGISTER_USER == user.USER_NAME)
-  }, [Employee])
+    const res = Employee.filter((item) => item.TYPE == 'E' && item.REGISTER_USER == user.USER_NAME).filter((item) => {
+      const updateTime = dateConverter(item.UPDATE_TIME);
+      const dateNow = dateConverter(date);
+      return updateTime === dateNow
+    }).sort((a, b) => b.UPDATE_TIME.getTime() - a.UPDATE_TIME.getTime())
+    return res
+  }, [Employee, date])
 
   const NonKaryawan = useMemo(() => {
-    return Employee.filter((item) => item.TYPE == 'N' && item.REGISTER_USER == user.USER_NAME);
-  }, [Employee])
+    const res = Employee.filter((item) => item.TYPE == 'N' && item.REGISTER_USER == user.USER_NAME).filter((item) => {
+      const updateTime = dateConverter(item.UPDATE_TIME);
+      const dateNow = dateConverter(date);
+      return updateTime === dateNow
+    }).sort((a, b) => b.UPDATE_TIME.getTime() - a.UPDATE_TIME.getTime())
+    return res
+  }, [Employee, date])
 
   const renderListCard = ({ item, index }) => {
     return (
@@ -77,14 +49,24 @@ const HistoryRegister = () => {
           {/* <View style={styles.tag}>
             <Text style={styles.type}>{item.TYPE == 'E' ? 'Karyawan' : 'Non-Karyawan'}</Text>
           </View> */}
-          <Icon
-            name={item.SYNC_TIME !== null ? 'done' : 'radio-button-unchecked'}
-            size={25}
-            color={item.SYNC_TIME !== null ? '#195FBA' : '#FFB81C'}
-          />
+          {item.REGISTER_STATUS == 'REJECTED' ?
+            <Icon
+              name={'close'}
+              size={25}
+              color={'#DC1B0F'}
+            />
+            :
+            <Icon
+              name={item.SYNC_TIME !== null ? 'done' : 'radio-button-unchecked'}
+              size={25}
+              color={item.SYNC_TIME !== null ? '#195FBA' : '#FFB81C'}
+            />}
         </View>
         <View style={styles.bottomCard}>
-          <Text style={styles.nik}>{item.EMPLOYEE_NIK?.split('')?.filter(item => item != ' ')?.join('')}</Text>
+          <Text style={styles.nik}>{item.EMPLOYEE_NIK}<Text style={styles.time}> | {moment(item.UPDATE_TIME).format('HH:mm')}</Text></Text>
+          <View style={[styles.tag, item.REGISTER_STATUS == 'REJECTED' && { borderColor: '#DC1B0F', backgroundColor: 'rgba(220, 27, 15, 0.3)' }]}>
+            <Text style={styles.statusTxt}>{item.REGISTER_STATUS}</Text>
+          </View>
         </View>
       </View>
     );
@@ -122,9 +104,14 @@ const HistoryRegister = () => {
           </TouchableOpacity>
         </View>
         <View style={styles.body}>
-          <Text style={styles.date}>
-            {moment(new Date()).format('DD MMMM YYYY')}
-          </Text>
+          <View style={styles.listHeader}>
+            <Text style={styles.date}>
+              {moment(date).format('DD MMMM YYYY')}
+            </Text>
+            <TouchableOpacity activeOpacity={0.8} onPress={() => setDateModal(true)} style={styles.selectDate}>
+              <Text style={styles.selectDateTxt}>Pilih Tanggal</Text>
+            </TouchableOpacity>
+          </View>
           <FlatList
             data={menu === 0 ? Karyawan : NonKaryawan}
             renderItem={renderListCard}
@@ -134,6 +121,14 @@ const HistoryRegister = () => {
             ListEmptyComponent={<Text style={styles.empty}>Empty</Text>}
           />
         </View>
+        {dateModal && (
+          <DateTimePicker
+            value={date}
+            mode={'date'}
+            display="default"
+            onChange={onDateChange}
+          />
+        )}
       </View>
     </>
   );
@@ -206,7 +201,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
-    marginBottom: 5,
+    marginBottom: 10,
   },
   tag: {
     backgroundColor: '#D7E6F9',
@@ -219,11 +214,16 @@ const styles = StyleSheet.create({
   bottomCard: {
     flexDirection: 'row',
     alignItems: 'center',
+    justifyContent: 'space-between',
   },
   nik: {
     fontSize: 16,
     fontFamily: Fonts.book,
     color: '#6C6C6C',
+  },
+  time: {
+    fontFamily: Fonts.book,
+    color: '#000'
   },
   name: {
     fontSize: 16,
@@ -240,5 +240,23 @@ const styles = StyleSheet.create({
     color: '#000',
     textAlign: 'center',
     paddingVertical: 10,
+  },
+  statusTxt: {
+    fontSize: 12,
+    fontFamily: Fonts.book,
+    color: '#000',
+  },
+  listHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+  },
+  selectDate: {
+    paddingLeft: 10,
+  },
+  selectDateTxt: {
+    fontFamily: Fonts.bold,
+    fontSize: 14,
+    color: '#195FBA'
   }
 });

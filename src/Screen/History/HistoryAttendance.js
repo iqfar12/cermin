@@ -28,6 +28,7 @@ const HistoryAttendance = () => {
     const user = TaskServices.getCurrentUser();
 
     const ListAttendance = useMemo(() => {
+        const location = user.LOCATION.split(',');
         const res = MasterAttendance.map((item) => {
             const user = MasterEmployee.find((data) => data.ID == item.EMPLOYEE_ID);
             item.name = user.EMPLOYEE_FULLNAME
@@ -39,11 +40,24 @@ const HistoryAttendance = () => {
             const dateNow = dateConverter(date);
             return absenDate === dateNow
         })
-        if (search !== '') {
-            return res.filter((item) => item.name.toLowerCase().includes(search.toLowerCase()) || item.nik.toLowerCase().includes(search.toLowerCase()))
+        let data = res;
+        if (user.REFERENCE_LOCATION == 'AFD') {
+            data = res.filter((item) => location.includes(item.location))
+        } else if (user.REFERENCE_LOCATION == 'BA') {
+            data = res.filter((item) => location.includes(item.location.substr(0, 4)))
+        } else if (user.REFERENCE_LOCATION == 'COMPANY') {
+            data = res.filter((item) => location.includes(item.location.substr(0, 2)))
+        } else {
+            // TODO: HO Need Filter!!
+            data = res
         }
-        return res
+        if (search !== '') {
+            return data.filter((item) => item.name.toLowerCase().includes(search.toLowerCase()) || item.nik.toLowerCase().includes(search.toLowerCase()))
+        }
+        return data
     }, [MasterAttendance, search, date])
+
+    console.log(ListAttendance);
 
     const GroupingListMember = useMemo(() => {
         const group = ListAttendance.reduce(function (r, a) {
@@ -400,8 +414,8 @@ const styles = StyleSheet.create({
         alignItems: 'center',
         justifyContent: 'center',
         paddingVertical: 8,
-        borderTopRightRadius: 3,
-        borderBottomRightRadius: 3,
+        borderTopRightRadius: 10,
+        borderBottomRightRadius: 10,
         marginRight: 5,
         paddingHorizontal: 18,
     },

@@ -56,7 +56,7 @@ const HomeContent = () => {
   }, [MasterAttendance])
 
   const ListNotRegisterEmployee = useMemo(() => {
-    const res = MasterEmployee.filter((item) => item.REGISTER_STATUS == "NONE");
+    const res = MasterEmployee.filter((item) => item.REGISTER_STATUS == "NONE" || item.REGISTER_STATUS == 'REJECTED');
     const location = user.LOCATION.split(',');
     let data = res;
     if (user.REFERENCE_LOCATION == 'AFD') {
@@ -91,7 +91,7 @@ const HomeContent = () => {
       title: 'Masuk',
       iconColor: '#3D9F70',
       onNavigation: () => {
-        navigation.navigate('Take Picture Recognition', { online: true });
+        navigation.navigate('Take Picture Recognition');
       },
     },
     {

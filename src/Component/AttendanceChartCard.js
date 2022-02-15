@@ -13,6 +13,7 @@ const AttendanceChartCard = ({ onPress }) => {
   const user = TaskServices.getCurrentUser();
 
   const ListAttendance = useMemo(() => {
+    const location = user.LOCATION.split(',');
     const res = MasterAttendance.map((item) => {
       const user = MasterEmployee.find((data) => data.ID == item.EMPLOYEE_ID);
       item.name = user.EMPLOYEE_FULLNAME
@@ -24,7 +25,18 @@ const AttendanceChartCard = ({ onPress }) => {
       const dateNow = dateConverter(new Date());
       return absenDate === dateNow
     })
-    return res
+    let data = res;
+    if (user.REFERENCE_LOCATION == 'AFD') {
+      data = res.filter((item) => location.includes(item.location))
+    } else if (user.REFERENCE_LOCATION == 'BA') {
+      data = res.filter((item) => location.includes(item.location.substr(0, 4)))
+    } else if (user.REFERENCE_LOCATION == 'COMPANY') {
+      data = res.filter((item) => location.includes(item.location.substr(0, 2)))
+    } else {
+      // TODO: HO Need Filter!!
+      data = res
+    }
+    return data
   }, [MasterAttendance])
 
   const GroupingListMember = useMemo(() => {
@@ -69,13 +81,16 @@ const AttendanceChartCard = ({ onPress }) => {
     }
     return data;
   }, [MasterEmployee])
-
   const AttendanceInPercentage = useMemo(() => {
-    const attendanceIn = ListAttendance.filter((item) => item.TYPE == '1');
+    const attendanceIn = ListAttendance.filter((item) => item.TYPE == '1').map((item) => item.nik).filter((item, index, arr) => index === arr.indexOf(item))
     if (attendanceIn.length === 0) {
       return 0
     }
-    return Math.round((attendanceIn.length / ListEmployee.length) * 100)
+    const number = (attendanceIn.length / ListEmployee.length) * 100
+    if (number > 100) {
+      return 100
+    }
+    return Math.ceil(number)
   }, [ListEmployee, ListAttendance])
 
   const CompleteAttendance = useMemo(() => {
@@ -84,7 +99,11 @@ const AttendanceChartCard = ({ onPress }) => {
     if (completed.length === 0) {
       return 0
     }
-    return Math.round((completed.length / ListEmployee.length) * 100)
+    const number = (completed.length / ListEmployee.length) * 100;
+    if (number > 100) {
+      return 100
+    }
+    return Math.ceil(number)
   }, [GroupingListMember, ListEmployee])
 
   return (

@@ -10,6 +10,7 @@ import {
   ActivityIndicator,
   TextInput,
   StatusBar,
+  AppState,
 } from 'react-native';
 import { Camera as RNCamera } from 'expo-camera';
 import {
@@ -48,7 +49,7 @@ const RegisterScreen = ({ route }) => {
   const [camera, setCamera] = useState();
   const [isLoading, setIsLoading] = useState(false);
   const navigation = useNavigation();
-  const [hint, setHint] = useState(false);
+  const [hint, setHint] = useState(true);
   const [step, setStep] = useState(0);
   const [failed, setFailed] = useState(false);
   const [label, setLabel] = useState('');
@@ -61,6 +62,20 @@ const RegisterScreen = ({ route }) => {
   const [message, setMessage] = useState('');
   const [RandomPhase, setRandomPhase] = useState(shuffleAllArray([1, 2, 3, 4]));
   const [cameraFront, setCameraFront] = useState(true);
+  const [ready, setReady] = useState(true);
+
+  useEffect(() => {
+    const onChangeState = () => {
+      if (AppState.currentState === 'active') {
+        setReady(true)
+      } else {
+        setReady(false);
+      }
+    }
+    AppState.addEventListener('change', onChangeState)
+
+    return () => AppState.removeEventListener('change', onChangeState)
+  }, [])
 
   const filename = () => {
     const val = RandomPhase[step];
@@ -278,7 +293,7 @@ const RegisterScreen = ({ route }) => {
         const ry =
           (eye_left[0] + (eye_right[0] - eye_left[0]) / 2 - nose[0]) /
           res.detection.box.width;
-        if (rx > 0.2) {
+        if (rx > 0.17 && rx < 0.3) {
           return { valid: true, message: 'Correct' }
         } else {
           return { valid: false, message: 'Posisi Kurang Tepat' }
@@ -404,7 +419,7 @@ const RegisterScreen = ({ route }) => {
         const ry =
           (eye_left[0] + (eye_right[0] - eye_left[0]) / 2 - nose[0]) /
           res.detection.box.width;
-        if (ry > -0.04) {
+        if (ry > -0.08 && ry < -0.05) {
           return { valid: true, message: 'Correct' }
         } else {
           return { valid: false, message: 'Posisi Kurang Tepat' }
@@ -474,7 +489,7 @@ const RegisterScreen = ({ route }) => {
         const ry =
           (eye_left[0] + (eye_right[0] - eye_left[0]) / 2 - nose[0]) /
           res.detection.box.width;
-        if (ry > 0.04) {
+        if (ry > 0.04 && ry < 0.08) {
           return { valid: true, message: 'Correct' }
         } else {
           return { valid: false, message: 'Posisi Kurang Tepat' }
@@ -596,35 +611,6 @@ const RegisterScreen = ({ route }) => {
 
   const register = async () => {
     navigation.replace('Preview Screen', { preview: images, ...route?.params });
-    // let formData = new FormData();
-    // images.forEach((item, index) => {
-    //   formData.append('images', {
-    //     uri: item.uri,
-    //     type: 'image/jpeg',
-    //     name: 'image' + index + '.jpg',
-    //   });
-    // });
-    // formData.append('label', label);
-
-    // try {
-    //   const resApi = await axios.post(Endpoint.Register, formData, {
-    //     headers: {
-    //       Accept: 'multipart/form-data',
-    //       'Content-Type': 'multipart/form-data',
-    //     },
-    //   });
-    //   if (resApi) {
-    //     console.log(resApi.data, 'data register');
-    //     setIsLoading(false);
-    //     setStatus('Pendaftaran Berhasil');
-    //     setRegisModal(true);
-    //   }
-    // } catch (error) {
-    //   console.log(error, 'error register api');
-    //   setRegisModal(true);
-    //   setStatus('Pendaftaran Gagal ' + error?.response?.data?.message);
-    //   setIsLoading(false);
-    // }
   };
 
   useEffect(() => {
@@ -677,7 +663,7 @@ const RegisterScreen = ({ route }) => {
         setImages([...images, resize]);
         if (step < 3) {
           setStep(step + 1);
-          setHint(true);
+          // setHint(true);
         }
         //  else {
         //   await register();
@@ -696,7 +682,6 @@ const RegisterScreen = ({ route }) => {
   };
 
   const showModal = () => {
-    const val = RandomPhase[step];
     if (isLoading) {
       return (
         <Modal transparent visible={isLoading}>
@@ -708,121 +693,29 @@ const RegisterScreen = ({ route }) => {
         </Modal>
       );
     }
-    if (hint && val === 1) {
+    if (hint) {
       return (
-        <Modal transparent visible={hint && val === 1}>
+        <Modal transparent visible={hint}>
           <View style={styles.modalContainer}>
             <View style={styles.wrappers}>
-              <Text style={styles.direction}>Hadap Depan</Text>
-              <View style={styles.hintImage}>
-                <Image style={styles.image} source={GuideFront} />
+              <Text style={styles.direction}>Posisi Pengambilan Foto</Text>
+              <View style={styles.imageContainer}>
+                <View style={styles.hintImage}>
+                  <Image style={styles.image} source={GuideFront} />
+                </View>
+                <View style={styles.hintImage}>
+                  <Image style={styles.image} source={GuideLeft} />
+                </View>
+                <View style={styles.hintImage}>
+                  <Image style={styles.image} source={GuideRight} />
+                </View>
+                <View style={styles.hintImage}>
+                  <Image style={styles.image} source={GuideUp} />
+                </View>
               </View>
               <Text style={styles.hintText}>
                 {
-                  'Posisikan kepala anda tegak menghadap kamera sesuai dengan bingkai pada layar anda, pastikan mata tidak berkedip ketika mengambil foto\n \nKedua mata harus terlihat di layar dan lihat kamera saat mengambil foto'
-                }
-              </Text>
-              <TouchableOpacity
-                activeOpacity={0.8}
-                onPress={() => setHint(false)}
-                style={styles.hintButton}
-              >
-                <Text style={styles.hintButtonTitle}>Saya Mengerti</Text>
-              </TouchableOpacity>
-            </View>
-          </View>
-        </Modal>
-      );
-    }
-    if (hint && val === 2) {
-      return (
-        <Modal transparent visible={hint && val === 2}>
-          <View style={styles.modalContainer}>
-            <View style={styles.wrappers}>
-              <Text style={styles.direction}>Hadap Kiri</Text>
-              <View style={styles.hintImage}>
-                <Image style={styles.image} source={GuideLeft} />
-              </View>
-              <Text style={styles.hintText}>
-                {
-                  'Gerakan kepala anda sedikit (kurang lebih 30 derajat) kearah Kiri sesuai dengan bingkai pada layar anda \n\n Kedua mata harus terlihat di layar dan lihat kamera saat mengambil foto.'
-                }
-              </Text>
-              <TouchableOpacity
-                activeOpacity={0.8}
-                onPress={() => setHint(false)}
-                style={styles.hintButton}
-              >
-                <Text style={styles.hintButtonTitle}>Saya Mengerti</Text>
-              </TouchableOpacity>
-            </View>
-          </View>
-        </Modal>
-      );
-    }
-    if (hint && val === 3) {
-      return (
-        <Modal transparent visible={hint && val === 3}>
-          <View style={styles.modalContainer}>
-            <View style={styles.wrappers}>
-              <Text style={styles.direction}>Hadap Kanan</Text>
-              <View style={styles.hintImage}>
-                <Image style={styles.image} source={GuideRight} />
-              </View>
-              <Text style={styles.hintText}>
-                {
-                  'Gerakan kepala anda sedikit (kurang lebih 30 derajat) kearah Kanan sesuai dengan bingkai pada layar anda \n\n Kedua mata harus terlihat di layar dan lihat kamera saat mengambil foto.'
-                }
-              </Text>
-              <TouchableOpacity
-                activeOpacity={0.8}
-                onPress={() => setHint(false)}
-                style={styles.hintButton}
-              >
-                <Text style={styles.hintButtonTitle}>Saya Mengerti</Text>
-              </TouchableOpacity>
-            </View>
-          </View>
-        </Modal>
-      );
-    }
-    if (hint && val === 4) {
-      return (
-        <Modal transparent visible={hint && val === 4}>
-          <View style={styles.modalContainer}>
-            <View style={styles.wrappers}>
-              <Text style={styles.direction}>Hadap Atas</Text>
-              <View style={styles.hintImage}>
-                <Image style={styles.image} source={GuideUp} />
-              </View>
-              <Text style={styles.hintText}>
-                {
-                  'Gerakan kepala anda sedikit (kurang lebih 30 derajat) kearah atas sesuai dengan bingkai pada layar anda \n\n Kedua mata harus terlihat di layar dan lihat kamera saat mengambil foto.'
-                }
-              </Text>
-              <TouchableOpacity
-                activeOpacity={0.8}
-                onPress={() => setHint(false)}
-                style={styles.hintButton}
-              >
-                <Text style={styles.hintButtonTitle}>Saya Mengerti</Text>
-              </TouchableOpacity>
-            </View>
-          </View>
-        </Modal>
-      );
-    }
-    if (hint && val === 5) {
-      return (
-        <Modal transparent visible={hint && val === 5}>
-          <View style={styles.modalContainer}>
-            <View style={styles.wrappers}>
-              <View style={styles.hintImage}>
-                <Image style={styles.image} source={GuideDown} />
-              </View>
-              <Text style={styles.hintText}>
-                {
-                  'Gerakan kepala anda sedikit (kurang lebih 30 derajat) kearah bawah sesuai dengan bingkai pada layar anda \n\n Kedua mata harus terlihat di layar dan lihat kamera saat mengambil foto.'
+                  'Posisikan kepala anda sesuai dengan bingkai pada layar anda, pastikan mata tidak berkedip ketika mengambil foto\n \nKedua mata harus terlihat di layar dan lihat kamera saat mengambil foto'
                 }
               </Text>
               <TouchableOpacity
@@ -964,7 +857,7 @@ const RegisterScreen = ({ route }) => {
             <Text style={styles.stepTxt}>Pastikan mata melihat kamera</Text>
           </View>
         </View>
-        {isFocused && !isLoading ? (
+        {isFocused && !isLoading && ready ? (
           <View style={styles.wrapper}>
             <RNCamera
               style={styles.preview}
@@ -1075,7 +968,7 @@ const styles = StyleSheet.create({
     resizeMode: 'contain',
   },
   hintImage: {
-    width: '33%',
+    width: '25%',
     height: undefined,
     aspectRatio: 3 / 4,
     justifyContent: 'center',
@@ -1083,8 +976,13 @@ const styles = StyleSheet.create({
     padding: 10,
     margin: 10,
   },
+  imageContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-around',
+  },
   hintText: {
-    fontSize: 16,
+    fontSize: 14,
     textAlign: 'center',
     paddingVertical: 10,
     paddingHorizontal: 15,

@@ -54,7 +54,7 @@ const ListRegisterScreen = () => {
     const ListEmployee = useMemo(() => {
         const duplicateId = DuplicateEmployee.map((item) => item.EMPLOYEE_ID);
         const location = user.LOCATION.split(',');
-        const res = MasterEmployee.filter((item) => item.REGISTER_STATUS == 'NONE')
+        const res = MasterEmployee.filter((item) => item.REGISTER_STATUS == 'NONE' || item.REGISTER_STATUS == 'REJECTED')
         let data = res;
         if (user.REFERENCE_LOCATION == 'AFD') {
             data = res.filter((item) => location.includes(item.AFD_CODE))

@@ -55,17 +55,19 @@ const PreviewAttendanceRest = ({ route }) => {
 
       await TaskServices.saveData('TR_ATTENDANCE', body);
 
-      navigation.navigate('Home')
+      navigation.replace('Attendance Rest')
     }
   }
 
   useEffect(() => {
-    if (count > 0) {
-      setTimeout(() => {
-        setCount(count - 1)
-      }, 1000)
-    } else {
-      onAttendance();
+    if (Results !== undefined) {
+      if (count > 0) {
+        setTimeout(() => {
+          setCount(count - 1)
+        }, 1000)
+      } else {
+        onAttendance();
+      }
     }
   }, [count])
 
@@ -108,7 +110,7 @@ const PreviewAttendanceRest = ({ route }) => {
                 <Text style={styles.retakeTxt}>Ambil Ulang</Text>
                 <Icon name={'party-mode'} size={30} color={'#FFB81C'} />
               </TouchableOpacity>
-              <SubmitButton backgroundColor={'#FFB81C'} onPress={onAttendance} title={`Absen Istirahat(${count})`} />
+              {Results !== undefined && <SubmitButton backgroundColor={'#FFB81C'} onPress={onAttendance} title={`Absen${Results !== undefined ? `(${count})` : ''} `} />}
             </View>
           </View>
         </ScrollView>

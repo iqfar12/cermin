@@ -293,7 +293,7 @@ const PreRegisterScreen = () => {
   }
 
   const ListEmployee = useMemo(() => {
-    const res = MasterEmployee.filter((item) => item.TYPE === 'E').filter((item) => item.REGISTER_STATUS == 'NONE');
+    const res = MasterEmployee.filter((item) => item.TYPE === 'E').filter((item) => item.REGISTER_STATUS == 'NONE' || item.REGISTER_STATUS == 'REJECTED');
     const location = user.LOCATION.split(',');
     let data = res;
     if (user.REFERENCE_LOCATION == 'AFD') {
@@ -466,7 +466,7 @@ const PreRegisterScreen = () => {
         title={'Batalkan'}
       />
       <View style={styles.container}>
-        <ScrollView>
+        <ScrollView contentContainerStyle={styles.scroll}>
           <View style={styles.titleContainer}>
             <Text style={styles.title}>Isi keterangan data</Text>
             {/* <Text style={styles.subTitle}>Silakan Login untuk melanjutkan</Text> */}
@@ -726,5 +726,8 @@ const styles = StyleSheet.create({
   list: {
     paddingTop: 15,
     paddingBottom: 10
+  },
+  scroll: {
+    paddingBottom: 20,
   }
 });

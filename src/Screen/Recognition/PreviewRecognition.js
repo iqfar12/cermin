@@ -31,7 +31,7 @@ const PreviewRecognition = ({ route }) => {
       navigation.navigate('Home')
     } else {
       const id = UuidGenerator();
-      const code = MasterAbsenceCode.find((item) => item.TYPE == 'WORKED' && item.SOURCE == Results.SOURCE)?.CODE  
+      const code = MasterAbsenceCode.find((item) => item.TYPE == 'WORKED' && item.SOURCE == Results.SOURCE)?.CODE
       // 1 = Masuk
       // 2 = Istirahat
       // 3 = Pulang
@@ -55,19 +55,22 @@ const PreviewRecognition = ({ route }) => {
 
       await TaskServices.saveData('TR_ATTENDANCE', body);
 
-      navigation.navigate('Home')
+      navigation.replace('Take Picture Recognition');
     }
   }
 
   useEffect(() => {
-    if (count > 0) {
-      setTimeout(() => {
-        setCount(count - 1)
-      }, 1000)
-    } else {
-      onAttendance();
+    if (Results !== undefined) {
+      if (count > 0) {
+        setTimeout(() => {
+          setCount(count - 1)
+        }, 1000)
+      } else {
+        onAttendance();
+      }
     }
   }, [count])
+
   return (
     <>
       <StatusBar translucent backgroundColor={'rgba(0, 0, 0, 0)'} />
@@ -107,7 +110,7 @@ const PreviewRecognition = ({ route }) => {
                 <Text style={styles.retakeTxt}>Ambil Ulang</Text>
                 <Icon name={'party-mode'} size={30} color={'#195FBA'} />
               </TouchableOpacity>
-              <SubmitButton onPress={onAttendance} title={`Absen(${count})`} />
+              {Results !== undefined && <SubmitButton onPress={onAttendance} title={`Absen${Results !== undefined ? `(${count})` : ''} `} />}
             </View>
           </View>
         </ScrollView>

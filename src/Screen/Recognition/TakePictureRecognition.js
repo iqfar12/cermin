@@ -7,6 +7,8 @@ import {
   StatusBar,
   Modal,
   Image,
+  AppState,
+  BackHandler,
 } from 'react-native';
 import { Camera, requestCameraPermissionsAsync } from 'expo-camera';
 import * as FaceDetector from 'expo-face-detector';
@@ -66,6 +68,33 @@ const TakePictureRecognition = ({ route }) => {
     latitude: 0,
     longitude: 0,
   });
+  const [focus, setFocus] = useState(true);
+
+  useEffect(() => {
+    const onChangeState = () => {
+      if (AppState.currentState === 'active') {
+        setFocus(true);
+      } else {
+        setReady(false);
+        setFocus(false);
+      }
+    }
+
+    AppState.addEventListener('change', onChangeState)
+
+    return () => AppState.removeEventListener('change', onChangeState)
+  }, [])
+
+  useEffect(() => {
+    const onBackHandler = () => {
+      navigation.navigate('Home')
+      return true
+    }
+
+    BackHandler.addEventListener('hardwareBackPress', onBackHandler)
+
+    return () => BackHandler.removeEventListener('hardwareBackPress', onBackHandler)
+  }, [])
 
   useEffect(() => {
     geolocation.getCurrentPosition((res) => {
@@ -78,9 +107,22 @@ const TakePictureRecognition = ({ route }) => {
     })
   }, [isFocused])
 
+  const user = TaskServices.getCurrentUser();
   const Descriptor = useMemo(() => {
-    const res = MasterEmployee.filter((item) => item.FACE_DESCRIPTOR !== null).map((item) => JSON.parse(item.FACE_DESCRIPTOR))
-    return res
+    const res = MasterEmployee.filter((item) => item.FACE_DESCRIPTOR !== null)
+    const location = user.LOCATION.split(',');
+    let data = res;
+    if (user.REFERENCE_LOCATION == 'AFD') {
+      data = res.filter((item) => location.includes(item.AFD_CODE))
+    } else if (user.REFERENCE_LOCATION == 'BA') {
+      data = res.filter((item) => location.includes(item.WERKS))
+    } else if (user.REFERENCE_LOCATION == 'COMPANY') {
+      data = res.filter((item) => location.includes(item.COMP_CODE))
+    } else {
+      // TODO: HO Need Filter!!
+      data = res
+    }
+    return data.map((item) => JSON.parse(item.FACE_DESCRIPTOR))
   }, [MasterEmployee]);
 
   const condition4 = event => {
@@ -176,43 +218,43 @@ const TakePictureRecognition = ({ route }) => {
 
       console.log('detecting....');
       const detection = await faceapi
-      .detectSingleFace(
-        imageTensor,
-        new faceapi.TinyFaceDetectorOptions({
-          inputSize: 416,
-          scoreThreshold: 0.43,
-        }),
-      )
-      .withFaceLandmarks()
-      .withFaceDescriptor();
-    if (detection) {
-      const descriptors = Descriptor.map(item =>
-        faceapi.LabeledFaceDescriptors.fromJSON(item),
-      );
-      const faceMatcher = new faceapi.FaceMatcher(descriptors, 0.43);
-      const results = faceMatcher.findBestMatch(detection.descriptor);
-      console.log(results);
-      if (results._label != 'unknown') {
-        setIsLoading(false);
+        .detectSingleFace(
+          imageTensor,
+          new faceapi.TinyFaceDetectorOptions({
+            inputSize: 416,
+            scoreThreshold: 0.43,
+          }),
+        )
+        .withFaceLandmarks()
+        .withFaceDescriptor();
+      if (detection) {
+        const descriptors = Descriptor.map(item =>
+          faceapi.LabeledFaceDescriptors.fromJSON(item),
+        );
+        const faceMatcher = new faceapi.FaceMatcher(descriptors, 0.43);
+        const results = faceMatcher.findBestMatch(detection.descriptor);
         console.log(results);
-        navigation.navigate('Preview Recognition', {
-          data: {
-            label: results._label,
-            accuracy: results._distance,
-            coord: coordinate
-          },
-          image: gambar,
-        });
+        if (results._label != 'unknown') {
+          setIsLoading(false);
+          console.log(results);
+          navigation.replace('Preview Recognition', {
+            data: {
+              label: results._label,
+              accuracy: results._distance,
+              coord: coordinate
+            },
+            image: gambar,
+          });
+        } else {
+          unknownRedirect(gambar);
+        }
       } else {
         unknownRedirect(gambar);
       }
-    } else {
-      unknownRedirect(gambar);
-    }
     } catch (error) {
       unknownRedirect(gambar)
     }
-    
+
   };
 
   const unknownRedirect = image => {
@@ -236,7 +278,7 @@ const TakePictureRecognition = ({ route }) => {
       // // if (online) {
       //   // recognizeOnline(results);
       // // } else {
-        await RecognitionOffline(results.base64, results);
+      await RecognitionOffline(results.base64, results);
       // }
     }
   };
@@ -260,7 +302,7 @@ const TakePictureRecognition = ({ route }) => {
   };
 
   return (
-    <View style={{flex: 1}}>
+    <View style={{ flex: 1 }}>
       {showModal()}
       <StatusBar backgroundColor={'#0E5CBE'} />
       <View style={styles.container}>
@@ -282,7 +324,7 @@ const TakePictureRecognition = ({ route }) => {
             style={styles.switch}
             onPress={() => setFront(!front)} />
         </View>
-        {isFocused ? (
+        {isFocused && focus ? (
           <View style={styles.wrapper}>
             <Camera
               ref={ref => {
@@ -295,12 +337,12 @@ const TakePictureRecognition = ({ route }) => {
                 mode: FaceDetector.FaceDetectorMode.fast,
                 detectLandmarks: FaceDetector.FaceDetectorLandmarks.none,
                 runClassifications: FaceDetector.FaceDetectorClassifications.none,
-                minDetectionInterval: 100,
+                minDetectionInterval: 500,
                 tracking: true,
               }}
               onCameraReady={() => setReady(true)}
               onMountError={err => console.log(err, 'error mount')}
-              onFacesDetected={ready ? onFacesDetected : null}
+              onFacesDetected={ready && focus ? onFacesDetected : null}
             >
               <CircleMask />
               <Image style={styles.frame} source={FrontFrame} />
@@ -310,7 +352,7 @@ const TakePictureRecognition = ({ route }) => {
         ) : null}
         <View style={styles.body}>
           <View style={styles.hintImage}>
-              <Image style={styles.image} source={GuideFront} />
+            <Image style={styles.image} source={GuideFront} />
           </View>
           <Text style={styles.subTitle}>
             {motionCount > 0 ? 'Lihat Ke Arah Kamera' : wording(step[motionCount])}

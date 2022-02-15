@@ -27,6 +27,7 @@ import { uploadSyncEmployee } from './Upload/UploadEmployee';
 import { AbsenceCode } from './Download/AbsenceCode';
 import { getModel } from './Download/MasterModel';
 import axios from 'axios';
+import SuccessModal from '../../Component/SuccessModal';
 
 const Percentage = ({ value = 0 }) => {
   return (
@@ -49,6 +50,7 @@ const SyncScreen = () => {
   const [animation, setAnimation] = useState();
   const [loop, setLoop] = useState(false);
   const [connection, setConnection] = useState(false);
+  const [success, setSuccess] = useState(false);
   const [masterAfdeling, setMasterAfdeling] = useState({
     progress: 0,
     total: 0,
@@ -199,10 +201,10 @@ const SyncScreen = () => {
     })
 
     await postSync();
-    setTimeout(() => {
+    // setTimeout(() => {
       setSync(false);
       setLoop(false);
-    }, 3000)
+    // }, 3000)
   };
 
   const onUpload = async () => {
@@ -226,6 +228,7 @@ const SyncScreen = () => {
       if (res) {
         console.log(res.data);
         await updateUserSync(res.data.token);
+        setSuccess(true);
       }
     } catch (error) {
       console.log(error, 'error');
@@ -272,6 +275,16 @@ const SyncScreen = () => {
           onClose={() => setConnection(false)}
         />
       );
+    }
+    if (success) {
+      return (
+        <SuccessModal
+          visible={success}
+          title={'Sync Berhasil'}
+          content={'Sinkronisasi Data Berhasil'}
+          onPress={() => setSuccess(false)}
+        />
+      )
     }
   };
 

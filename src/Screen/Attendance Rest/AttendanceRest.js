@@ -7,6 +7,8 @@ import {
   StatusBar,
   Modal,
   Image,
+  AppState,
+  BackHandler,
 } from 'react-native';
 import { Camera, requestCameraPermissionsAsync } from 'expo-camera';
 import * as FaceDetector from 'expo-face-detector';
@@ -66,6 +68,22 @@ const AttendanceRest = ({ route }) => {
     longitude: 0,
   });
   const MasterEmployee = TaskServices.getAllData('TM_EMPLOYEE');
+  const [focus, setFocus] = useState(true);
+
+  useEffect(() => {
+    const onChangeState = () => {
+      if (AppState.currentState === 'active') {
+        setFocus(true);
+      } else {
+        setReady(false);
+        setFocus(false);
+      }
+    }
+
+    AppState.addEventListener('change', onChangeState)
+
+    return () => AppState.removeEventListener('change', onChangeState)
+  }, [])
 
   useEffect(() => {
     geolocation.getCurrentPosition((res) => {
@@ -78,10 +96,34 @@ const AttendanceRest = ({ route }) => {
     })
   }, [isFocused])
 
+  const user = TaskServices.getCurrentUser();
   const Descriptor = useMemo(() => {
-    const res = MasterEmployee.filter((item) => item.FACE_DESCRIPTOR !== null).map((item) => JSON.parse(item.FACE_DESCRIPTOR))
-    return res
+    const res = MasterEmployee.filter((item) => item.FACE_DESCRIPTOR !== null)
+    const location = user.LOCATION.split(',');
+    let data = res;
+    if (user.REFERENCE_LOCATION == 'AFD') {
+      data = res.filter((item) => location.includes(item.AFD_CODE))
+    } else if (user.REFERENCE_LOCATION == 'BA') {
+      data = res.filter((item) => location.includes(item.WERKS))
+    } else if (user.REFERENCE_LOCATION == 'COMPANY') {
+      data = res.filter((item) => location.includes(item.COMP_CODE))
+    } else {
+      // TODO: HO Need Filter!!
+      data = res
+    }
+    return data.map((item) => JSON.parse(item.FACE_DESCRIPTOR))
   }, [MasterEmployee]);
+
+  useEffect(() => {
+    const onBackHandler = () => {
+      navigation.navigate('Home')
+      return true
+    }
+
+    BackHandler.addEventListener('hardwareBackPress', onBackHandler)
+
+    return () => BackHandler.removeEventListener('hardwareBackPress', onBackHandler)
+  }, [])
 
   const condition4 = event => {
     const rightEye = event?.faces[0]?.rightEyeOpenProbability;
@@ -194,7 +236,7 @@ const AttendanceRest = ({ route }) => {
         console.log(results);
         if (results._label != 'unknown') {
           setIsLoading(false);
-          navigation.navigate('Preview Attendance Rest', {
+          navigation.replace('Preview Attendance Rest', {
             data: {
               label: results._label,
               accuracy: results._distance,
@@ -311,7 +353,7 @@ const AttendanceRest = ({ route }) => {
             style={styles.switch}
             onPress={() => setFront(!front)} />
         </View>
-        {isFocused ? (
+        {isFocused && focus ? (
           <View style={styles.wrapper}>
             <Camera
               ref={ref => {
@@ -324,12 +366,12 @@ const AttendanceRest = ({ route }) => {
                 mode: FaceDetector.FaceDetectorMode.fast,
                 detectLandmarks: FaceDetector.FaceDetectorLandmarks.none,
                 runClassifications: FaceDetector.FaceDetectorClassifications.none,
-                minDetectionInterval: 100,
+                minDetectionInterval: 500,
                 tracking: true,
               }}
               onCameraReady={() => setReady(true)}
               onMountError={err => console.log(err, 'error mount')}
-              onFacesDetected={ready ? onFacesDetected : null}
+              onFacesDetected={ready && focus ? onFacesDetected : null}
             >
               <CircleMask />
               <Image style={styles.frame} source={FrontFrame} />
