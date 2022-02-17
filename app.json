@@ -1,0 +1,17 @@
+{
+  "expo": {
+    "name": "cermin",
+    "slug": "cermin",
+    "version": "1.0.0",
+    "assetBundlePatterns": [
+      "**/*"
+    ],
+    "android": {
+      "package": "com.cermin.app"
+    },
+    "ios": {
+      "bundleIdentifier": "com.cermin.app"
+    }
+  },
+  "name": "cermin"
+}
