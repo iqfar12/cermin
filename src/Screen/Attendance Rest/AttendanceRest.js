@@ -105,7 +105,7 @@ const AttendanceRest = ({ route }) => {
       data = res.filter((item) => location.includes(item.AFD_CODE))
     } else if (user.REFERENCE_LOCATION == 'BA') {
       data = res.filter((item) => location.includes(item.WERKS))
-    } else if (user.REFERENCE_LOCATION == 'COMPANY') {
+    } else if (user.REFERENCE_LOCATION == 'COMP') {
       data = res.filter((item) => location.includes(item.COMP_CODE))
     } else {
       // TODO: HO Need Filter!!
@@ -341,7 +341,7 @@ const AttendanceRest = ({ route }) => {
             size={25}
             color={'#6C6C6C'}
             style={styles.back}
-            onPress={() => navigation.goBack()}
+            onPress={() => navigation.navigate('Home')}
           />
           <TouchableOpacity activeOpacity={0.8} onPress={() => navigation.goBack()}>
             <Text style={styles.title}>Kembali</Text>

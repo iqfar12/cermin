@@ -104,7 +104,7 @@ const PreviewAttendanceRest = ({ route }) => {
             <View style={styles.buttonContainer}>
               <TouchableOpacity
                 activeOpacity={0.8}
-                onPress={() => navigation.replace('Attendance Rest', { data: data })}
+                onPress={() => navigation.replace('Attendance Rest')}
                 style={styles.retake}
               >
                 <Text style={styles.retakeTxt}>Ambil Ulang</Text>

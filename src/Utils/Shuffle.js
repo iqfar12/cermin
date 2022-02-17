@@ -45,3 +45,12 @@ export function shuffleAllArray(array) {
 
   return array;
 }
+
+export const shuffleBackArray = (array = [1, 2, 3, 4]) => {
+  let tmp = array[0];
+  let slices = array.slice(1, 4);
+  let res = shuffleAllArray(slices);
+  res.unshift(tmp);
+
+  return res
+}

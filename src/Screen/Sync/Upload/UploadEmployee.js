@@ -58,10 +58,14 @@ export const uploadSyncEmployee = async () => {
                             count: uploadCount.count + 1
                         }
 
-                        const data = {
+                        let data = {
                             ID: item.ID,
                             SYNC_TIME: new Date(),
                             SYNC_STATUS: 1,
+                        }
+
+                        if (item.TYPE == 'N') {
+                            data.REGISTER_STATUS = 'Success'
                         }
 
                      TaskServices.saveData('TM_EMPLOYEE', data)

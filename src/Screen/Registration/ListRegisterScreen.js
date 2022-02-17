@@ -19,30 +19,6 @@ const RightComponent = ({ navigation }) => {
     );
 };
 
-const DummyData = [
-    {
-        id: 0,
-    },
-    {
-        id: 0,
-    },
-    {
-        id: 0,
-    },
-    {
-        id: 0,
-    },
-    {
-        id: 0,
-    },
-    {
-        id: 0,
-    },
-    {
-        id: 0,
-    },
-]
-
 const ListRegisterScreen = () => {
     const navigation = useNavigation();
     const MasterEmployee = TaskServices.getAllData('TM_EMPLOYEE');
@@ -60,7 +36,7 @@ const ListRegisterScreen = () => {
             data = res.filter((item) => location.includes(item.AFD_CODE))
         } else if (user.REFERENCE_LOCATION == 'BA') {
             data = res.filter((item) => location.includes(item.WERKS))
-        } else if (user.REFERENCE_LOCATION == 'COMPANY') {
+        } else if (user.REFERENCE_LOCATION == 'COMP') {
             data = res.filter((item) => location.includes(item.COMP_CODE))
         } else {
             // TODO: HO Need Filter!!
@@ -106,6 +82,15 @@ const ListRegisterScreen = () => {
       };
 
     const renderListCard = ({ item, index }) => {
+        const location = () => {
+            if (user.REFERENCE_LOCATION == 'AFD') {
+                return item.AFD_CODE
+            } else if (user.REFERENCE_LOCATION == 'BA') {
+                return item.WERKS
+            } else {
+                return item.COMP_CODE
+            }
+        }
         return (
             <TouchableOpacity activeOpacity={0.8} onPress={() => onRegister(item)} style={styles.card}>
                 <View style={styles.cardLeft}>
@@ -115,7 +100,7 @@ const ListRegisterScreen = () => {
                 <View style={styles.cardRight}>
                     <View style={styles.location}>
                         <Icon name={'location-pin'} size={20} color={'#C5C5C5'} />
-                        <Text style={styles.locationTxt}>{item.WERKS}</Text>
+                        <Text style={styles.locationTxt}>{location()}</Text>
                     </View>
                     <Icon name={'keyboard-arrow-right'} size={25} color={'#2F78D7'} />
                 </View>

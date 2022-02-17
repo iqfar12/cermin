@@ -104,7 +104,7 @@ const PreviewRecognition = ({ route }) => {
             <View style={styles.buttonContainer}>
               <TouchableOpacity
                 activeOpacity={0.8}
-                onPress={() => navigation.replace('Take Picture Recognition', { data: data })}
+                onPress={() => navigation.replace('Take Picture Recognition')}
                 style={styles.retake}
               >
                 <Text style={styles.retakeTxt}>Ambil Ulang</Text>

@@ -13,6 +13,7 @@ const TM_USERS = {
     NAME: 'string?',
     JOB_DESC: 'string?',
     ROLE_NAME: 'string?',
+    ROLE_ID: 'int?',
     COMP_CODE: 'string?',
     COMP_NAME: 'string?',
     REFERENCE_LOCATION: 'string?',

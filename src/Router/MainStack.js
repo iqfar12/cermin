@@ -31,13 +31,19 @@ import DetailHistoryAttendance from '../Screen/History/DetailHistoryAttendance';
 const StackNavigator = createNativeStackNavigator();
 
 const MainStackNavigator = () => {
+  const lingking = {
+    prefixes: [
+      'cerminapp://',
+    ],
+  };
   return (
-    <NavigationContainer>
+    <NavigationContainer linking={lingking}>
       <StackNavigator.Navigator
         initialRouteName={'Splash'}
         screenOptions={{
           headerShown: false,
         }}
+        
       >
         <StackNavigator.Screen name={'Splash'} component={SplashScreen} />
         <StackNavigator.Screen name={'Home'} component={HomeScreen} />
@@ -50,7 +56,7 @@ const MainStackNavigator = () => {
           component={RecognitionScreen}
         />
         <StackNavigator.Screen
-          name={'Verification Screen'}
+          name={'Verification'}
           component={MainVerificationScreen}
         />
         <StackNavigator.Screen
