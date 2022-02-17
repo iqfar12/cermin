@@ -331,7 +331,8 @@ const RegisterScreen = ({ route }) => {
           runClassifications: FaceDetector.FaceDetectorClassifications.none,
         });
         const jaw = corner.faces[0].BOTTOM_MOUTH.y;
-        if (jaw <= 136) {
+        console.log(jaw);
+        if (jaw <= 138 && jaw >= 120) {
           // Top
           console.log('top');
           return { valid: true, message: 'Correct' };
@@ -392,7 +393,7 @@ const RegisterScreen = ({ route }) => {
           console.log('center');
           return { valid: true, message: 'Correct' };
         } else {
-          return { valid: false, message: 'Posisi Salah' };
+          return { valid: false, message: 'Posisi Salah\nPastikan Mata dan Hidung Sejajar dengan garis' };
         }
       } else {
         return { valid: false, message: 'No Face Detected' };
@@ -463,7 +464,7 @@ const RegisterScreen = ({ route }) => {
           console.log('left');
           return { valid: true, message: 'Correct' };
         } else {
-          return { valid: false, message: 'Posisi Salah' };
+          return { valid: false, message: 'Posisi Salah\nPastikan Mata dan Hidung Sejajar dengan garis\nPastikan Mata dan Hidung Sejajar dengan garis' };
         }
       } else {
         return { valid: false, message: 'No Face Detected' };
@@ -528,12 +529,13 @@ const RegisterScreen = ({ route }) => {
           runClassifications: FaceDetector.FaceDetectorClassifications.none,
         });
         const { x, y } = corner.faces[0].NOSE_BASE;
+        console.log(x)
         if (x <= 65 && x >= 50) {
           // Right
           console.log('right');
           return { valid: true, message: 'Correct' };
         } else {
-          return { valid: false, message: 'Posisi Salah' };
+          return { valid: false, message: 'Posisi Salah\nPastikan Mata dan Hidung Sejajar dengan garis' };
         }
       } else {
         return { valid: false, message: 'No Face Detected' };
@@ -695,7 +697,7 @@ const RegisterScreen = ({ route }) => {
               </View>
               <Text style={styles.hintText}>
                 {
-                  'Posisikan kepala anda sesuai dengan bingkai pada layar anda, pastikan mata tidak berkedip ketika mengambil foto\n \nKedua mata harus terlihat di layar dan lihat kamera saat mengambil foto'
+                  'Posisikan kepala anda sesuai dengan bingkai pada layar anda.\nPastikan Mata dan Hidung Sejajar dengan garis dan tidak berkedip ketika mengambil foto\n \nKedua mata harus terlihat di layar dan lihat kamera saat mengambil foto'
                 }
               </Text>
               <TouchableOpacity
@@ -829,14 +831,14 @@ const RegisterScreen = ({ route }) => {
               autoFocus={'on'}
             />
             <Image style={styles.frame} source={Frame()} />
-            <Image style={styles.line} source={Line()} />
+            {/* <Image style={styles.line} source={Line()} /> */}
           </View>
         ) : <View style={styles.wrapper}>
             <View
               style={styles.preview}
             />
             <Image style={styles.frame} source={Frame()} />
-            <Image style={styles.line} source={Line()} />
+            {/* <Image style={styles.line} source={Line()} /> */}
           </View>}
         <View style={styles.cameraContainer}>
           <View activeOpacity={0.8} style={styles.switchCamera}>
