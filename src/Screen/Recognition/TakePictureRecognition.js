@@ -29,6 +29,8 @@ import ExpoIcon from '@expo/vector-icons/MaterialIcons';
 import { Fonts } from '../../Utils/Fonts';
 import TaskServices from '../../Database/TaskServices';
 import geolocation from '@react-native-community/geolocation';
+import SoundPlayer from 'react-native-sound-player';
+
 
 const CircleMask = () => {
   return (
@@ -60,7 +62,7 @@ const TakePictureRecognition = ({ route }) => {
   const [isTake, setTake] = useState(false);
   const isFocused = useIsFocused();
   const navigation = useNavigation();
-  const [step, setStep] = useState(shuffleArr());
+  const [step, setStep] = useState(shuffleArr([2, 3, 2, 3]));
   const [faceId, setFaceId] = useState(0);
   const [front, setFront] = useState(true);
   const MasterEmployee = TaskServices.getAllData('TM_EMPLOYEE');
@@ -69,6 +71,10 @@ const TakePictureRecognition = ({ route }) => {
     longitude: 0,
   });
   const [focus, setFocus] = useState(true);
+
+  useEffect(() => {
+    return () => setReady(false);
+  }, [])
 
   useEffect(() => {
     const onChangeState = () => {
@@ -159,6 +165,34 @@ const TakePictureRecognition = ({ route }) => {
     }
   };
 
+  const filename = () => {
+    let val = step[motionCount];
+    if (motionCount > 0) {
+      return 'look_camera'
+    }
+    if (val === 0) {
+      return 'look_left';
+    } else if (val === 1) {
+      return 'look_right';
+    } else if (val === 2) {
+      return 'smile';
+    } else {
+      return 'blink';
+    }
+  };
+
+  useEffect(() => {
+    if (isFocused && ready) {
+      if (motionCount > 0) {
+        SoundPlayer.playSoundFile(filename(), 'mp3')
+      } else {
+        setTimeout(() => {
+          SoundPlayer.playSoundFile(filename(), 'mp3')
+        }, 1000)
+      }
+    }
+  }, [isFocused, motionCount, step, ready])
+
   const onFacesDetected = event => {
     let val = step[motionCount];
     if (motionCount === 0) {
@@ -183,15 +217,15 @@ const TakePictureRecognition = ({ route }) => {
   };
 
   useEffect(() => {
-    if (motionCount > 0) {
+    if (motionCount > -1) {
       setTimeout(() => {
         takePicture();
-      }, 1500)
+      }, 2500)
     }
   }, [motionCount]);
 
   const randomize = () => {
-    setStep(shuffleArr());
+    setStep(shuffleArr([2, 3, 2, 3]));
     // console.log(step, 'steps');
     setMotionCount(0);
   };
@@ -199,7 +233,7 @@ const TakePictureRecognition = ({ route }) => {
   useEffect(() => {
     let timeout = setTimeout(() => {
       randomize();
-    }, 10000);
+    }, 7000);
 
     return () => clearTimeout(timeout);
   }, [step]);
@@ -220,9 +254,12 @@ const TakePictureRecognition = ({ route }) => {
       const detection = await faceapi
         .detectSingleFace(
           imageTensor,
+          // new faceapi.SsdMobilenetv1Options({
+          //   minConfidence: 0.43,
+          // })
           new faceapi.TinyFaceDetectorOptions({
-            inputSize: 416,
-            scoreThreshold: 0.43,
+            inputSize: 608,
+            scoreThreshold: 0.45,
           }),
         )
         .withFaceLandmarks()
@@ -252,6 +289,7 @@ const TakePictureRecognition = ({ route }) => {
         unknownRedirect(gambar);
       }
     } catch (error) {
+      console.log(error, 'error');
       unknownRedirect(gambar)
     }
 
@@ -342,11 +380,11 @@ const TakePictureRecognition = ({ route }) => {
               }}
               onCameraReady={() => setReady(true)}
               onMountError={err => console.log(err, 'error mount')}
-              onFacesDetected={ready && focus ? onFacesDetected : null}
+              onFacesDetected={ready && focus && isFocused ? onFacesDetected : null}
             >
               <CircleMask />
               <Image style={styles.frame} source={FrontFrame} />
-              <Image style={styles.frame} source={FrontLine} />
+              {/* <Image style={styles.frame} source={FrontLine} /> */}
             </Camera>
           </View>
         ) : null}

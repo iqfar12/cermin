@@ -60,9 +60,11 @@ const RegisterScreen = ({ route }) => {
   const isFocused = useIsFocused();
   const [isAlready, setIsAlready] = useState(false);
   const [message, setMessage] = useState('');
-  const [RandomPhase, setRandomPhase] = useState(shuffleBackArray([1, 2, 3, 4]));
+  const [RandomPhase, setRandomPhase] = useState(shuffleBackArray([1, 2, 3]));
   const [cameraFront, setCameraFront] = useState(true);
   const [ready, setReady] = useState(true);
+  const [detect, setDetect] = useState(false);
+  const [mainDescriptor, setMainDescriptor] = useState([]);
 
   useEffect(() => {
     const onChangeState = () => {
@@ -97,12 +99,12 @@ const RegisterScreen = ({ route }) => {
   };
 
   useEffect(() => {
-    if (isFocused) {
+    if (isFocused && !hint) {
       setTimeout(() => {
         playSound();
       }, 1000);
     }
-  }, [isFocused, step]);
+  }, [isFocused, step, hint]);
 
   const isRegistered = async () => {
     setIsLoading(true);
@@ -399,8 +401,8 @@ const RegisterScreen = ({ route }) => {
         return { valid: false, message: 'No Face Detected' };
       }
     } catch (error) {
-    console.log(error, 'error');
-    return { valid: false, message: 'Error Image' };
+      console.log(error, 'error');
+      return { valid: false, message: 'Error Image' };
     }
   };
 
@@ -601,6 +603,7 @@ const RegisterScreen = ({ route }) => {
     try {
       const image = await camera.takePictureAsync();
       setIsLoading(true);
+      setDetect(false);
       if (image) {
         console.log(image, 'position');
         // const res = await detectCorner(image);
@@ -617,42 +620,109 @@ const RegisterScreen = ({ route }) => {
   };
 
   useEffect(() => {
-    if (images.length === 4) {
+    if (images.length === 3) {
       setIsLoading(true);
       register();
     }
   }, [images]);
 
+  const condition4 = event => {
+    const jaw = event?.faces[0]?.BOTTOM_MOUTH.y;
+    console.log(jaw);
+    if (jaw >= 300 && jaw <= 330) {
+      // Top
+      console.log('top');
+      takePicture()
+    }
+  };
+
+  const condition1 = event => {
+    const { x, y } = event?.faces[0]?.NOSE_BASE;
+    console.log(x);
+    if (x >= 185 && x <= 200) {
+      // Center
+      console.log('center');
+      takePicture();
+    }
+  };
+
+  const condition2 = event => {
+    const { x, y } = event?.faces[0]?.NOSE_BASE;
+    console.log(x);
+    if (x >= 130 && x <= 145) {
+      // Left
+      console.log('left');
+      takePicture();
+    }
+  };
+
+  const condition3 = event => {
+    const { x, y } = event?.faces[0]?.NOSE_BASE;
+    console.log(x);
+    if (x >= 205 && x <= 245) {
+      // Left
+      console.log('right');
+      takePicture();
+    }
+  };
+
+  const onFaceDetected = event => {
+    const val = RandomPhase[step];
+
+    if (event.faces.length > 0) {
+      if (val === 1) {
+        condition1(event)
+      } else if (val === 2) {
+        condition2(event)
+      } else if (val === 3) {
+        condition3(event)
+      } else {
+        condition4(event)
+      }
+    }
+  }
+
   const cropImage = async image => {
     try {
+      const val = RandomPhase[step];
       const resize = await manipulateAsync(image.uri, [
         { resize: { width: 768, height: 1024 } },
       ], { base64: true });
 
-      // await faceapi.tf.ready();
-      // const img = faceapi.tf.util.encodeString(resize.base64, 'base64').buffer;
-      // const raw = new Uint8Array(img);
-      // const imageTensor = decodeJpeg(raw)
+      await faceapi.tf.ready();
+      const img = faceapi.tf.util.encodeString(resize.base64, 'base64').buffer;
+      const raw = new Uint8Array(img);
+      const imageTensor = decodeJpeg(raw)
 
-      let position = undefined;
-      const val = RandomPhase[step];
+      const detect = await faceapi.detectSingleFace(imageTensor).withFaceLandmarks().withFaceDescriptor();
+      let range = 1.0;
       if (val === 1) {
-        position = await detectFront(image);
-      } else if (val === 2) {
-        position = await detectLeft(image);
-      } else if (val === 3) {
-        position = await detectRight(image);
+        setMainDescriptor(detect.descriptor);
+        const {valid} = await detectFront(image);
+        range = valid ? 0.0 : 0.9
       } else {
-        position = await detectUp(image);
+        range = faceapi.euclideanDistance(mainDescriptor, detect.descriptor)
       }
-      if (position !== undefined && position.valid) {
+      console.log(range, 'range');
+      // const val = RandomPhase[step];
+      // if (val === 1) {
+      //   position = await detectFront(image);
+      // } else if (val === 2) {
+      //   position = await detectLeft(image);
+      // } else if (val === 3) {
+      //   position = await detectRight(image);
+      // } else {
+      //   position = await detectUp(image);
+      // }
+      if (range <= 0.4) {
         setImages([...images, resize]);
-        if (step < 3) {
+        if (step < 2) {
           setStep(step + 1);
         }
-      } else {
+      }
+      else {
         setFailed(true);
-        setMessage(position?.message);
+        setMessage('Gambar Blur atau Tidak Terdeteksi\n \nJika Pesan ini Muncul Berkali-kali silahkan mulai dari awal');
       }
       setIsLoading(false);
     } catch (error) {
@@ -817,7 +887,7 @@ const RegisterScreen = ({ route }) => {
           </View>
           <View style={styles.right}>
             <Text style={styles.step}>
-              {step + 1}/4 Hadap {Direction()}
+              {step + 1}/3 Hadap {Direction()}
             </Text>
             <Text style={styles.stepTxt}>Pastikan mata melihat kamera</Text>
           </View>
@@ -829,6 +899,19 @@ const RegisterScreen = ({ route }) => {
               ref={ref => setCamera(ref)}
               type={cameraFront ? 'front' : 'back'}
               autoFocus={'on'}
+              onCameraReady={() => {
+                setTimeout(() => {
+                  setDetect(true)
+                }, step > 0 ? 2000 : 3000)
+              }}
+              onFacesDetected={detect && !hint && !failed ? onFaceDetected : null}
+              faceDetectorSettings={{
+                mode: FaceDetector.FaceDetectorMode.fast,
+                detectLandmarks: FaceDetector.FaceDetectorLandmarks.none,
+                runClassifications: FaceDetector.FaceDetectorClassifications.none,
+                minDetectionInterval: 500,
+                tracking: false,
+              }}
             />
             <Image style={styles.frame} source={Frame()} />
             {/* <Image style={styles.line} source={Line()} /> */}
@@ -852,7 +935,8 @@ const RegisterScreen = ({ route }) => {
           <TouchableOpacity
             style={styles.takeButton}
             onPress={takePicture}
-            disabled={camera === undefined}
+            // disabled={camera === undefined}
+            disabled={true}
             activeOpacity={0.5}
           >
             <View style={styles.circle} />

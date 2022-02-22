@@ -3,14 +3,23 @@ import axios from 'axios';
 
 export const getMasterEmployee = async () => {
   const user = TaskServices.getCurrentUser();
-  const dbLocal = TaskServices.getAllData('TM_EMPLOYEE');
   const url = 'https://apis-dev1.tap-agri.com/crm-msa-attendance/employee';
   // const url = 'https://192.168.0.108:4000/employee';
   const duplicate_url = 'https://apis-dev1.tap-agri.com/crm-msa-attendance/employee-invalid'
+  const dbLocal = TaskServices.getAllData('TM_EMPLOYEE').filter((item) => {
+    const location = user.LOCATION.split(',');
+    if (user.REFERENCE_LOCATION == 'AFD') {
+      return location.includes(item.AFD_CODE);
+    } else if (user.REFERENCE_LOCATION == 'BA') {
+      return location.includes(item.WERKS)
+    } else {
+      return location.includes(item.COMP_CODE)
+    }
+  })
 
   let downloadProgress = {
     count: 0,
-    total: dbLocal.length,
+    total: user.LAST_SYNC !== null ? dbLocal.length : 0,
   };
 
   const getDuplicate = async (page = 1) => {
@@ -43,7 +52,7 @@ export const getMasterEmployee = async () => {
     }
   }
 
-  const getData = async (page = 1) => {
+  const getData = async (page = 1, total = 0) => {
     let params = new URLSearchParams();
     params.append('page', page);
     params.append('join', 'faceDescriptor');

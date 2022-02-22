@@ -80,6 +80,7 @@ const PreRegisterScreen = () => {
   const [employeeSearch, setEmployeeSearch] = useState('');
   const [referenceLocation, setReferenceLocation] = useState('Afdeling');
   const [referenceModal, setReferenceModal] = useState(false);
+  const regex = new RegExp('^[a-zA-Z0-9]+$');
 
   const onRegister = async () => {
     const id = UuidGenerator();
@@ -151,6 +152,12 @@ const PreRegisterScreen = () => {
   const onPickReference = val => {
     setReferenceLocation(val);
     setReferenceModal(false);
+  }
+
+  const onChangeNik = val => {
+    if (regex.test(val) || val.length === 0) {
+      setNik(val)
+    }
   }
 
   const renderAfdeling = ({ item, index }) => {
@@ -514,7 +521,7 @@ const PreRegisterScreen = () => {
                   <TextInput
                     style={styles.input}
                     value={nik}
-                    onChangeText={val => setNik(val)}
+                    onChangeText={val => onChangeNik(val)}
                     placeholder={'No. Identitas'}
                   />
                 )}

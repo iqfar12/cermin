@@ -1,6 +1,6 @@
 import React, { useMemo, useState } from 'react'
 import { StyleSheet, Text, View, TouchableOpacity, TextInput, FlatList, Platform } from 'react-native'
-import { useNavigation } from '@react-navigation/native';
+import { useNavigation, useIsFocused } from '@react-navigation/native';
 import { Fonts } from '../../Utils/Fonts';
 import SubHeader from '../../Component/SubHeader';
 import Icon from '@expo/vector-icons/MaterialIcons'
@@ -26,6 +26,7 @@ const HistoryAttendance = () => {
     const [date, setDate] = useState(new Date());
     const [showDate, setShowDate] = useState(false);
     const user = TaskServices.getCurrentUser();
+    const isFocused = useIsFocused();
 
     const ListAttendance = useMemo(() => {
         const location = user.LOCATION.split(',');
@@ -61,9 +62,7 @@ const HistoryAttendance = () => {
             return data.filter((item) => item.name.toLowerCase().includes(search.toLowerCase()) || item.nik.toLowerCase().includes(search.toLowerCase()))
         }
         return data
-    }, [MasterAttendance, search, date])
-
-    console.log(ListAttendance);
+    }, [MasterAttendance, search, date, isFocused])
 
     const GroupingListMember = useMemo(() => {
         const group = ListAttendance.reduce(function (r, a) {

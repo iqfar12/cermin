@@ -55,7 +55,8 @@ const PreviewAttendanceOut = ({ route }) => {
 
       await TaskServices.saveData('TR_ATTENDANCE', body);
 
-      navigation.replace('Attendance Out')
+      // navigation.replace('Attendance Out')
+      navigation.goBack();
     }
   }
 

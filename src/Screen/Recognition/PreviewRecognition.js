@@ -55,7 +55,8 @@ const PreviewRecognition = ({ route }) => {
 
       await TaskServices.saveData('TR_ATTENDANCE', body);
 
-      navigation.replace('Take Picture Recognition');
+      // navigation.replace('Take Picture Recognition');
+      navigation.goBack();
     }
   }
 
@@ -69,6 +70,8 @@ const PreviewRecognition = ({ route }) => {
         onAttendance();
       }
     }
+
+    return
   }, [count])
 
   return (
