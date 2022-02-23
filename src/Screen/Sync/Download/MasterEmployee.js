@@ -1,5 +1,6 @@
 import TaskServices from '../../../Database/TaskServices';
 import axios from 'axios';
+import { dateGenerator } from '../../../Utils/DateConverter';
 
 export const getMasterEmployee = async () => {
   const user = TaskServices.getCurrentUser();
@@ -97,7 +98,7 @@ export const getMasterEmployee = async () => {
                 DELETE_TIME: item.deleteTime,
                 DELETE_USER: item.deleteUser,
                 SYNC_STATUS: 1,
-                SYNC_TIME: new Date(),
+                SYNC_TIME: dateGenerator(),
               };
 
               TaskServices.saveData('TM_EMPLOYEE', data);

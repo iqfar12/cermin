@@ -22,8 +22,6 @@ const DetailHistoryAttendance = ({route}) => {
         return MasterAttendance.filter((item) => item.EMPLOYEE_ID == id);
     }, [MasterAttendance])
 
-    console.log(ListAttendance);
-
     const renderListCard = ({ item, index }) => {
         const type = () => {
             if (item.TYPE == '1') {
@@ -49,7 +47,7 @@ const DetailHistoryAttendance = ({route}) => {
         }
         return (
             <View style={styles.card}>
-                <Text style={styles.time}>{moment(item.DATETIME).format('HH:mm')}</Text>
+                <Text style={styles.time}>{moment(item.INSERT_TIME).format('HH:mm')}</Text>
                 <Icon name={type()} size={30} color={color()} />
                 <Text style={styles.text}>{item.DESCRIPTION}</Text>
             </View>

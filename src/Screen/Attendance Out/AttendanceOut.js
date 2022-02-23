@@ -135,7 +135,7 @@ const AttendanceOut = ({ route }) => {
     if (rightEye < 0.06 && leftEye < 0.06 && !isTake) {
       setTake(true);
       setIsMotion(true);
-      setMotionCount(motionCount + 1);
+      setMotionCount(1);
     }
   };
 
@@ -143,7 +143,7 @@ const AttendanceOut = ({ route }) => {
     const basePosition = event?.faces[0]?.NOSE_BASE?.x;
     if (basePosition <= 140) {
       setIsMotion(true);
-      setMotionCount(motionCount + 1);
+      setMotionCount(1);
     }
   };
 
@@ -151,7 +151,7 @@ const AttendanceOut = ({ route }) => {
     const basePosition = event?.faces[0]?.NOSE_BASE?.x;
     if (basePosition >= 250) {
       setIsMotion(true);
-      setMotionCount(motionCount + 1);
+      setMotionCount(1);
     }
   };
 
@@ -159,7 +159,7 @@ const AttendanceOut = ({ route }) => {
     const mouth = event?.faces[0]?.smilingProbability;
     if (mouth > 0.9) {
       setIsMotion(true);
-      setMotionCount(motionCount + 1);
+      setMotionCount(1);
     }
   };
 
@@ -255,7 +255,7 @@ const AttendanceOut = ({ route }) => {
           imageTensor,
           new faceapi.TinyFaceDetectorOptions({
             inputSize: 608,
-            scoreThreshold: 0.45,
+            scoreThreshold: 0.43,
           }),
         )
         .withFaceLandmarks()
@@ -264,7 +264,7 @@ const AttendanceOut = ({ route }) => {
         const descriptors = Descriptor.map(item =>
           faceapi.LabeledFaceDescriptors.fromJSON(item),
         );
-        const faceMatcher = new faceapi.FaceMatcher(descriptors, 0.43);
+        const faceMatcher = new faceapi.FaceMatcher(descriptors, 0.45);
         const results = faceMatcher.findBestMatch(detection.descriptor);
         console.log(results);
         if (results._label != 'unknown') {
@@ -297,6 +297,7 @@ const AttendanceOut = ({ route }) => {
   };
 
   const takePicture = async () => {
+    if (isLoading) return;
     if (!camera) return;
     const image = await camera.takePictureAsync();
     if (image) {
@@ -363,6 +364,7 @@ const AttendanceOut = ({ route }) => {
     }
   };
 
+  const {ID, SOURCE} = TaskServices.getAllData('T_NAVIGATE')[0];
   return (
     <View style={{ flex: 1 }}>
       {showModal()}
@@ -376,7 +378,7 @@ const AttendanceOut = ({ route }) => {
             style={styles.back}
             onPress={() => navigation.navigate('Home')}
           />
-          <TouchableOpacity activeOpacity={0.8} onPress={() => navigation.goBack()}>
+          <TouchableOpacity activeOpacity={0.8} onPress={() => navigation.navigate(SOURCE)}>
             <Text style={styles.title}>Kembali</Text>
           </TouchableOpacity>
           <ExpoIcon
@@ -403,7 +405,7 @@ const AttendanceOut = ({ route }) => {
                 tracking: true,
               }}
               onCameraReady={() => setReady(true)}
-              onMountError={err => console.log(err, 'error mount')}
+              onMountError={err => setReady(false)}
               onFacesDetected={ready && focus && isFocused ? onFacesDetected : null}
             >
               <CircleMask />

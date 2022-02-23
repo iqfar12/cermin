@@ -117,7 +117,7 @@ const styles = StyleSheet.create({
     color: '#FFF',
   },
   num: {
-    fontSize: 32,
+    fontSize: 28,
     fontFamily: Fonts.bold,
     color: '#FFF',
     marginHorizontal: 5,

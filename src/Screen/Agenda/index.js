@@ -12,6 +12,7 @@ import BottomModal from "../../Component/BottomModal";
 import TaskServices from "../../Database/TaskServices";
 import MenuModal from "../../Component/MenuModal";
 import { UuidGenerator } from "../../Utils/UuidGenerator";
+import { dateGenerator } from "../../Utils/DateConverter";
 
 
 const RightComponent = ({ navigation }) => {
@@ -82,7 +83,7 @@ const LeaveScreen = () => {
             EMPLOYEE_ID: user.ID,
             TYPE: '4',
             ABSENCE_CODE: leaveType,
-            DATETIME: new Date(),
+            DATETIME: dateGenerator(),
             ACCURACY: null,
             LATITUDE: null,
             LONGITUDE: null,

@@ -81,10 +81,10 @@ const HistoryAttendance = () => {
                 LOCATION: item[0].location,
                 NIK: item[0].nik,
                 EMPLOYEE_ID: item[0].EMPLOYEE_ID,
-                ATTENDANCE_IN: attendanceIn !== undefined ? attendanceIn.DATETIME : null,
-                ATTENDANCE_OUT: attendanceOut !== undefined ? attendanceOut.DATETIME : null,
-                REST: rest !== undefined ? rest.DATETIME : null,
-                AGENDA: agenda !== undefined ? agenda.DATETIME : null,
+                ATTENDANCE_IN: attendanceIn !== undefined ? attendanceIn.INSERT_TIME : null,
+                ATTENDANCE_OUT: attendanceOut !== undefined ? attendanceOut.INSERT_TIME : null,
+                REST: rest !== undefined ? rest.INSERT_TIME : null,
+                AGENDA: agenda !== undefined ? agenda.INSERT_TIME : null,
             }
         });
         return res
@@ -107,6 +107,15 @@ const HistoryAttendance = () => {
 
         return data;
     }, [MasterEmployee, user])
+
+    const setRoute = async () => {
+        const nav = {
+            ID: 0,
+            SOURCE: 'History Attendance'
+        }
+
+        await TaskServices.saveData('T_NAVIGATE', nav)
+    }
 
     const renderListCard = ({ item, index }) => {
         // const user = MasterEmployee.find((data) => data.ID == item.EMPLOYEE_ID);
@@ -160,19 +169,28 @@ const HistoryAttendance = () => {
                     </View>
                     <View style={styles.buttonContainer}>
                         {item.ATTENDANCE_IN === null &&
-                            <TouchableOpacity activeOpacity={0.8} onPress={() =>  navigation.navigate('Take Picture Recognition')} style={styles.stateButtonLogout}>
+                            <TouchableOpacity activeOpacity={0.8} onPress={() => {
+                                setRoute()
+                                navigation.navigate('Take Picture Recognition')
+                            }} style={styles.stateButtonLogout}>
                                 <Icon name={'login'} size={25} color={'#FFF'} />
                                 <Text style={styles.stateButtonTxt}>Masuk</Text>
                             </TouchableOpacity>
                         }
                         {item.ATTENDANCE_OUT === null &&
-                            <TouchableOpacity activeOpacity={0.8} onPress={() => navigation.navigate('Attendance Out')} style={styles.stateButtonLogout}>
+                            <TouchableOpacity activeOpacity={0.8} onPress={() => {
+                                setRoute()
+                                navigation.navigate('Attendance Out')
+                            }} style={styles.stateButtonLogout}>
                                 <Icon name={'logout'} size={25} color={'#FFF'} />
                                 <Text style={styles.stateButtonTxt}>Pulang</Text>
                             </TouchableOpacity>
                         }
                         {item.REST === null &&
-                            <TouchableOpacity activeOpacity={0.8} onPress={() => navigation.navigate('Attendance Rest')} style={styles.stateButtonRest}>
+                            <TouchableOpacity activeOpacity={0.8} onPress={() => {
+                                setRoute()
+                                navigation.navigate('Attendance Rest')
+                            }} style={styles.stateButtonRest}>
                                 <Icon name={'local-cafe'} size={25} color={'#FFF'} />
                                 <Text style={styles.stateButtonTxt}>Istirahat</Text>
                             </TouchableOpacity>

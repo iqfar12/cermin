@@ -5,6 +5,7 @@ import { Fonts } from '../../Utils/Fonts';
 import SubHeader from '../../Component/SubHeader';
 import Icon from '@expo/vector-icons/MaterialIcons'
 import TaskServices from '../../Database/TaskServices';
+import { dateGenerator } from '../../Utils/DateConverter';
 
 const RightComponent = ({ navigation }) => {
     return (
@@ -66,11 +67,11 @@ const ListRegisterScreen = () => {
           WERKS: data?.WERKS,
           REGISTER_STATUS: 'PROCESS',
           FACE_DESCRIPTOR: data?.FACE_DESCRIPTOR,
-          INSERT_TIME: new Date(),
+          INSERT_TIME: dateGenerator(),
           INSERT_USER: user?.USER_NAME,
-          REGISTER_TIME: new Date(),
+          REGISTER_TIME: dateGenerator(),
           REGISTER_USER: user.USER_NAME,
-          UPDATE_TIME: new Date(),
+          UPDATE_TIME: dateGenerator(),
           UPDATE_USER: user.USER_NAME,
           DELETE_TIME: null,
           DELETE_USER: null,

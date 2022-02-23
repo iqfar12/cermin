@@ -351,59 +351,59 @@ const RegisterScreen = ({ route }) => {
   };
 
   const detectFront = async image => {
-    // try {
-    //   const res = await faceapi.detectSingleFace(image,
-    //     new faceapi.TinyFaceDetectorOptions({ inputSize: 416, scoreThreshold: 0.4 })
-    //   ).withFaceLandmarks().withFaceDescriptor();
-    //   if (res) {
-    //     return { valid: true, message: 'Correct' }
-    //   } else {
-    //     return { valid: false, message: 'No Face Detected' };
-    //   }
-    // } catch (error) {
-    //   console.log(error, 'error');
-    //   return {
-    //     valid: false, message: 'Error Image'
-    //   }
-    // }
     try {
-      const res = await FaceDetector.detectFacesAsync(image.uri, {
-        mode: FaceDetector.FaceDetectorMode.fast,
-        detectLandmarks: FaceDetector.FaceDetectorLandmarks.none,
-        runClassifications: FaceDetector.FaceDetectorClassifications.none,
-      });
-      if (res.faces.length > 0) {
-        const { bounds } = res.faces[0];
-        const { origin, size } = bounds;
-        const crop = {
-          originX: origin.x,
-          originY: origin.y,
-          height: size.height,
-          width: size.width,
-        };
-        const resize = { width: 160, height: 160 };
-
-        const result = await manipulateAsync(image.uri, [{ crop }, { resize }]);
-        const corner = await FaceDetector.detectFacesAsync(result.uri, {
-          mode: FaceDetector.FaceDetectorMode.fast,
-          detectLandmarks: FaceDetector.FaceDetectorLandmarks.none,
-          runClassifications: FaceDetector.FaceDetectorClassifications.none,
-        });
-        const { x, y } = corner.faces[0].NOSE_BASE;
-        if (x <= 85 && x >= 70) {
-          // Center
-          console.log('center');
-          return { valid: true, message: 'Correct' };
-        } else {
-          return { valid: false, message: 'Posisi Salah\nPastikan Mata dan Hidung Sejajar dengan garis' };
-        }
+      const res = await faceapi.detectSingleFace(image,
+        new faceapi.TinyFaceDetectorOptions({ inputSize: 608, scoreThreshold: 0.4 })
+      ).withFaceLandmarks().withFaceDescriptor();
+      if (res) {
+        return { valid: true, message: 'Correct' }
       } else {
         return { valid: false, message: 'No Face Detected' };
       }
     } catch (error) {
       console.log(error, 'error');
-      return { valid: false, message: 'Error Image' };
+      return {
+        valid: false, message: 'Error Image'
+      }
     }
+    // try {
+    //   const res = await FaceDetector.detectFacesAsync(image.uri, {
+    //     mode: FaceDetector.FaceDetectorMode.fast,
+    //     detectLandmarks: FaceDetector.FaceDetectorLandmarks.none,
+    //     runClassifications: FaceDetector.FaceDetectorClassifications.none,
+    //   });
+    //   if (res.faces.length > 0) {
+    //     const { bounds } = res.faces[0];
+    //     const { origin, size } = bounds;
+    //     const crop = {
+    //       originX: origin.x,
+    //       originY: origin.y,
+    //       height: size.height,
+    //       width: size.width,
+    //     };
+    //     const resize = { width: 160, height: 160 };
+
+    //     const result = await manipulateAsync(image.uri, [{ crop }, { resize }]);
+    //     const corner = await FaceDetector.detectFacesAsync(result.uri, {
+    //       mode: FaceDetector.FaceDetectorMode.fast,
+    //       detectLandmarks: FaceDetector.FaceDetectorLandmarks.none,
+    //       runClassifications: FaceDetector.FaceDetectorClassifications.none,
+    //     });
+    //     const { x, y } = corner.faces[0].NOSE_BASE;
+    //     if (x <= 85 && x >= 70) {
+    //       // Center
+    //       console.log('center');
+    //       return { valid: true, message: 'Correct' };
+    //     } else {
+    //       return { valid: false, message: 'Posisi Salah\nPastikan Mata dan Hidung Sejajar dengan garis' };
+    //     }
+    //   } else {
+    //     return { valid: false, message: 'No Face Detected' };
+    //   }
+    // } catch (error) {
+    //   console.log(error, 'error');
+    //   return { valid: false, message: 'Error Image' };
+    // }
   };
 
   const detectLeft = async image => {
@@ -694,11 +694,11 @@ const RegisterScreen = ({ route }) => {
       const raw = new Uint8Array(img);
       const imageTensor = decodeJpeg(raw)
 
-      const detect = await faceapi.detectSingleFace(imageTensor).withFaceLandmarks().withFaceDescriptor();
+      const detect = await faceapi.detectSingleFace(imageTensor, new faceapi.TinyFaceDetectorOptions({inputSize: 608, scoreThreshold: 0.45})).withFaceLandmarks().withFaceDescriptor();
       let range = 1.0;
       if (val === 1) {
         setMainDescriptor(detect.descriptor);
-        const {valid} = await detectFront(image);
+        const {valid} = await detectFront(imageTensor);
         range = valid ? 0.0 : 0.9
       } else {
         range = faceapi.euclideanDistance(mainDescriptor, detect.descriptor)

@@ -22,6 +22,7 @@ import {UuidGenerator} from '../../Utils/UuidGenerator';
 import TaskServices from '../../Database/TaskServices';
 import * as expoFS from 'expo-file-system';
 import SoundPlayer from 'react-native-sound-player';
+import { dateGenerator } from '../../Utils/DateConverter';
 
 
 const PreviewScreen = ({route}) => {
@@ -92,7 +93,7 @@ const PreviewScreen = ({route}) => {
         NAME: data?.EMPLOYEE_FULLNAME,
         FILE_NAME: data?.EMPLOYEE_FULLNAME,
         URL: path,
-        INSERT_TIME: new Date(),
+        INSERT_TIME: dateGenerator(),
         INSERT_USER: user.NAME,
         SYNC_STATUS: null,
         SYNC_TIME: null,

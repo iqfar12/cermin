@@ -19,29 +19,6 @@ import { useNavigation } from '@react-navigation/native';
 import SyncNotif from '../../Component/SyncNotif';
 import TaskServices from '../../Database/TaskServices';
 
-const Dummy = [
-  {
-    name: 'Asep Zaenudin',
-    code: '1234B- 31265357',
-  },
-  {
-    name: 'Asep Zaenudin',
-    code: '1234B- 31265357',
-  },
-  {
-    name: 'Asep Zaenudin',
-    code: '1234B- 31265357',
-  },
-  {
-    name: 'Asep Zaenudin',
-    code: '1234B- 31265357',
-  },
-  {
-    name: 'Asep Zaenudin',
-    code: '1234B- 31265357',
-  },
-];
-
 const HomeContent = () => {
   const navigation = useNavigation();
   const [sync, setSync] = useState(true);
@@ -91,6 +68,12 @@ const HomeContent = () => {
       title: 'Masuk',
       iconColor: '#3D9F70',
       onNavigation: () => {
+        const nav = {
+          ID: 0,
+          SOURCE: 'Home'
+        }
+
+        TaskServices.saveData('T_NAVIGATE', nav)
         navigation.navigate('Take Picture Recognition');
       },
     },
@@ -99,6 +82,12 @@ const HomeContent = () => {
       title: 'Pulang',
       iconColor: '#DC1B0F',
       onNavigation: () => {
+        const nav = {
+          ID: 0,
+          SOURCE: 'Home'
+        }
+
+        TaskServices.saveData('T_NAVIGATE', nav)
         navigation.navigate('Attendance Out');
       },
     },
@@ -107,6 +96,12 @@ const HomeContent = () => {
       title: 'Istirahat',
       iconColor: '#FFB81C',
       onNavigation: () => {
+        const nav = {
+          ID: 0,
+          SOURCE: 'Home'
+        }
+
+        TaskServices.saveData('T_NAVIGATE', nav)
         navigation.navigate('Attendance Rest');
       },
     },

@@ -1,5 +1,6 @@
 import TaskServices from "../../../Database/TaskServices"
 import axios from "axios";
+import { dateGenerator } from "../../../Utils/DateConverter";
 
 export const uploadSyncEmployee = async () => {
     const dbLocal = TaskServices.getAllData('TM_EMPLOYEE').filter((item) => item.SYNC_TIME === null);
@@ -60,7 +61,7 @@ export const uploadSyncEmployee = async () => {
 
                         let data = {
                             ID: item.ID,
-                            SYNC_TIME: new Date(),
+                            SYNC_TIME: dateGenerator(),
                             SYNC_STATUS: 1,
                         }
 

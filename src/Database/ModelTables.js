@@ -92,6 +92,15 @@ const T_DUPLICATE = {
   }
 }
 
+const T_NAVIGATE = {
+  name: 'T_NAVIGATE',
+  primaryKey: 'ID',
+  properties: {
+    ID: 'int?',
+    SOURCE: 'string?'
+  }
+}
+
 const TM_AFD = {
   name: 'TM_AFD',
   primaryKey: 'AFD_CODE_GIS',
@@ -255,6 +264,7 @@ export default {
   TR_IMAGES,
   TR_NOTIFICATION,
   T_DUPLICATE,
+  T_NAVIGATE,
 
   SCHEMA_VERSION,
 };

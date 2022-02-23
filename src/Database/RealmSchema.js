@@ -20,6 +20,7 @@ let realmSchema = new Realm({
     ModelTables.TR_IMAGES,
     ModelTables.TR_NOTIFICATION,
     ModelTables.T_DUPLICATE,
+    ModelTables.T_NAVIGATE
   ],
   schemaVersion: ModelTables.SCHEMA_VERSION,
 });

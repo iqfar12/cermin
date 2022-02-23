@@ -19,6 +19,7 @@ import { v4 as uuidV4 } from 'uuid';
 import { UuidGenerator } from '../../Utils/UuidGenerator';
 import DummyAFD from '../../assets/DummyAFD.json';
 import BottomModal from '../../Component/BottomModal';
+import { dateGenerator } from '../../Utils/DateConverter';
 
 const RightComponent = ({ navigation }) => {
   return (
@@ -115,7 +116,7 @@ const PreRegisterScreen = () => {
       EMPLOYEE_NIK: type === 1 ? data?.EMPLOYEE_NIK.split(' ').join('') : nik,
       EMPLOYEE_FULLNAME: type === 1 ? data?.EMPLOYEE_FULLNAME : name.toUpperCase(),
       EMPLOYEE_POSITION: type === 1 ? data?.EMPLOYEE_POSITION : null,
-      EMPLOYEE_JOINDATE: type === 1 ? data?.EMPLOYEE_JOINDATE : new Date(),
+      EMPLOYEE_JOINDATE: type === 1 ? data?.EMPLOYEE_JOINDATE : dateGenerator(),
       EMPLOYEE_RESIGNDATE: type === 1 ? data?.EMPLOYEE_RESIGNDATE : null,
       REFERENCE_LOCATION: type === 1 ? data?.REFERENCE_LOCATION : referenceLocation,
       AFD_CODE: type === 1 ? data?.AFD_CODE : locationCode().afdeling,
@@ -123,11 +124,11 @@ const PreRegisterScreen = () => {
       WERKS: type === 1 ? data?.WERKS : locationCode().werks,
       REGISTER_STATUS: 'PROCESS',
       FACE_DESCRIPTOR: type === 1 ? data?.FACE_DESCRIPTOR : null,
-      INSERT_TIME: new Date(),
+      INSERT_TIME: dateGenerator(),
       INSERT_USER: type === 1 ? data?.INSERT_USER : user.USER_NAME,
-      REGISTER_TIME: new Date(),
+      REGISTER_TIME: dateGenerator(),
       REGISTER_USER: user.USER_NAME,
-      UPDATE_TIME: new Date(),
+      UPDATE_TIME: dateGenerator(),
       UPDATE_USER: user.USER_NAME,
       DELETE_TIME: null,
       DELETE_USER: null,
