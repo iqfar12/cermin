@@ -1,28 +1,34 @@
-import React, {createRef, useState, useEffect} from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import {
   StyleSheet,
   Text,
   View,
-  StatusBar,
-  ActivityIndicator,
-  Image,
-  Modal,
-  TextInput,
   TouchableOpacity,
-  FlatList,
+  StatusBar,
+  Modal,
+  Image,
+  AppState,
+  BackHandler,
 } from 'react-native';
-import Icon from 'react-native-vector-icons/Feather';
-import {Camera, requestCameraPermissionsAsync} from 'expo-camera';
-import {useNavigation, useIsFocused} from '@react-navigation/native';
+import { Camera, requestCameraPermissionsAsync } from 'expo-camera';
 import * as FaceDetector from 'expo-face-detector';
-import {Svg, Defs, Mask, Rect, Circle} from 'react-native-svg';
-import DashedProgress from '../../Component/DashedProgress';
+import { Svg, Defs, Mask, Rect, Circle } from 'react-native-svg';
+import { useIsFocused, useNavigation } from '@react-navigation/native';
+import Icon from 'react-native-vector-icons/Feather';
+import axios from 'axios';
+import { Endpoint } from '../../Utils/Endpoint';
 import * as fs from 'expo-file-system';
 import * as faceapi from 'face-api.js';
-import {decodeJpeg} from '@tensorflow/tfjs-react-native';
+import { decodeJpeg } from '@tensorflow/tfjs-react-native';
 import '../../../platform';
-import {manipulateAsync} from 'expo-image-manipulator';
-import {shuffleArr} from '../../Utils/Shuffle';
+import LoadingModal from '../../Component/LoadingModal';
+import { manipulateAsync } from 'expo-image-manipulator';
+import { shuffleArr } from '../../Utils/Shuffle';
+import { FrontFrame, FrontLine, GuideFront } from '../../assets';
+import ExpoIcon from '@expo/vector-icons/MaterialIcons';
+import { Fonts } from '../../Utils/Fonts';
+import TaskServices from '../../Database/TaskServices';
+import geolocation from '@react-native-community/geolocation';
 
 const CircleMask = () => {
   return (
@@ -30,7 +36,8 @@ const CircleMask = () => {
       <Defs>
         <Mask id="mask" x="0" y="0" height="100%" width="100%">
           <Rect height="100%" width="100%" fill="#fff" />
-          <Circle r="140" cx="50%" cy="45%" fill="black" />
+          <Rect height="90%" width="85%" x="8.5%" y="8%" fill="black" ry="160" rx="160" />
+          {/* <Circle r="30%" cx="50%" cy="40%" fill="black" /> */}
         </Mask>
       </Defs>
       <Rect
@@ -44,44 +51,103 @@ const CircleMask = () => {
   );
 };
 
-const MainVerificationScreen = ({route}) => {
+const MainVerificationScreen = ({ route }) => {
   const [camera, setCamera] = useState();
-  const [progress, setProgress] = useState(0);
-  const navigation = useNavigation();
-  const [motionCount, setMotionCount] = useState(0);
-  const isFocused = useIsFocused();
-  const [load, setLoad] = useState(false);
   const [ready, setReady] = useState(false);
+  const [isMotion, setIsMotion] = useState(false);
+  const [motionCount, setMotionCount] = useState(0);
   const [isLoading, setIsLoading] = useState(false);
-  const [label, setLabel] = useState('');
-  const [labelModal, setLabelModal] = useState(true);
-  const [user, setUser] = useState([]);
+  const [isTake, setTake] = useState(false);
+  const isFocused = useIsFocused();
+  const navigation = useNavigation();
   const [step, setStep] = useState(shuffleArr());
   const [faceId, setFaceId] = useState(0);
+  const [front, setFront] = useState(true);
+  const MasterEmployee = TaskServices.getAllData('TM_EMPLOYEE');
+  const [coordinate, setCoordinate] = useState({
+    latitude: 0,
+    longitude: 0,
+  });
+  const [focus, setFocus] = useState(true);
+  console.log(route.params, 'params');
 
-  const getUser = async () => {
-    const users = await route.params?.user;
-    setUser(users);
-  };
+  useEffect(() => {
+    const onChangeState = () => {
+      if (AppState.currentState === 'active') {
+        setFocus(true);
+      } else {
+        setReady(false);
+        setFocus(false);
+      }
+    }
+
+    AppState.addEventListener('change', onChangeState)
+
+    return () => AppState.removeEventListener('change', onChangeState)
+  }, [])
+
+  useEffect(() => {
+    const onBackHandler = () => {
+      navigation.navigate('Home')
+      return true
+    }
+
+    BackHandler.addEventListener('hardwareBackPress', onBackHandler)
+
+    return () => BackHandler.removeEventListener('hardwareBackPress', onBackHandler)
+  }, [])
+
+  useEffect(() => {
+    geolocation.getCurrentPosition((res) => {
+      setCoordinate({
+        latitude: res.coords.latitude,
+        longitude: res.coords.longitude
+      })
+    }, (err) => console.log('err Location'), {
+      enableHighAccuracy: true
+    })
+  }, [isFocused])
+
+  const user = TaskServices.getCurrentUser();
+  const Descriptor = useMemo(() => {
+    const res = MasterEmployee.filter((item) => item.FACE_DESCRIPTOR !== null)
+    const location = user.LOCATION.split(',');
+    let data = res;
+    if (user.REFERENCE_LOCATION == 'AFD') {
+      data = res.filter((item) => location.includes(item.AFD_CODE))
+    } else if (user.REFERENCE_LOCATION == 'BA') {
+      data = res.filter((item) => location.includes(item.WERKS))
+    } else if (user.REFERENCE_LOCATION == 'COMP') {
+      data = res.filter((item) => location.includes(item.COMP_CODE))
+    } else {
+      // TODO: HO Need Filter!!
+      data = res
+    }
+    return data.map((item) => JSON.parse(item.FACE_DESCRIPTOR))
+  }, [MasterEmployee]);
 
   const condition4 = event => {
     const rightEye = event?.faces[0]?.rightEyeOpenProbability;
     const leftEye = event?.faces[0]?.leftEyeOpenProbability;
-    if (rightEye < 0.06 && leftEye < 0.06) {
+    if (rightEye < 0.06 && leftEye < 0.06 && !isTake) {
+      setTake(true);
+      setIsMotion(true);
       setMotionCount(motionCount + 1);
     }
   };
 
   const condition1 = event => {
-    const basePosition = event?.faces[0]?.noseBasePosition.x;
+    const basePosition = event?.faces[0]?.NOSE_BASE?.x;
     if (basePosition <= 140) {
+      setIsMotion(true);
       setMotionCount(motionCount + 1);
     }
   };
 
   const condition2 = event => {
-    const basePosition = event?.faces[0]?.noseBasePosition.x;
+    const basePosition = event?.faces[0]?.NOSE_BASE?.x;
     if (basePosition >= 250) {
+      setIsMotion(true);
       setMotionCount(motionCount + 1);
     }
   };
@@ -89,166 +155,23 @@ const MainVerificationScreen = ({route}) => {
   const condition3 = event => {
     const mouth = event?.faces[0]?.smilingProbability;
     if (mouth > 0.9) {
+      setIsMotion(true);
       setMotionCount(motionCount + 1);
-    }
-  };
-
-  const randomize = () => {
-    setStep(shuffleArr());
-    // console.log(step, 'steps');
-    setMotionCount(0);
-    setProgress(0);
-  };
-
-  useEffect(() => {
-    let timeout = setTimeout(() => {
-      randomize();
-    }, 10000);
-
-    return () => clearTimeout(timeout);
-  }, [step]);
-
-  useEffect(() => {
-    setLoad(true);
-    getUser();
-    return () => {
-      setCamera();
-      setLoad(false);
-      setReady(false);
-      setProgress(0);
-    };
-  }, []);
-
-  const renderName = ({item, index}) => {
-    return (
-      <TouchableOpacity
-        key={index}
-        activeOpacity={0.8}
-        onPress={() => {
-          setLabelModal(false);
-          setLabel(item);
-        }}
-        style={styles.button}
-      >
-        <Text style={styles.buttonTitle}>{item}</Text>
-      </TouchableOpacity>
-    );
-  };
-
-  const showModal = () => {
-    if (labelModal) {
-      return (
-        <Modal transparent visible={labelModal}>
-          <TouchableOpacity
-            activeOpacity={0.8}
-            onPress={() => navigation.goBack()}
-            style={styles.modalContainer}
-          >
-            <View style={styles.wrapper}>
-              <Text style={styles.pickerTitle}>Pilih User</Text>
-              {route.params !== undefined && (
-                <FlatList
-                  data={user}
-                  renderItem={renderName}
-                  keyExtractor={(_, idx) => idx.toString()}
-                />
-              )}
-            </View>
-          </TouchableOpacity>
-        </Modal>
-      );
-    }
-  };
-
-  const RecognitionOffline = async (image, gambar) => {
-    // const res = {
-    //   _distance: 0.38753125995316545,
-    //   _label: 'Iqfar',
-    // };
-    // return res;
-    await faceapi.tf.ready();
-    const userJsonPath = fs.documentDirectory + 'User.json';
-    const jsonString = await fs.readAsStringAsync(userJsonPath);
-    const userData = JSON.parse(jsonString).filter(item => item.label == label);
-    const img = faceapi.tf.util.encodeString(image, 'base64').buffer;
-    const raw = new Uint8Array(img);
-    const imageTensor = decodeJpeg(raw);
-
-    const detection = await faceapi
-      .detectSingleFace(
-        imageTensor,
-        new faceapi.TinyFaceDetectorOptions({
-          inputSize: 416,
-          scoreThreshold: 0.43,
-        }),
-      )
-      .withFaceLandmarks()
-      .withFaceDescriptor();
-
-    if (detection) {
-      const descriptors = userData.map(item =>
-        faceapi.LabeledFaceDescriptors.fromJSON(item),
-      );
-      console.log(descriptors);
-      const faceMatcher = new faceapi.FaceMatcher(descriptors, 0.43);
-      const results = faceMatcher.findBestMatch(detection.descriptor);
-      console.log(results, 'xxx', results._label == label);
-      if (results._label != 'unknown' && results._label == label) {
-        setIsLoading(false);
-        navigation.navigate('Preview Verification', {
-          data: {
-            label: results._label,
-          },
-          image: gambar,
-          label,
-        });
-      } else {
-        unknownRedirect(gambar);
-      }
-    } else {
-      unknownRedirect(gambar);
-    }
-  };
-
-  const unknownRedirect = image => {
-    setIsLoading(false);
-    navigation.navigate('Preview Verification', {
-      data: undefined,
-      image,
-    });
-  };
-
-  const takePicture = async () => {
-    if (!camera) return;
-    const option = {
-      quality: 0.5,
-    };
-    try {
-      const image = await camera.takePictureAsync({base64: true});
-      if (image) {
-        setProgress(0);
-        setLoad(false);
-        const resize = {width: image.width / 5, height: image.height / 5};
-        const results = await manipulateAsync(image.uri, [{resize}], {
-          base64: true,
-        });
-        await RecognitionOffline(results.base64, results);
-      }
-    } catch (error) {
-      console.log(error, 'verifiy');
     }
   };
 
   const onFacesDetected = event => {
     let val = step[motionCount];
-    if (val === 0) {
-      condition1(event);
-    } else if (val === 1) {
-      condition2(event);
-    } else if (val === 2) {
-      condition3(event);
-    } else {
-      condition4(event);
+    if (motionCount === 0) {
+      if (val === 0) {
+        condition1(event);
+      } else if (val === 1) {
+        condition2(event);
+      } else if (val === 2) {
+        condition3(event);
+      } else {
+        condition4(event);
+      }
     }
 
     const faceID = event?.faces[0]?.faceID;
@@ -261,18 +184,117 @@ const MainVerificationScreen = ({route}) => {
   };
 
   useEffect(() => {
-    setProgress(motionCount * 25);
-    if (motionCount > 3) {
-      console.log(motionCount, 'motion');
-      takePicture();
+    if (motionCount > 0) {
+      setTimeout(() => {
+        takePicture();
+      }, 1500)
     }
   }, [motionCount]);
 
+  const randomize = () => {
+    setStep(shuffleArr());
+    // console.log(step, 'steps');
+    setMotionCount(0);
+  };
+
+  useEffect(() => {
+    let timeout = setTimeout(() => {
+      randomize();
+    }, 10000);
+
+    return () => clearTimeout(timeout);
+  }, [step]);
+
+  const RecognitionOffline = async (image, gambar) => {
+    // const res = {
+    //   _distance: 0.38753125995316545,
+    //   _label: 'Iqfar',
+    // };
+    // return res;
+    try {
+      await faceapi.tf.ready()
+      const img = faceapi.tf.util.encodeString(image, 'base64').buffer;
+      const raw = new Uint8Array(img);
+      const imageTensor = decodeJpeg(raw);
+
+      console.log('detecting....');
+      const detection = await faceapi
+        .detectSingleFace(
+          imageTensor,
+          new faceapi.TinyFaceDetectorOptions({
+            inputSize: 416,
+            scoreThreshold: 0.43,
+          }),
+        )
+        .withFaceLandmarks()
+        .withFaceDescriptor();
+      if (detection) {
+        const descriptors = Descriptor.map(item =>
+          faceapi.LabeledFaceDescriptors.fromJSON(item),
+        );
+        const faceMatcher = new faceapi.FaceMatcher(descriptors, 0.43);
+        const results = faceMatcher.findBestMatch(detection.descriptor);
+        console.log(results);
+        if (results._label != 'unknown') {
+          setIsLoading(false);
+          console.log(results);
+          navigation.replace('Preview Recognition', {
+            data: {
+              label: results._label,
+              accuracy: results._distance,
+              coord: coordinate
+            },
+            image: gambar,
+          });
+        } else {
+          unknownRedirect(gambar);
+        }
+      } else {
+        unknownRedirect(gambar);
+      }
+    } catch (error) {
+      unknownRedirect(gambar)
+    }
+
+  };
+
+  const unknownRedirect = image => {
+    setIsLoading(false);
+    navigation.navigate('Preview Recognition', {
+      data: undefined,
+      image,
+    });
+  };
+
+  const takePicture = async () => {
+    if (!camera) return;
+    const image = await camera.takePictureAsync();
+    if (image) {
+      setIsLoading(true);
+      const resize = { width: image.width / 5, height: image.height / 5 };
+      const results = await manipulateAsync(image.uri, [{ resize }], {
+        base64: true,
+      });
+      // // console.log(results.uri, results.height, results.width);
+      // // if (online) {
+      //   // recognizeOnline(results);
+      // // } else {
+      await RecognitionOffline(results.base64, results);
+      // }
+    }
+  };
+
+  const showModal = () => {
+    if (isLoading) {
+      return <LoadingModal />;
+    }
+  };
+
   const wording = val => {
     if (val === 0) {
-      return 'Hadapkan wajah 15 derajat ke kiri';
+      return 'Hadapkan wajah ke kiri';
     } else if (val === 1) {
-      return 'Hadapkan wajah 15 derajat ke kanan';
+      return 'Hadapkan wajah ke kanan';
     } else if (val === 2) {
       return 'Tersenyum';
     } else {
@@ -281,82 +303,125 @@ const MainVerificationScreen = ({route}) => {
   };
 
   return (
-    <>
+    <View style={{ flex: 1 }}>
       {showModal()}
       <StatusBar backgroundColor={'#0E5CBE'} />
-      <View style={styles.header}>
-        <Icon
-          name={'arrow-left'}
-          size={25}
-          color={'#F0F2F2'}
-          style={styles.back}
-          onPress={() => navigation.goBack()}
-        />
-        <Text style={styles.title}>Verifikasi Wajah</Text>
-      </View>
-      {load && !labelModal ? (
+      <View style={styles.container}>
+        <View style={styles.header}>
+          <Icon
+            name={'chevron-left'}
+            size={25}
+            color={'#6C6C6C'}
+            style={styles.back}
+            onPress={() => navigation.goBack()}
+          />
+          <TouchableOpacity activeOpacity={0.8} onPress={() => navigation.goBack()}>
+            <Text style={styles.title}>Kembali</Text>
+          </TouchableOpacity>
+          <ExpoIcon
+            name={'photo-camera'}
+            size={25}
+            color={'#195FBA'}
+            style={styles.switch}
+            onPress={() => setFront(!front)} />
+        </View>
+        {isFocused && focus ? (
+          <View style={styles.wrapper}>
+            <Camera
+              ref={ref => {
+                setCamera(ref);
+              }}
+              style={styles.preview}
+              type={front ? 'front' : 'back'}
+              ratio={'4:3'}
+              faceDetectorSettings={{
+                mode: FaceDetector.FaceDetectorMode.fast,
+                detectLandmarks: FaceDetector.FaceDetectorLandmarks.none,
+                runClassifications: FaceDetector.FaceDetectorClassifications.none,
+                minDetectionInterval: 500,
+                tracking: true,
+              }}
+              onCameraReady={() => setReady(true)}
+              onMountError={err => console.log(err, 'error mount')}
+              // onFacesDetected={ready && focus ? onFacesDetected : null}
+            >
+              <CircleMask />
+              <Image style={styles.frame} source={FrontFrame} />
+              <Image style={styles.frame} source={FrontLine} />
+            </Camera>
+          </View>
+        ) : null}
         <View style={styles.body}>
-          <Text style={styles.topTitle}>
-            Posisikan dan Tahan Wajah Anda Sampai Bar penuh
+          <View style={styles.hintImage}>
+            <Image style={styles.image} source={GuideFront} />
+          </View>
+          <Text style={styles.subTitle}>
+            {motionCount > 0 ? 'Lihat Ke Arah Kamera' : wording(step[motionCount])}
           </Text>
-          <Camera
-            ref={ref => {
-              setCamera(ref);
-            }}
-            style={styles.preview}
-            type={'front'}
-            ratio={'4:3'}
-            faceDetectorSettings={{
-              mode: FaceDetector.FaceDetectorMode.fast,
-              detectLandmarks: FaceDetector.FaceDetectorLandmarks.none,
-              runClassifications: FaceDetector.FaceDetectorClassifications.none,
-              minDetectionInterval: 100,
-              tracking: true,
-            }}
-            onCameraReady={ready => setReady(true)}
-            onMountError={err => console.log(err, 'error mount')}
-            onFacesDetected={ready ? onFacesDetected : null}
-          >
-            <CircleMask />
-          </Camera>
-          <View style={styles.dashedContainer}>
-            <DashedProgress progress={progress} />
-          </View>
-          <View style={styles.mask}>
-            <Text style={styles.stepDetail}>
-              {wording(step[motionCount])} dan tahan posisi tersebut beberapa
-              detik
-            </Text>
-          </View>
         </View>
-      ) : (
-        <View style={styles.container}>
-          <ActivityIndicator size={'large'} color={'#000'} />
-        </View>
-      )}
-    </>
+      </View>
+    </View>
   );
 };
 
 export default MainVerificationScreen;
 
 const styles = StyleSheet.create({
+  preview: {
+    aspectRatio: 3 / 4,
+  },
   container: {
     flex: 1,
+    backgroundColor: '#FFF',
+    position: 'relative',
+    // marginTop: 30,
+  },
+  masking: {
+    aspectRatio: 1 / 1,
+    width: '75%',
+    height: undefined,
+  },
+  mask: {
+    position: 'absolute',
+    alignItems: 'center',
+    borderRadius: 200,
+    borderWidth: 5,
+    alignSelf: 'center',
+    top: 0,
+    marginTop: 164,
+  },
+  round: {
+    width: '42%',
+    height: undefined,
+    aspectRatio: 1 / 1,
+    borderRadius: 100,
+  },
+  button: {
+    borderWidth: 3,
+    borderColor: '#0E5CBE',
+    borderRadius: 100,
+    padding: 5,
+    backgroundColor: '#FFF',
+  },
+  buttonContainer: {
+    position: 'absolute',
     justifyContent: 'center',
     alignItems: 'center',
+    alignSelf: 'center',
+    bottom: 0,
+    marginBottom: -25,
+  },
+  subTitle: {
+    fontSize: 24,
+    fontFamily: Fonts.bold,
+    color: '#6C6C6C'
   },
   header: {
-    backgroundColor: '#0E5CBE',
+    backgroundColor: '#FFF',
     flexDirection: 'row',
-    justifyContent: 'center',
     alignItems: 'center',
     paddingVertical: 16,
     position: 'relative',
-  },
-  title: {
-    color: '#FFFFFF',
-    fontSize: 20,
   },
   back: {
     position: 'absolute',
@@ -364,103 +429,40 @@ const styles = StyleSheet.create({
     padding: 16,
     alignSelf: 'center',
   },
-  body: {
-    paddingTop: 30,
-    flex: 1,
-    backgroundColor: '#FFF',
-    position: 'relative',
-  },
-  preview: {
-    aspectRatio: 3 / 4,
-  },
-  topTitle: {
-    fontSize: 16,
-    fontWeight: 'bold',
-    color: '#000',
-    textAlign: 'center',
-    paddingHorizontal: 20,
+  switch: {
     position: 'absolute',
-    zIndex: 10,
-    top: 0,
+    right: 0,
+    paddingHorizontal: 20,
+    paddingVertical: 16,
     alignSelf: 'center',
-    marginTop: 20,
   },
-  imageHintContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-evenly',
+  title: {
+    color: '#6C6C6C',
+    fontSize: 20,
+    marginLeft: 50,
   },
-  imageHint: {
-    width: '33%',
+  frame: {
+    width: '100%',
+    height: undefined,
+    aspectRatio: 3 / 4,
+    position: 'absolute',
+  },
+  hintImage: {
+    width: '25%',
     height: undefined,
     aspectRatio: 1 / 1,
+    alignItems: 'center',
     justifyContent: 'center',
-    alignItems: 'center',
   },
-  mask: {
-    paddingHorizontal: 20,
-    alignItems: 'center',
-    justifyContent: 'space-around',
-    marginBottom: 50,
-    position: 'absolute',
-    bottom: 0,
-  },
-  step: {
-    fontSize: 20,
-    fontWeight: 'bold',
-    color: '#000',
-    marginTop: 20,
-    marginBottom: 10,
-    textAlign: 'center',
-  },
-  stepDetail: {
-    color: '#888888',
-    textAlign: 'center',
-  },
-  dashedContainer: {
-    justifyContent: 'center',
-    alignItems: 'center',
-    position: 'absolute',
-    alignSelf: 'center',
-    top: 0,
-    marginTop: 120,
-  },
-  modalContainer: {
+  image: {
     flex: 1,
-    justifyContent: 'center',
-    paddingHorizontal: 20,
-    backgroundColor: 'rgba(0, 0, 0, 0.7)',
+    resizeMode: 'contain'
   },
-  wrapper: {
-    backgroundColor: '#FFF',
-    padding: 20,
-    borderRadius: 20,
-  },
-  inputName: {
-    backgroundColor: 'rgba(0, 0, 0, 0.1)',
-    marginHorizontal: 20,
-    paddingHorizontal: 20,
-    marginVertical: 20,
-    borderRadius: 20,
-    paddingVertical: 10,
-  },
-  button: {
-    marginHorizontal: 20,
-    paddingVertical: 15,
-    marginBottom: 20,
+  body: {
     alignItems: 'center',
-    borderWidth: 1,
-    borderColor: '#0F52BA',
-    borderRadius: 20,
-  },
-  buttonTitle: {
-    fontSize: 16,
-    color: '#000',
-  },
-  pickerTitle: {
-    fontSize: 16,
-    textAlign: 'center',
-    fontWeight: 'bold',
-    marginBottom: 15,
-  },
+    borderTopWidth: 1,
+    borderColor: '#C5C5C5',
+    paddingTop: 20,
+    marginTop: 10,
+  }
 });

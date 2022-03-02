@@ -7,6 +7,7 @@ import android.content.Context;
 import android.content.res.Configuration;
 import androidx.annotation.NonNull;
 
+import com.cermin.permission_manager.PermissionManagerPackage;
 import com.facebook.react.PackageList;
 import com.facebook.react.ReactApplication;
 import com.rnfs.RNFSPackage;
@@ -38,6 +39,7 @@ public class MainApplication extends Application implements ReactApplication {
       List<ReactPackage> packages = new PackageList(this).getPackages();
       // Packages that cannot be autolinked yet can be added manually here, for example:
       // packages.add(new MyReactNativePackage());
+      packages.add(new PermissionManagerPackage());
       return packages;
     }
 

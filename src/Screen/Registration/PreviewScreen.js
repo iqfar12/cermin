@@ -1,4 +1,4 @@
-import React, {useState} from 'react';
+import React, {useState, useEffect} from 'react';
 import {
   StyleSheet,
   Text,
@@ -21,6 +21,9 @@ import fs from 'react-native-fs';
 import {UuidGenerator} from '../../Utils/UuidGenerator';
 import TaskServices from '../../Database/TaskServices';
 import * as expoFS from 'expo-file-system';
+import SoundPlayer from 'react-native-sound-player';
+import { dateGenerator } from '../../Utils/DateConverter';
+
 
 const PreviewScreen = ({route}) => {
   const [index, setIndex] = useState(0);
@@ -28,6 +31,12 @@ const PreviewScreen = ({route}) => {
   const user = TaskServices.getCurrentUser();
   console.log(route.params, 'params');
   const {preview, data} = route.params;
+
+  useEffect(() => {
+    setTimeout(() => {
+      SoundPlayer.playSoundFile('success_regis', 'mp3')
+    }, 1000)
+  }, []);
 
   const register = async () => {
     let formData = new FormData();
@@ -84,7 +93,7 @@ const PreviewScreen = ({route}) => {
         NAME: data?.EMPLOYEE_FULLNAME,
         FILE_NAME: data?.EMPLOYEE_FULLNAME,
         URL: path,
-        INSERT_TIME: new Date(),
+        INSERT_TIME: dateGenerator(),
         INSERT_USER: user.NAME,
         SYNC_STATUS: null,
         SYNC_TIME: null,

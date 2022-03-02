@@ -3,12 +3,16 @@ import axios from 'axios';
 
 export const getMasterCompany = async () => {
   const user = TaskServices.getCurrentUser();
-  const dbLocal = TaskServices.getAllData('TM_COMP');
   const url = 'https://apis-dev1.tap-agri.com/crm-msa-attendance/companies';
+  const dbLocal = TaskServices.getAllData('TM_COMP').filter((item) => {
+    const location = user.LOCATION.split(',').map(a => a.substr(0, 2));
+    return location.includes(item.COMP_CODE);
+  })
+  console.log(dbLocal, 'company')
 
   let downloadProgress = {
     count: 0,
-    total: dbLocal.length,
+    total: user.LAST_SYNC !== null ? dbLocal.length : 0,
   };
 
   try {

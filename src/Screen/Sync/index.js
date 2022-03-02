@@ -28,6 +28,8 @@ import { AbsenceCode } from './Download/AbsenceCode';
 import { getModel } from './Download/MasterModel';
 import axios from 'axios';
 import SuccessModal from '../../Component/SuccessModal';
+import { uploadAbsence } from './Upload/UploadAbsence';
+import { dateGenerator } from '../../Utils/DateConverter';
 
 const Percentage = ({ value = 0 }) => {
   return (
@@ -91,8 +93,18 @@ const SyncScreen = () => {
     total: 0,
     status: 0
   })
+  const [attendance, setAttendance] = useState({
+    progress: 0,
+    total: 0,
+    status: 0
+  })
 
   const resetState = () => {
+   setAttendance({
+      progress: 0,
+      total: 0,
+      status: 0
+    })
     setMasterAfdeling({
       progress: 0,
       total: 0,
@@ -215,6 +227,14 @@ const SyncScreen = () => {
         status: 1
       })
     })
+
+    await uploadAbsence().then((data) => {
+      setAttendance({
+        progress: data.count,
+        total: data.total,
+        status: 1,
+      })
+    })
   }
 
   const postSync = async () => {
@@ -289,8 +309,8 @@ const SyncScreen = () => {
   };
 
   const ValuePercentage = useMemo(() => {
-    const total = masterAfdeling.status + masterCompanies.status + masterEmployee.status + masterEst.status + masterRegion.status + uploadEmployee.status + absenceCode.status + model.status
-    return Math.floor((total / 8) * 100)
+    const total = attendance.status + masterAfdeling.status + masterCompanies.status + masterEmployee.status + masterEst.status + masterRegion.status + uploadEmployee.status + absenceCode.status + model.status
+    return Math.floor((total / 9) * 100)
   }, [
     masterAfdeling,
     masterCompanies,
@@ -299,7 +319,8 @@ const SyncScreen = () => {
     masterRegion,
     uploadEmployee,
     absenceCode,
-    model
+    model,
+    attendance
   ])
 
   return (
@@ -341,22 +362,16 @@ const SyncScreen = () => {
 
           <View style={styles.section}>
             <Text style={styles.sectionTitle}>Upload Data</Text>
-            {/* <ProgressSyncBar
-              title={'Attendance'}
-              total={masterAfdeling.total}
-              progress={masterAfdeling.progress}
-              sync={sync}
-            />
-            <ProgressSyncBar
-              title={'Images'}
-              total={masterAfdeling.total}
-              progress={masterAfdeling.progress}
-              sync={sync}
-            /> */}
             <ProgressSyncBar
               title={'Master Data Karyawan'}
               total={uploadEmployee.total}
               progress={uploadEmployee.progress}
+              sync={sync}
+            />
+            <ProgressSyncBar
+              title={'Master Data Absen'}
+              total={attendance.total}
+              progress={attendance.progress}
               sync={sync}
             />
           </View>

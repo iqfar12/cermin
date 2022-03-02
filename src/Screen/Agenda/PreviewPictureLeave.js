@@ -14,6 +14,7 @@ import SubmitButton from '../../Component/SubmitButton';
 import { Fonts } from '../../Utils/Fonts';
 import TaskServices from '../../Database/TaskServices';
 import { UuidGenerator } from '../../Utils/UuidGenerator';
+import { dateGenerator } from '../../Utils/DateConverter';
 
 const PreviewPictureLeave = ({ route }) => {
   const navigation = useNavigation();
@@ -41,13 +42,13 @@ const PreviewPictureLeave = ({ route }) => {
         EMPLOYEE_ID: Results.ID,
         TYPE: '2',
         ABSENCE_CODE: code || 'K',
-        DATETIME: new Date(),
+        DATETIME: dateGenerator(),
         ACCURACY: data?.accuracy,
         LATITUDE: data?.coord?.latitude || 0.00,
         LONGITUDE: data?.coord?.longitude || 0.00,
         MANUAL_INPUT: 0,
         DESCRIPTION: 'Absen Istirahat',
-        INSERT_TIME: new Date(),
+        INSERT_TIME: dateGenerator(),
         INSERT_USER: Results.EMPLOYEE_NIK,
         SYNC_STATUS: null,
         SYNC_TIME: null,

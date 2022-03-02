@@ -15,7 +15,7 @@ const RecognizeBarCard = ({onPress, data = []}) => {
       data = res.filter((item) => location.includes(item.AFD_CODE))
     } else if (user.REFERENCE_LOCATION == 'BA') {
       data = res.filter((item) => location.includes(item.WERKS))
-    } else if (user.REFERENCE_LOCATION == 'COMPANY') {
+    } else if (user.REFERENCE_LOCATION == 'COMP') {
       data = res.filter((item) => location.includes(item.COMP_CODE))
     } else {
       // TODO: HO Need Filter!!
@@ -117,7 +117,7 @@ const styles = StyleSheet.create({
     color: '#FFF',
   },
   num: {
-    fontSize: 32,
+    fontSize: 28,
     fontFamily: Fonts.bold,
     color: '#FFF',
     marginHorizontal: 5,

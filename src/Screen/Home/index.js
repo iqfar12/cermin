@@ -30,6 +30,7 @@ import moment from 'moment';
 import NoConnectionModal from '../../Component/NoConnectionModal';
 import WarningModal from '../../Component/WarningModal';
 import SuccessModal from '../../Component/SuccessModal';
+import { dateGenerator } from '../../Utils/DateConverter';
 
 moment.locale('id');
 const HomeScreen = ({route}) => {
@@ -204,5 +205,6 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: '#FFF',
+    position: 'relative',
   },
 });
