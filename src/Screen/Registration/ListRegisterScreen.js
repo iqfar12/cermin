@@ -51,7 +51,7 @@ const ListRegisterScreen = () => {
         }
     }, [MasterEmployee, search, isFocused])
 
-    const onRegister = async (data) => {       
+    const onRegister = async (data) => {
         const body = {
           ID: data?.ID,
           TYPE: 'E',
@@ -92,8 +92,9 @@ const ListRegisterScreen = () => {
                 return item.COMP_CODE
             }
         }
+        const isPermission = user.PERMISSION.map((item) => item.includes('mobile-registrasi')).includes(true);
         return (
-            <TouchableOpacity activeOpacity={0.8} onPress={() => onRegister(item)} style={styles.card}>
+            <TouchableOpacity activeOpacity={0.8} disabled={!isPermission} onPress={() => onRegister(item)} style={styles.card}>
                 <View style={styles.cardLeft}>
                     <Text style={styles.name}>{item.EMPLOYEE_FULLNAME}</Text>
                     <Text style={styles.nik}>{item.EMPLOYEE_NIK} </Text>

@@ -61,7 +61,7 @@ const AttendanceRest = ({ route }) => {
   const [isTake, setTake] = useState(false);
   const isFocused = useIsFocused();
   const navigation = useNavigation();
-  const [step, setStep] = useState(shuffleArr([2,3,2,3]));
+  const [step, setStep] = useState(shuffleArr([2, 3, 2, 3]));
   const [faceId, setFaceId] = useState(0);
   const [front, setFront] = useState(true);
   const [coordinate, setCoordinate] = useState({
@@ -158,7 +158,8 @@ const AttendanceRest = ({ route }) => {
 
   const condition3 = event => {
     const mouth = event?.faces[0]?.smilingProbability;
-    if (mouth > 0.9) {
+    if (mouth > 0.9 && !isTake) {
+      setTake(true)
       setIsMotion(true);
       setMotionCount(1);
     }
@@ -166,23 +167,25 @@ const AttendanceRest = ({ route }) => {
 
   const onFacesDetected = event => {
     let val = step[motionCount];
-    if (val === 0) {
-      condition1(event);
-    } else if (val === 1) {
-      condition2(event);
-    } else if (val === 2) {
-      condition3(event);
-    } else {
-      condition4(event);
+    if (!isTake && motionCount === 0) {
+      if (val === 0) {
+        condition1(event);
+      } else if (val === 1) {
+        condition2(event);
+      } else if (val === 2) {
+        condition3(event);
+      } else {
+        condition4(event);
+      }
     }
 
-    const faceID = event?.faces[0]?.faceID;
-    if (faceId !== faceID) {
-      // setIsMotion(false);
-      // setMotionCount(0);
-      randomize();
-    }
-    setFaceId(faceID);
+    // const faceID = event?.faces[0]?.faceID;
+    // if (faceId !== faceID) {
+    //   // setIsMotion(false);
+    //   // setMotionCount(0);
+    //   randomize();
+    // }
+    // setFaceId(faceID);
   };
 
   const filename = () => {
@@ -202,7 +205,7 @@ const AttendanceRest = ({ route }) => {
   };
 
   useEffect(() => {
-    if (isFocused && ready) {
+    if (isFocused && ready && !isTake) {
       if (motionCount > 0) {
         SoundPlayer.playSoundFile(filename(), 'mp3')
       } else {
@@ -223,7 +226,7 @@ const AttendanceRest = ({ route }) => {
   }, [motionCount]);
 
   const randomize = () => {
-    setStep(shuffleArr([2,3,2,3]));
+    setStep(shuffleArr([2, 3, 2, 3]));
     // console.log(step, 'steps');
     setMotionCount(0);
   };
@@ -256,7 +259,7 @@ const AttendanceRest = ({ route }) => {
           imageTensor,
           new faceapi.TinyFaceDetectorOptions({
             inputSize: 608,
-            scoreThreshold: 0.43,
+            scoreThreshold: 0.3,
           }),
         )
         .withFaceLandmarks()
@@ -311,7 +314,7 @@ const AttendanceRest = ({ route }) => {
       //   if (online) {
       // recognizeOnline(results);
       //   } else {
-      await RecognitionOffline(results.base64, results);
+      await RecognitionOffline(results.base64, image);
       //   }
     }
   };
@@ -365,7 +368,7 @@ const AttendanceRest = ({ route }) => {
     }
   };
 
-  const {ID, SOURCE} = TaskServices.getAllData('T_NAVIGATE')[0];
+  const { ID, SOURCE } = TaskServices.getAllData('T_NAVIGATE')[0];
   return (
     <View style={{ flex: 1 }}>
       {showModal()}
@@ -399,9 +402,9 @@ const AttendanceRest = ({ route }) => {
               type={front ? 'front' : 'back'}
               ratio={'4:3'}
               faceDetectorSettings={{
-                mode: FaceDetector.FaceDetectorMode.fast,
-                detectLandmarks: FaceDetector.FaceDetectorLandmarks.none,
-                runClassifications: FaceDetector.FaceDetectorClassifications.none,
+                mode: 2,
+                detectLandmarks: 2,
+                runClassifications: 2,
                 minDetectionInterval: 500,
                 tracking: true,
               }}

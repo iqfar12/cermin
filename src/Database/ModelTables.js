@@ -26,6 +26,7 @@ const TM_USERS = {
     DELETE_USER: 'string?',
     LAST_SYNC: 'date?',
     SERVER: 'string?',
+    PERMISSION: { type: 'list', objectType: 'string', optional: true }
   },
 };
 

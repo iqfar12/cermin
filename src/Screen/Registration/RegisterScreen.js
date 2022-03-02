@@ -356,7 +356,18 @@ const RegisterScreen = ({ route }) => {
         new faceapi.TinyFaceDetectorOptions({ inputSize: 608, scoreThreshold: 0.4 })
       ).withFaceLandmarks().withFaceDescriptor();
       if (res) {
-        return { valid: true, message: 'Correct' }
+        const eye_right = getMeanPosition(res.landmarks.getRightEye());
+        const eye_left = getMeanPosition(res.landmarks.getLeftEye());
+        const nose = getMeanPosition(res.landmarks.getNose());
+        const mouth = getMeanPosition(res.landmarks.getMouth());
+        const ry =
+          (eye_left[0] + (eye_right[0] - eye_left[0]) / 2 - nose[0]) /
+          res.detection.box.width;
+        if (ry < -0.05 || ry > 0.04) {
+          return { valid: false, message: 'Posisi Kurang Tepat' }  
+        } else {
+          return { valid: true, message: 'Correct' }
+        }
       } else {
         return { valid: false, message: 'No Face Detected' };
       }
@@ -412,16 +423,16 @@ const RegisterScreen = ({ route }) => {
     //     new faceapi.TinyFaceDetectorOptions({ inputSize: 416, scoreThreshold: 0.4 })
     //   ).withFaceLandmarks().withFaceDescriptor();
     //   if (res) {
-    //     const eye_right = getMeanPosition(res.landmarks.getRightEye());
-    //     const eye_left = getMeanPosition(res.landmarks.getLeftEye());
-    //     const nose = getMeanPosition(res.landmarks.getNose());
-    //     const mouth = getMeanPosition(res.landmarks.getMouth());
-    //     const jaw = getTop(res.landmarks.getJawOutline());
+        // const eye_right = getMeanPosition(res.landmarks.getRightEye());
+        // const eye_left = getMeanPosition(res.landmarks.getLeftEye());
+        // const nose = getMeanPosition(res.landmarks.getNose());
+        // const mouth = getMeanPosition(res.landmarks.getMouth());
+        // const jaw = getTop(res.landmarks.getJawOutline());
 
     //     const rx = (jaw - mouth[1]) / res.detection.box.height + 0.5;
-    //     const ry =
-    //       (eye_left[0] + (eye_right[0] - eye_left[0]) / 2 - nose[0]) /
-    //       res.detection.box.width;
+        // const ry =
+        //   (eye_left[0] + (eye_right[0] - eye_left[0]) / 2 - nose[0]) /
+        //   res.detection.box.width;
     //     if (ry > -0.08 && ry < -0.05) {
     //       return { valid: true, message: 'Correct' }
     //     } else {
@@ -668,7 +679,6 @@ const RegisterScreen = ({ route }) => {
 
   const onFaceDetected = event => {
     const val = RandomPhase[step];
-
     if (event.faces.length > 0) {
       if (val === 1) {
         condition1(event)
@@ -694,7 +704,7 @@ const RegisterScreen = ({ route }) => {
       const raw = new Uint8Array(img);
       const imageTensor = decodeJpeg(raw)
 
-      const detect = await faceapi.detectSingleFace(imageTensor, new faceapi.TinyFaceDetectorOptions({inputSize: 608, scoreThreshold: 0.45})).withFaceLandmarks().withFaceDescriptor();
+      const detect = await faceapi.detectSingleFace(imageTensor, new faceapi.TinyFaceDetectorOptions({inputSize: 608, scoreThreshold: 0.5})).withFaceLandmarks().withFaceDescriptor();
       let range = 1.0;
       if (val === 1) {
         setMainDescriptor(detect.descriptor);
@@ -714,7 +724,7 @@ const RegisterScreen = ({ route }) => {
       // } else {
       //   position = await detectUp(image);
       // }
-      if (range <= 0.4) {
+      if (range <= 0.3) {
         setImages([...images, resize]);
         if (step < 2) {
           setStep(step + 1);
@@ -906,9 +916,9 @@ const RegisterScreen = ({ route }) => {
               }}
               onFacesDetected={detect && !hint && !failed ? onFaceDetected : null}
               faceDetectorSettings={{
-                mode: FaceDetector.FaceDetectorMode.fast,
-                detectLandmarks: FaceDetector.FaceDetectorLandmarks.none,
-                runClassifications: FaceDetector.FaceDetectorClassifications.none,
+                mode: 2,
+                detectLandmarks: 2,
+                runClassifications: 2,
                 minDetectionInterval: 500,
                 tracking: false,
               }}

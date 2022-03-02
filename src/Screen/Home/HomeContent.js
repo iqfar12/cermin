@@ -26,11 +26,32 @@ const HomeContent = () => {
   const MasterAttendance = TaskServices.getAllData('TR_ATTENDANCE');
   const user = TaskServices.getCurrentUser();
 
-  const ListAgenda = useMemo(() => {
-    const res = MasterAttendance.filter((item) => item.TYPE == '4')
 
+  const ListEmployee = useMemo(() => {
+    const res = MasterEmployee.filter((item) => item.TYPE === 'E')
+    const location = user.LOCATION.split(',');
+    let data = res;
+    if (user.REFERENCE_LOCATION == 'AFD') {
+      data = res.filter((item) => location.includes(item.AFD_CODE))
+    } else if (user.REFERENCE_LOCATION == 'BA') {
+      data = res.filter((item) => location.includes(item.WERKS))
+    } else if (user.REFERENCE_LOCATION == 'COMP') {
+      data = res.filter((item) => location.includes(item.COMP_CODE))
+    } else {
+      // TODO: HO Need Filter!!
+      data = res
+    }
+
+    return data
+  }, [MasterEmployee])
+
+
+  const ListAgenda = useMemo(() => {
+    const res = MasterAttendance.filter((item) => item.TYPE == '4').filter((item) => ListEmployee.map((item) => item.ID).includes(item.EMPLOYEE_ID))
+    
     return res
-  }, [MasterAttendance])
+  }, [MasterAttendance, ListEmployee])
+
 
   const ListNotRegisterEmployee = useMemo(() => {
     const res = MasterEmployee.filter((item) => item.REGISTER_STATUS == "NONE" || item.REGISTER_STATUS == 'REJECTED');
@@ -56,6 +77,7 @@ const HomeContent = () => {
   }, []);
   const NavigationButtonList = [
     {
+      show: user.PERMISSION.map((item) => item.includes('mobile-registrasi')).includes(true),
       iconName: 'person-add',
       title: 'Register',
       iconColor: '#195FBA',
@@ -64,6 +86,7 @@ const HomeContent = () => {
       },
     },
     {
+      show: user.PERMISSION.map((item) => item.includes('mobile-login')).includes(true),
       iconName: 'add-task',
       title: 'Masuk',
       iconColor: '#3D9F70',
@@ -78,6 +101,7 @@ const HomeContent = () => {
       },
     },
     {
+      show: user.PERMISSION.map((item) => item.includes('mobile-absensi-keluar')).includes(true),
       iconName: 'logout',
       title: 'Pulang',
       iconColor: '#DC1B0F',
@@ -92,6 +116,7 @@ const HomeContent = () => {
       },
     },
     {
+      show: user.PERMISSION.map((item) => item.includes('mobile-absensi-istirahat')).includes(true),
       iconName: 'local-cafe',
       title: 'Istirahat',
       iconColor: '#FFB81C',
@@ -106,6 +131,7 @@ const HomeContent = () => {
       },
     },
     {
+      show: user.PERMISSION.map((item) => item.includes('mobile-izin')).includes(true),
       iconName: 'article',
       title: 'Izin',
       iconColor: '#423FDA',
@@ -144,17 +170,19 @@ const HomeContent = () => {
   };
 
   const renderNavButton = (item, index) => {
-    return (
-      <TouchableOpacity
-        style={styles.navButton}
-        onPress={item.onNavigation}
-        activeOpacity={0.8}
-        key={index}
-      >
-        <Icon name={item.iconName} size={25} color={item.iconColor} />
-        <Text style={styles.navTitle}>{item.title}</Text>
-      </TouchableOpacity>
-    );
+    if (item.show) {
+      return (
+        <TouchableOpacity
+          style={styles.navButton}
+          onPress={item.onNavigation}
+          activeOpacity={0.8}
+          key={index}
+        >
+          <Icon name={item.iconName} size={25} color={item.iconColor} />
+          <Text style={styles.navTitle}>{item.title}</Text>
+        </TouchableOpacity>
+      );
+    }
   };
 
   return (
@@ -204,11 +232,13 @@ const HomeContent = () => {
               ListEmptyComponent={<PermittedCard name={'Tidak ada Data'} />}
             />
           </View>
-          <View style={styles.navContainer}>
-            {NavigationButtonList.map((item, index) =>
-              renderNavButton(item, index),
-            )}
-          </View>
+          {user.PERMISSION.length > 0 && (
+            <View style={styles.navContainer}>
+              {NavigationButtonList.map((item, index) =>
+                renderNavButton(item, index),
+              )}
+            </View>
+          )}
         </View>
       </ScrollView>
     </View>
@@ -262,7 +292,7 @@ const styles = StyleSheet.create({
     borderTopLeftRadius: 30,
     borderTopRightRadius: 30,
     padding: 20,
-    paddingBottom: 80,
+    paddingBottom: 150,
   },
   permittedHeader: {
     flexDirection: 'row',
@@ -296,6 +326,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-around',
+    height: '20%',
   },
   navButton: {
     justifyContent: 'center',

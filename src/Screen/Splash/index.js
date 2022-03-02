@@ -12,7 +12,7 @@ import '@tensorflow/tfjs-react-native';
 import fs from 'react-native-fs';
 import axios from 'axios';
 import RNFetchBlob from 'rn-fetch-blob'
-
+import { requestAdvanceStoragePermission } from '../../Utils/StoragePermisssion';
 
 const SplashScreen = () => {
   const user = TaskServices.getCurrentUser();
@@ -217,6 +217,7 @@ const SplashScreen = () => {
     await requestCameraPermissionsAsync();
     await PermissionsAndroid.request(PermissionsAndroid.PERMISSIONS.WRITE_EXTERNAL_STORAGE)
     await PermissionsAndroid.request(PermissionsAndroid.PERMISSIONS.ACCESS_FINE_LOCATION)
+    await requestAdvanceStoragePermission();
   };
 
   const loadModel = async () => {

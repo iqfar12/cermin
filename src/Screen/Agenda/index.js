@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from "react";
+import React, { useState, useMemo, useEffect } from "react";
 import { View, Text, StyleSheet, TouchableOpacity, FlatList, TextInput, ScrollView } from "react-native";
 import { useNavigation } from '@react-navigation/native';
 import Icon from '@expo/vector-icons/MaterialIcons'
@@ -13,7 +13,7 @@ import TaskServices from "../../Database/TaskServices";
 import MenuModal from "../../Component/MenuModal";
 import { UuidGenerator } from "../../Utils/UuidGenerator";
 import { dateGenerator } from "../../Utils/DateConverter";
-
+import Geolocation from '@react-native-community/geolocation';
 
 const RightComponent = ({ navigation }) => {
     return (
@@ -39,6 +39,21 @@ const LeaveScreen = () => {
     const [descrip, setDescrip] = useState('')
     const [leaveType, setLeaveType] = useState();
     const [typeModal, setTypeModal] = useState(false);
+    const [coord, setCoord] = useState({
+        latitude: 0,
+        longitude: 0
+    });
+
+    useEffect(() => {
+        Geolocation.getCurrentPosition((res) => {
+            setCoord({
+                latitude: res.coords.latitude,
+                longitude: res.coords.longitude
+            })
+        }, (err) => console.log(err), {
+            enableHighAccuracy: true
+        })
+    }, [])
 
     const ListEmployee = useMemo(() => {
         if (userSearch !== '') {
@@ -84,9 +99,9 @@ const LeaveScreen = () => {
             TYPE: '4',
             ABSENCE_CODE: leaveType,
             DATETIME: dateGenerator(),
-            ACCURACY: null,
-            LATITUDE: null,
-            LONGITUDE: null,
+            ACCURACY: 99.9,
+            LATITUDE: coord.latitude,
+            LONGITUDE: coord.longitude,
             MANUAL_INPUT: 1,
             DESCRIPTION: descrip,
             INSERT_TIME: new Date(),
@@ -114,7 +129,7 @@ const LeaveScreen = () => {
                     searchValue={userSearch}
                     onSearch={(val) => setUserSearch(val)}
                     titleBottomButton={'Tutup'}
-                    size={0.5}
+                    size={0.6}
                     bottomOnPress={() => {
                         setUserModal(false)
                         setUserSearch('');
@@ -140,7 +155,7 @@ const LeaveScreen = () => {
                             style={styles.modalButton}
                         >
                             <Text style={styles.modalButtonTitle}>{item.DESCRIPTION}</Text>
-                            <Icon name={'adjust'} size={25} color={'#195FBA'} />
+                            <Icon name={'adjust'} size={25} color={leaveType == item.CODE ? '#195FBA' : '#DADADA'} />
                         </TouchableOpacity>
                     ))}
                 </MenuModal>

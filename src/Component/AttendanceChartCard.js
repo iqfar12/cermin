@@ -100,7 +100,7 @@ const AttendanceChartCard = ({ onPress }) => {
   }, [ListEmployee, ListAttendance])
 
   const CompleteAttendance = useMemo(() => {
-    const completed = GroupingListMember.filter((item) => item.ATTENDANCE_IN !== null && item.ATTENDANCE_OUT !== null && item.REST !== null)
+    const completed = GroupingListMember.filter((item) => item.ATTENDANCE_IN !== null && item.ATTENDANCE_OUT !== null)
 
     if (completed.length === 0) {
       return 0

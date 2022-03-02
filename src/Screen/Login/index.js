@@ -84,7 +84,8 @@ const LoginScreen = () => {
       DELETE_TIME: null,
       DELETE_USER: null,
       LAST_SYNC: null,
-      SERVER: ServerList[server].baseUrl
+      SERVER: ServerList[server].baseUrl,
+      PERMISSION: data?.role?.permissions !== null ? data?.role?.permissions.split(',') : [],
     };
 
     await TaskServices.saveData('TM_USERS', body);

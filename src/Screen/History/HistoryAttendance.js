@@ -76,6 +76,20 @@ const HistoryAttendance = () => {
             const rest = item.find((item) => item.TYPE == '2');
             const agenda = item.find((item) => item.TYPE == '4');
 
+            let insertTime = new Date();
+            if (attendanceIn !== undefined) {
+                insertTime = attendanceIn.INSERT_TIME
+            }
+            if (attendanceOut !== undefined) {
+                insertTime = attendanceOut.INSERT_TIME
+            }
+            if (rest !== undefined) {
+                insertTime = rest.INSERT_TIME
+            }
+            if (agenda !== undefined) {
+                insertTime = agenda.INSERT_TIME
+            }
+
             return {
                 NAME: item[0].name,
                 LOCATION: item[0].location,
@@ -85,6 +99,7 @@ const HistoryAttendance = () => {
                 ATTENDANCE_OUT: attendanceOut !== undefined ? attendanceOut.INSERT_TIME : null,
                 REST: rest !== undefined ? rest.INSERT_TIME : null,
                 AGENDA: agenda !== undefined ? agenda.INSERT_TIME : null,
+                INSERT_TIME: insertTime
             }
         });
         return res
@@ -131,7 +146,7 @@ const HistoryAttendance = () => {
         //     }
         // }
         return (
-            <TouchableOpacity activeOpacity={0.8} onPress={() => navigation.navigate('Detail History Attendance', { id: item.EMPLOYEE_ID })} style={styles.card}>
+            <TouchableOpacity activeOpacity={0.8} onPress={() => navigation.navigate('Detail History Attendance', { id: item.EMPLOYEE_ID, date: item.INSERT_TIME })} style={styles.card}>
                 <View style={styles.top}>
                     <Text style={styles.name}>{item.NIK}<Text style={styles.nik}> | {item.NAME}</Text></Text>
                     <Icon name={'radio-button-unchecked'} size={25} color={'#FFB81C'} />
