@@ -43,8 +43,9 @@ const HistoryAttendance = () => {
             }
             return item
         }).filter((item) => {
-            const absenDate = dateConverter(item.DATETIME);
+            const absenDate = dateConverter(item.INSERT_TIME);
             const dateNow = dateConverter(date);
+            console.log(date, item.INSERT_TIME)
             return absenDate === dateNow
         })
         let data = res;
@@ -63,6 +64,7 @@ const HistoryAttendance = () => {
         }
         return data
     }, [MasterAttendance, search, date, isFocused])
+    console.log(ListAttendance, 'list attendance')
 
     const GroupingListMember = useMemo(() => {
         const group = ListAttendance.reduce(function (r, a) {
@@ -79,14 +81,11 @@ const HistoryAttendance = () => {
             let insertTime = new Date();
             if (attendanceIn !== undefined) {
                 insertTime = attendanceIn.INSERT_TIME
-            }
-            if (attendanceOut !== undefined) {
+            } else if (attendanceOut !== undefined) {
                 insertTime = attendanceOut.INSERT_TIME
-            }
-            if (rest !== undefined) {
+            } else if (rest !== undefined) {
                 insertTime = rest.INSERT_TIME
-            }
-            if (agenda !== undefined) {
+            } else if (agenda !== undefined) {
                 insertTime = agenda.INSERT_TIME
             }
 
@@ -133,18 +132,6 @@ const HistoryAttendance = () => {
     }
 
     const renderListCard = ({ item, index }) => {
-        // const user = MasterEmployee.find((data) => data.ID == item.EMPLOYEE_ID);
-        // const type = () => {
-        //     if (item.TYPE == '1') {
-        //         return 'Masuk'
-        //     } else if (item.TYPE == '2') {
-        //         return 'Istirahat'
-        //     } else if (item.TYPE == '3') {
-        //         return 'Pulang'
-        //     } else {
-        //         return 'Izin'
-        //     }
-        // }
         return (
             <TouchableOpacity activeOpacity={0.8} onPress={() => navigation.navigate('Detail History Attendance', { id: item.EMPLOYEE_ID, date: item.INSERT_TIME })} style={styles.card}>
                 <View style={styles.top}>

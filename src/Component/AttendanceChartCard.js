@@ -27,7 +27,7 @@ const AttendanceChartCard = ({ onPress }) => {
       }
       return item
     }).filter((item) => {
-      const absenDate = dateConverter(item.DATETIME);
+      const absenDate = dateConverter(item.INSERT_TIME);
       const dateNow = dateConverter(new Date());
       return absenDate === dateNow
     })

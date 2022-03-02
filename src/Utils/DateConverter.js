@@ -11,5 +11,5 @@ export const dateGenerator = () => {
     let hours = date.getHours();
     let localDate = date.setHours(hours + 7)
 
-    return new Date(localDate)
+    return new Date(date)
 }
