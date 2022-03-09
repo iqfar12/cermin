@@ -4,7 +4,7 @@ import MaterialIcons from '@expo/vector-icons/MaterialCommunityIcons';
 
 import { Sentot, Person } from '../../assets';
 import Maison, { Fonts } from '../../Utils/Fonts';
-import { useNavigation } from '@react-navigation/native';
+import { useNavigation, useIsFocused } from '@react-navigation/native';
 import TaskServices from '../../Database/TaskServices';
 import fs from 'react-native-fs';
 import * as expoFS from 'expo-file-system';
@@ -57,14 +57,18 @@ const ProfileScreen = () => {
   const [connection, setConnection] = useState(false);
   const MasterEmployee = TaskServices.getAllData('TM_EMPLOYEE');
   const [syncModal, setSyncModal] = useState(false);
+  const MasterAttendance = TaskServices.getAllData('TR_ATTENDANCE');
+  const isFocused = useIsFocused();
 
   const NotSync = useMemo(() => {
-    return MasterEmployee.filter((item) => item.SYNC_TIME === null).length
-  }, [MasterEmployee])
+    const EmployeeCount = MasterEmployee.filter((item) => item.SYNC_TIME === null).length
+    const AttendanceCount = MasterAttendance.filter((item) => item.SYNC_TIME === null).length
+    return EmployeeCount + AttendanceCount
+  }, [MasterEmployee, MasterAttendance, isFocused])
 
   const onLogout = async () => {
     const isConnected = await NetInfo.fetch()
-    if (NotSync) {
+    if (NotSync > 0) {
       setSyncModal(true);
       return;
     }

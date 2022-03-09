@@ -158,9 +158,11 @@ const HomeContent = () => {
   }, [date]);
 
   useEffect(() => {
-    setTimeout(() => {
+    let timeout = setTimeout(() => {
       setDate(new Date());
     }, 5000);
+
+    return () => clearTimeout(timeout)
   }, [date]);
 
   const renderPermittedCardList = ({ item, index }) => {

@@ -188,7 +188,7 @@ const LeaveScreen = () => {
                 </View>
                 <View style={styles.AccountContainer}>
                     <Text style={styles.AccountTitle}>Pilih Akun</Text>
-                    <TouchableOpacity activeOpacity={0.8} onPress={() => setUserModal(true)} style={styles.TouchAccount}>
+                    <TouchableOpacity activeOpacity={0.8} onPress={() => setUserModal(true)} style={[styles.TouchAccount, {borderColor: user ? '#195FBA' : '#C5C5C5'}]}>
                         <Icon name="person" size={24} color="#C5C5C5" />
                         <View style={styles.ContentContainer}>
                             <Text style={styles.TextContent} numberOfLines={1} ellipsizeMode={'tail'}>{user ? user.EMPLOYEE_NIK : 'Pilih User'} <Text style={styles.TextSubContent}>{user ? `| ${user.EMPLOYEE_FULLNAME}` : ''}</Text></Text>
@@ -296,7 +296,6 @@ const styles = StyleSheet.create({
         marginTop: 10,
         paddingVertical: 13,
         borderRadius: 30,
-        borderColor: '#195FBA',
         borderWidth: 3
     },
     ContentContainer: {

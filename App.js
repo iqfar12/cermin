@@ -1,8 +1,9 @@
 import { StatusBar } from 'expo-status-bar';
-import React from 'react';
-import { StyleSheet, Text, View } from 'react-native';
+import React, { useEffect } from 'react';
+import { StyleSheet, Text, View, AppState } from 'react-native';
 import MainStackNavigator from './src/Router/MainStack';
 import * as Sentry from 'sentry-expo';
+import { lockTimezone } from './src/Utils/StoragePermisssion';
 
 export default function App() {
 
@@ -11,6 +12,15 @@ export default function App() {
     debug: false,
     enableInExpoDevelopment: true
   })
+
+  // useEffect(() => {
+  //   const locked = async () => {
+  //     await lockTimezone();
+  //   }
+  //   AppState.addEventListener('change', locked)
+
+  //   return () => AppState.removeEventListener('change', locked);
+  // }, [])
 
   return (
     <MainStackNavigator />

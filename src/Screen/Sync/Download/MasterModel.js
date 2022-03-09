@@ -94,13 +94,13 @@ export const getModel = async () => {
 
     console.log('download model');
     const urlSsd =
-        'https://github.com/justadudewhohacks/face-api.js-models/raw/master/uncompressed/ssd_mobilenetv1.weights';
+        'https://cermindev1.tap-agri.com/models/ssd_mobilenetv1.weights';
     const urlFaceLandmark =
-        'https://github.com/justadudewhohacks/face-api.js-models/raw/master/uncompressed/face_landmark_68_model.weights';
+        'https://cermindev1.tap-agri.com/models/face_landmark_68_model.weights';
     const urlFaceRecognition =
-        'https://github.com/justadudewhohacks/face-api.js-models/raw/master/uncompressed/face_recognition_model.weights';
+        'https://cermindev1.tap-agri.com/models/face_recognition_model.weights';
     const urlTiny =
-        'https://github.com/justadudewhohacks/face-api.js-models/raw/master/uncompressed/tiny_face_detector_model.weights';
+        'https://cermindev1.tap-agri.com/models/tiny_face_detector_model.weights';
     const ssd = await axios.get(urlSsd, { responseType: 'arraybuffer' });
     const base64Ssd = encode(ssd.data);
     await fs

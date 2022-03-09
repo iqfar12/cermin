@@ -45,7 +45,6 @@ const HistoryAttendance = () => {
         }).filter((item) => {
             const absenDate = dateConverter(item.INSERT_TIME);
             const dateNow = dateConverter(date);
-            console.log(date, item.INSERT_TIME)
             return absenDate === dateNow
         })
         let data = res;
@@ -64,7 +63,6 @@ const HistoryAttendance = () => {
         }
         return data
     }, [MasterAttendance, search, date, isFocused])
-    console.log(ListAttendance, 'list attendance')
 
     const GroupingListMember = useMemo(() => {
         const group = ListAttendance.reduce(function (r, a) {
@@ -174,8 +172,8 @@ const HistoryAttendance = () => {
                             <TouchableOpacity activeOpacity={0.8} onPress={() => {
                                 setRoute()
                                 navigation.navigate('Take Picture Recognition')
-                            }} style={styles.stateButtonLogout}>
-                                <Icon name={'login'} size={25} color={'#FFF'} />
+                            }} style={styles.stateButtonLogin}>
+                                <Icon name={'add-task'} size={25} color={'#FFF'} />
                                 <Text style={styles.stateButtonTxt}>Masuk</Text>
                             </TouchableOpacity>
                         }
@@ -420,10 +418,16 @@ const styles = StyleSheet.create({
         alignItems: 'center',
         justifyContent: 'center',
         paddingVertical: 8,
-        borderTopLeftRadius: 10,
-        borderBottomLeftRadius: 10,
-        borderTopRightRadius: 3,
-        borderBottomRightRadius: 3,
+        borderRadius: 10,
+        marginRight: 5,
+        paddingHorizontal: 10,
+    },
+    stateButtonLogin: {
+        backgroundColor: '#3D9F70',
+        alignItems: 'center',
+        justifyContent: 'center',
+        paddingVertical: 8,
+        borderRadius: 10,
         marginRight: 5,
         paddingHorizontal: 10,
     },
@@ -433,14 +437,14 @@ const styles = StyleSheet.create({
         justifyContent: 'center',
         padding: 8,
         marginRight: 5,
+        borderRadius: 10,
     },
     stateButtonAgenda: {
         backgroundColor: '#423FDA',
         alignItems: 'center',
         justifyContent: 'center',
         paddingVertical: 8,
-        borderTopRightRadius: 10,
-        borderBottomRightRadius: 10,
+        borderRadius: 10,
         marginRight: 5,
         paddingHorizontal: 18,
     },

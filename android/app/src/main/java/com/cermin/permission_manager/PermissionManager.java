@@ -1,5 +1,6 @@
 package com.cermin.permission_manager;
 
+import android.content.Context;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Build;
@@ -31,6 +32,8 @@ public class PermissionManager extends ReactContextBaseJavaModule
         }
     }
 
+    Context context = getReactApplicationContext();
+
     @ReactMethod
     public void requestAllStoragePermission(Promise promise) {
         Boolean isGranted = checkPermission();
@@ -49,6 +52,20 @@ public class PermissionManager extends ReactContextBaseJavaModule
             } else {
                 promise.resolve("Not Android 11");
             }
+        }
+    }
+
+    @ReactMethod
+    public void LockTimezone (Promise promise) {
+        try {
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN_MR1) {
+                Settings.Global.putInt(context.getContentResolver(), Settings.Global.AUTO_TIME, 1);
+            } else {
+                Settings.System.putInt(context.getContentResolver(), Settings.Global.AUTO_TIME, 1);
+            }
+            promise.resolve("Timezone Locked");
+        } catch (Exception e) {
+            promise.reject(e);
         }
     }
 }

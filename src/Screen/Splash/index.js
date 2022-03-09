@@ -12,7 +12,7 @@ import '@tensorflow/tfjs-react-native';
 import fs from 'react-native-fs';
 import axios from 'axios';
 import RNFetchBlob from 'rn-fetch-blob'
-import { requestAdvanceStoragePermission } from '../../Utils/StoragePermisssion';
+import { requestAdvanceStoragePermission, lockTimezone } from '../../Utils/StoragePermisssion';
 
 const SplashScreen = () => {
   const user = TaskServices.getCurrentUser();
@@ -163,7 +163,7 @@ const SplashScreen = () => {
     const ssdWeight = new Float32Array(ssdBuffer);
     const landmarkWeight = new Float32Array(landmarkBuffer);
     const recognitionWeight = new Float32Array(recognitionBuffer);
-    
+
     try {
       await Promise.all([
         faceapi.nets.ssdMobilenetv1.load(ssdWeight),
@@ -218,6 +218,7 @@ const SplashScreen = () => {
     await PermissionsAndroid.request(PermissionsAndroid.PERMISSIONS.WRITE_EXTERNAL_STORAGE)
     await PermissionsAndroid.request(PermissionsAndroid.PERMISSIONS.ACCESS_FINE_LOCATION)
     await requestAdvanceStoragePermission();
+    // await lockTimezone();
   };
 
   const loadModel = async () => {
