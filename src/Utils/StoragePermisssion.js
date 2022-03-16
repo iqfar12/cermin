@@ -14,13 +14,24 @@ export const requestAdvanceStoragePermission = async () => {
 }
 
 export const lockTimezone = async () => {
-    return "Need to Proccess"
-    // let res;
-    // try {
-    //     res = await modules.LockTimezone();
-    //     console.log(res, 'lock timezone')
-    // } catch (error) {
-    //     console.log(error, 'error lock timezone')
-    // }
-    // return res
+    // return "Need to Proccess"
+    let res;
+    try {
+        res = await modules.LockTimezone();
+        console.log(res, 'lock timezone')
+    } catch (error) {
+        console.log(error, 'error lock timezone')
+    }
+    return res
+}
+
+export const checkTimezoneSetting = async () => {
+    let res = false;
+    try {
+        res = await modules.checkTimezoneSetting();
+        // console.log(res, 'status time setting');
+    } catch (error) {
+        console.log(error, 'error check ')
+    }
+    return res
 }

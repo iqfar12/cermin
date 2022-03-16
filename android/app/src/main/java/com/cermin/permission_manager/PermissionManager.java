@@ -68,4 +68,19 @@ public class PermissionManager extends ReactContextBaseJavaModule
             promise.reject(e);
         }
     }
+
+    @ReactMethod
+    public void checkTimezoneSetting (Promise promise) {
+        try {
+            Boolean res = false;
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN_MR1) {
+                res = Settings.Global.getInt(context.getContentResolver(), Settings.Global.AUTO_TIME, 0) == 1;
+            } else {
+                res = Settings.System.getInt(context.getContentResolver(), Settings.Global.AUTO_TIME, 0) == 1;
+            }
+            promise.resolve(res);
+        } catch (Exception e) {
+            promise.reject(e);
+        }
+    }
 }

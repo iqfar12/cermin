@@ -942,7 +942,7 @@ const RegisterScreen = ({ route }) => {
             />
           </View>
           <TouchableOpacity
-            style={styles.takeButton}
+            style={[styles.takeButton, {backgroundColor: detect ? 'rgba(220, 27, 15, 0.5)' : 'rgba(25, 95, 186, 0.5)'}]}
             // onPress={takePicture}
             onPress={() => {
               setDetect(true);
@@ -952,7 +952,7 @@ const RegisterScreen = ({ route }) => {
             // disabled={true}
             activeOpacity={0.5}
           >
-            <View style={styles.circle} />
+            <View style={[styles.circle, {backgroundColor: detect ? '#DC1B0F' : '#195FBA'}]} />
           </TouchableOpacity>
           <TouchableOpacity onPress={() => setCameraFront(!cameraFront)} activeOpacity={0.8} style={styles.switchCamera}>
             <Icon name={'flip-camera-ios'} size={35} color={'#A0A0A0'} />
@@ -995,7 +995,7 @@ const styles = StyleSheet.create({
     width: '20%',
     height: undefined,
     aspectRatio: 1 / 1,
-    backgroundColor: 'rgba(220, 27, 15, 0.5)',
+    // backgroundColor: 'rgba(220, 27, 15, 0.5)',
     borderRadius: 100,
   },
   circle: {

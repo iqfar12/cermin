@@ -8,6 +8,8 @@ import moment from 'moment';
 import TaskServices from '../../Database/TaskServices';
 import { dateConverter } from '../../Utils/DateConverter';
 import DateTimePicker from '@react-native-community/datetimepicker';
+import WarningTimeModal from '../../Component/WarningTimeModal';
+import { checkTimezoneSetting } from '../../Utils/StoragePermisssion';
 
 const RightComponent = ({ onPress, date }) => {
     return (
@@ -27,6 +29,7 @@ const HistoryAttendance = () => {
     const [showDate, setShowDate] = useState(false);
     const user = TaskServices.getCurrentUser();
     const isFocused = useIsFocused();
+    const [warningTime, setWarningTime] = useState(false);
 
     const ListAttendance = useMemo(() => {
         const location = user.LOCATION.split(',');
@@ -129,6 +132,12 @@ const HistoryAttendance = () => {
         await TaskServices.saveData('T_NAVIGATE', nav)
     }
 
+    const showModal = () => {
+        if (warningTime) {
+            return <WarningTimeModal visible={warningTime} onPress={() => setWarningTime(false)} />
+        }
+    }
+
     const renderListCard = ({ item, index }) => {
         return (
             <TouchableOpacity activeOpacity={0.8} onPress={() => navigation.navigate('Detail History Attendance', { id: item.EMPLOYEE_ID, date: item.INSERT_TIME })} style={styles.card}>
@@ -168,39 +177,54 @@ const HistoryAttendance = () => {
                         }
                     </View>
                     <View style={styles.buttonContainer}>
-                        {item.ATTENDANCE_IN === null &&
-                            <TouchableOpacity activeOpacity={0.8} onPress={() => {
+                        {item.ATTENDANCE_IN === null && user.PERMISSION.map((item) => item.includes('mobile-login')).includes(true) ?
+                            <TouchableOpacity activeOpacity={0.8} onPress={async () => {
+                                const res = await checkTimezoneSetting();
+                                if (!res) {
+                                    setWarningTime(true);
+                                    return
+                                }
                                 setRoute()
                                 navigation.navigate('Take Picture Recognition')
                             }} style={styles.stateButtonLogin}>
                                 <Icon name={'add-task'} size={25} color={'#FFF'} />
                                 <Text style={styles.stateButtonTxt}>Masuk</Text>
                             </TouchableOpacity>
-                        }
-                        {item.ATTENDANCE_OUT === null &&
-                            <TouchableOpacity activeOpacity={0.8} onPress={() => {
+                        : null}
+                        {item.ATTENDANCE_OUT === null && user.PERMISSION.map((item) => item.includes('mobile-absensi-keluar')).includes(true) ?
+                            <TouchableOpacity activeOpacity={0.8} onPress={async () => {
+                                const res = await checkTimezoneSetting();
+                                if (!res) {
+                                    setWarningTime(true);
+                                    return
+                                }
                                 setRoute()
                                 navigation.navigate('Attendance Out')
                             }} style={styles.stateButtonLogout}>
                                 <Icon name={'logout'} size={25} color={'#FFF'} />
                                 <Text style={styles.stateButtonTxt}>Pulang</Text>
                             </TouchableOpacity>
-                        }
-                        {item.REST === null &&
-                            <TouchableOpacity activeOpacity={0.8} onPress={() => {
+                        : null}
+                        {item.REST === null && user.PERMISSION.map((item) => item.includes('mobile-absensi-istirahat')).includes(true) ?
+                            <TouchableOpacity activeOpacity={0.8} onPress={async () => {
+                                const res = await checkTimezoneSetting();
+                                if (!res) {
+                                    setWarningTime(true);
+                                    return
+                                }
                                 setRoute()
                                 navigation.navigate('Attendance Rest')
                             }} style={styles.stateButtonRest}>
                                 <Icon name={'local-cafe'} size={25} color={'#FFF'} />
                                 <Text style={styles.stateButtonTxt}>Istirahat</Text>
                             </TouchableOpacity>
-                        }
-                        {item.AGENDA === null &&
+                        : null}
+                        {item.AGENDA === null && user.PERMISSION.map((item) => item.includes('mobile-izin')).includes(true) ?
                             <TouchableOpacity activeOpacity={0.8} onPress={() => navigation.navigate('Leave')} style={styles.stateButtonAgenda}>
                                 <Icon name={'article'} size={25} color={'#FFF'} />
                                 <Text style={styles.stateButtonTxt}>Izin</Text>
                             </TouchableOpacity>
-                        }
+                         : null}
                     </View>
                 </View>
             </TouchableOpacity>
@@ -215,6 +239,7 @@ const HistoryAttendance = () => {
 
     return (
         <View style={styles.wrapper}>
+            {showModal()}
             <SubHeader
                 right={<RightComponent onPress={() => setShowDate(true)} date={date} />}
                 onBack={() => navigation.goBack()}

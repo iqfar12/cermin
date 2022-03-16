@@ -33,8 +33,10 @@ import Success from './Success.png';
 import Password from './Password.png';
 import Email from './Email.png';
 import NotSync from './ic-no-data.png';
+import ic_batas_waktu from './ic-batas-waktu.png';
 
 export {
+  ic_batas_waktu,
   NotSync,
   Password,
   Email,

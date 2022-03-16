@@ -13,14 +13,14 @@ export default function App() {
     enableInExpoDevelopment: true
   })
 
-  // useEffect(() => {
-  //   const locked = async () => {
-  //     await lockTimezone();
-  //   }
-  //   AppState.addEventListener('change', locked)
+  useEffect(() => {
+    const locked = async () => {
+      await lockTimezone();
+    }
+    AppState.addEventListener('change', locked)
 
-  //   return () => AppState.removeEventListener('change', locked);
-  // }, [])
+    return () => AppState.removeEventListener('change', locked);
+  }, [])
 
   return (
     <MainStackNavigator />

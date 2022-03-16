@@ -18,6 +18,8 @@ import Icon from '@expo/vector-icons/MaterialIcons';
 import { useNavigation } from '@react-navigation/native';
 import SyncNotif from '../../Component/SyncNotif';
 import TaskServices from '../../Database/TaskServices';
+import WarningTimeModal from '../../Component/WarningTimeModal';
+import { checkTimezoneSetting } from '../../Utils/StoragePermisssion';
 
 const HomeContent = () => {
   const navigation = useNavigation();
@@ -25,7 +27,7 @@ const HomeContent = () => {
   const MasterEmployee = TaskServices.getAllData('TM_EMPLOYEE');
   const MasterAttendance = TaskServices.getAllData('TR_ATTENDANCE');
   const user = TaskServices.getCurrentUser();
-
+  const [warningTime, setWarningTime] = useState(false);
 
   const ListEmployee = useMemo(() => {
     const res = MasterEmployee.filter((item) => item.TYPE === 'E')
@@ -90,7 +92,12 @@ const HomeContent = () => {
       iconName: 'add-task',
       title: 'Masuk',
       iconColor: '#3D9F70',
-      onNavigation: () => {
+      onNavigation: async () => {
+        const res = await checkTimezoneSetting();
+        if (!res) {
+          setWarningTime(true)
+          return
+        }
         const nav = {
           ID: 0,
           SOURCE: 'Home'
@@ -105,7 +112,12 @@ const HomeContent = () => {
       iconName: 'logout',
       title: 'Pulang',
       iconColor: '#DC1B0F',
-      onNavigation: () => {
+      onNavigation: async () => {
+        const res = await checkTimezoneSetting();
+        if (!res) {
+          setWarningTime(true)
+          return
+        }
         const nav = {
           ID: 0,
           SOURCE: 'Home'
@@ -120,7 +132,12 @@ const HomeContent = () => {
       iconName: 'local-cafe',
       title: 'Istirahat',
       iconColor: '#FFB81C',
-      onNavigation: () => {
+      onNavigation: async () => {
+        const res = await checkTimezoneSetting();
+        if (!res) {
+          setWarningTime(true)
+          return
+        }
         const nav = {
           ID: 0,
           SOURCE: 'Home'
@@ -187,8 +204,15 @@ const HomeContent = () => {
     }
   };
 
+  const showModal = () => {
+    if (warningTime) {
+      return <WarningTimeModal visible={warningTime} onPress={() => setWarningTime(false)} />
+    }
+  }
+
   return (
     <View style={styles.container}>
+      {showModal()}
       <ScrollView
         scrollEnabled={false}
         showsVerticalScrollIndicator={false}

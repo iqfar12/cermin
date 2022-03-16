@@ -54,7 +54,7 @@ export const uploadAbsence = async () => {
                         TaskServices.saveData('TR_ATTENDANCE', data)
                     }
                 } catch (error) {
-                    console.log(error.response.data, 'error upload attendance')
+                    console.log(error.response, 'error upload attendance')
                 }
             })
         )
