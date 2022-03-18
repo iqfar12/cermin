@@ -36,8 +36,8 @@ const ServerList = [
   {
     // QA
     name: 'QA',
-    url: 'https://192.168.100.40:3000/auth/login',
-    baseUrl: 'https://apis-dev1.tap-agri.com',
+    url: 'https://apis-qa.tap-agri.com/crm-msa-auth-data/',
+    baseUrl: 'https://apis-qa.tap-agri.com',
   },
   {
     // DEV

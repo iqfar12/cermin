@@ -31,13 +31,13 @@ import DetailHistoryAttendance from '../Screen/History/DetailHistoryAttendance';
 const StackNavigator = createNativeStackNavigator();
 
 const MainStackNavigator = () => {
-  const lingking = {
+  const linking = {
     prefixes: [
       'cerminapp://',
     ],
   };
   return (
-    <NavigationContainer linking={lingking}>
+    <NavigationContainer linking={linking}>
       <StackNavigator.Navigator
         initialRouteName={'Splash'}
         screenOptions={{

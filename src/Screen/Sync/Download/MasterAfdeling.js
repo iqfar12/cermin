@@ -3,7 +3,7 @@ import TaskServices from '../../../Database/TaskServices';
 
 export const getMasterAfdeling = async () => {
   const user = TaskServices.getCurrentUser();
-  const url = 'https://apis-dev1.tap-agri.com/crm-msa-attendance/afdeling';
+  const url =  user.SERVER + '/crm-msa-attendance/afdeling';
   const dbLocal = TaskServices.getAllData('TM_AFD').filter((item) => {
     const location = user.LOCATION.split(',')
     if (user.REFERENCE_LOCATION == 'AFD') {

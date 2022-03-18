@@ -4,6 +4,7 @@ import { StyleSheet, Text, View, AppState } from 'react-native';
 import MainStackNavigator from './src/Router/MainStack';
 import * as Sentry from 'sentry-expo';
 import { lockTimezone } from './src/Utils/StoragePermisssion';
+import NetInfo from '@react-native-community/netinfo';
 
 export default function App() {
 
@@ -16,6 +17,7 @@ export default function App() {
   useEffect(() => {
     const locked = async () => {
       await lockTimezone();
+      await NetInfo.fetch();
     }
     AppState.addEventListener('change', locked)
 

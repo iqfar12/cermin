@@ -259,7 +259,7 @@ const SyncScreen = () => {
   const onSync = async () => {
     const isConnected = await NetInfo.fetch();
     console.log(isConnected)
-    if (isConnected.isConnected || isConnected.type == 'wifi') {
+    if (isConnected.isConnected || isConnected.type == 'wifi' || isConnected.isWifiEnabled === true) {
       resetState()
       setLoop(true);
       setSync(true);

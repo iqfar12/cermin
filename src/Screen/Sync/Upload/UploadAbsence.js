@@ -4,9 +4,9 @@ import { dateGenerator } from "../../../Utils/DateConverter";
 
 export const uploadAbsence = async () => {
     const dbLocal = TaskServices.getAllData('TR_ATTENDANCE')
-    .filter((item) => item.SYNC_TIME === null)
+        .filter((item) => item.SYNC_TIME === null)
     const user = TaskServices.getCurrentUser();
-    const url = 'https://apis-dev1.tap-agri.com/crm-msa-attendance/attendances/absence/mobile';
+    const url = user.SERVER + '/crm-msa-attendance/attendances/absence/mobile';
     // const url = 'http://192.168.100.40:4000/attendances/absence/mobile';
 
     let uploadCount = {

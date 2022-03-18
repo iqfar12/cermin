@@ -4,9 +4,9 @@ import { dateGenerator } from '../../../Utils/DateConverter';
 
 export const getMasterEmployee = async () => {
   const user = TaskServices.getCurrentUser();
-  const url = 'https://apis-dev1.tap-agri.com/crm-msa-attendance/employee';
+  const url = user.SERVER + '/crm-msa-attendance/employee';
   // const url = 'https://192.168.0.108:4000/employee';
-  const duplicate_url = 'https://apis-dev1.tap-agri.com/crm-msa-attendance/employee-invalid'
+  const duplicate_url = user.SERVER + '/crm-msa-attendance/employee-invalid'
   const dbLocal = TaskServices.getAllData('TM_EMPLOYEE').filter((item) => {
     const location = user.LOCATION.split(',');
     if (user.REFERENCE_LOCATION == 'AFD') {
