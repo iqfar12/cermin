@@ -9,6 +9,8 @@ import {
   Image,
   AppState,
   BackHandler,
+  Linking,
+  ToastAndroid,
 } from 'react-native';
 import { Camera, requestCameraPermissionsAsync } from 'expo-camera';
 import * as FaceDetector from 'expo-face-detector';
@@ -30,6 +32,7 @@ import { Fonts } from '../../Utils/Fonts';
 import TaskServices from '../../Database/TaskServices';
 import geolocation from '@react-native-community/geolocation';
 import NotFoundModal from '../../Component/NotFoundModal';
+import { op } from '@tensorflow/tfjs';
 
 const CircleMask = () => {
   return (
@@ -108,7 +111,9 @@ const MainVerificationScreen = ({ route }) => {
 
   useEffect(() => {
     const onBackHandler = () => {
-      navigation.navigate('Home')
+      // navigation.navigate('Home')
+      // BackHandler.exitApp();
+      openUrl(false, 'Aborted');
       return true
     }
 
@@ -250,6 +255,16 @@ const MainVerificationScreen = ({ route }) => {
 
   const fetchData = async () => {
     console.log('downloaded model')
+    if (
+      faceapi.nets.ssdMobilenetv1.isLoaded &&
+      faceapi.nets.faceLandmark68Net.isLoaded &&
+      faceapi.nets.faceRecognitionNet.isLoaded &&
+      faceapi.nets.tinyFaceDetector.isLoaded
+    ) {
+      console.log('Loaded')
+      setIsLoading(false);
+      return
+    }
     const tinyFile = await fs.readFile(pathTiny, 'base64');
     const ssdFile = await fs.readFile(pathSsd, 'base64');
     const landmarkFile = await fs.readFile(pathFaceLandmarks, 'base64');
@@ -266,6 +281,7 @@ const MainVerificationScreen = ({ route }) => {
     const recognitionWeight = new Float32Array(recognitionBuffer);
 
     try {
+      if ()
       await Promise.all([
         faceapi.nets.ssdMobilenetv1.load(ssdWeight),
         faceapi.nets.faceLandmark68Net.load(landmarkWeight),
@@ -347,6 +363,18 @@ const MainVerificationScreen = ({ route }) => {
     isReady();
   }, [])
 
+  const openUrl = async (status = false, log = '') => {
+    const url = `${route.params.package}://${route.params.route}` + `?nik=${route.params.nik}&status=${status}&log=${log}`;
+    // const url = 'guinea://Home'
+    console.log(url);
+    // const canOpen = await Linking.canOpenURL(url);
+    // if (canOpen) {
+      await Linking.openURL(url)
+    // } else {
+    //   ToastAndroid.show("Link Not Valid", ToastAndroid.LONG)
+    // }
+  }
+
   const RecognitionOffline = async (image, gambar) => {
     try {
       await faceapi.tf.ready()
@@ -375,22 +403,36 @@ const MainVerificationScreen = ({ route }) => {
         if (results._label != 'unknown') {
           setIsLoading(false);
           console.log(results);
-          navigation.replace('Preview Verification', {
-            data: {
-              label: results._label,
-              accuracy: results._distance,
-              coord: coordinate
-            },
-            image: gambar,
-          });
+          if (results._label.split('/').join('') == Employee.EMPLOYEE_NIK.split('/').join('')) {
+            await openUrl(true, 'Face Verified')
+          } else {
+            await openUrl(false, 'Face Not Match')
+          }
+          // navigation.replace('Preview Verification', {
+          //   data: {
+          //     label: results._label,
+          //     accuracy: results._distance,
+          //     coord: coordinate
+          //   },
+          //   image: gambar,
+          // });
         } else {
-          unknownRedirect(gambar);
+          console.log('No Results');
+          setIsLoading(false)
+          await openUrl(false, 'No Results Detected')
+          // unknownRedirect(gambar);
         }
       } else {
-        unknownRedirect(gambar);
+        console.log('No Detection')
+        setIsLoading(false)
+        await openUrl(false, 'No Face Detected')
+        // unknownRedirect(gambar);
       }
     } catch (error) {
-      unknownRedirect(gambar)
+      console.log(error, 'error verification')
+      setIsLoading(false)
+      await openUrl(false, 'Detection Error')
+      // unknownRedirect(gambar)
     }
 
   };
@@ -404,6 +446,7 @@ const MainVerificationScreen = ({ route }) => {
   };
 
   const takePicture = async () => {
+    setMotionCount(0)
     if (!camera) return;
     const image = await camera.takePictureAsync();
     if (image) {
@@ -417,6 +460,7 @@ const MainVerificationScreen = ({ route }) => {
   };
 
   const onPressNotFoundModal = async () => {
+    openUrl(false, 'Not Sync on Cermin App')
     setNotFound(false);
   }
 
@@ -498,7 +542,7 @@ const MainVerificationScreen = ({ route }) => {
               }}
               onCameraReady={() => setReady(true)}
               onMountError={err => console.log(err, 'error mount')}
-            // onFacesDetected={ready && focus && !isLoading ? onFacesDetected : null}
+              onFacesDetected={ready && focus && !isLoading ? onFacesDetected : null}
             >
               <Image style={styles.frame} source={FrontFrame} />
             </Camera>
