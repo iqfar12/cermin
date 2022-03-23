@@ -281,7 +281,10 @@ const MainVerificationScreen = ({ route }) => {
     const recognitionWeight = new Float32Array(recognitionBuffer);
 
     try {
-      if ()
+      if (!faceapi.nets.ssdMobilenetv1.isLoaded ||
+        !faceapi.nets.faceLandmark68Net.isLoaded ||
+        !faceapi.nets.faceRecognitionNet.isLoaded ||
+        !faceapi.nets.tinyFaceDetector.isLoaded)
       await Promise.all([
         faceapi.nets.ssdMobilenetv1.load(ssdWeight),
         faceapi.nets.faceLandmark68Net.load(landmarkWeight),

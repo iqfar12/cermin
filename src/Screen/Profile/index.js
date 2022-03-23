@@ -132,8 +132,8 @@ const ProfileScreen = () => {
     const AFD = TaskServices.getAllData('TM_AFD');
     const data = {
       TR_ATTENDANCE: Attendance,
-      TR_IMAGES: images,
-      TM_AFD: AFD,
+      // TR_IMAGES: images,
+      // TM_AFD: AFD,
     };
     const packagePath =
       'file:///storage/emulated/0/Android/media/com.cermin';
