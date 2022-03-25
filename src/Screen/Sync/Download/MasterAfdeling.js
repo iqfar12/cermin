@@ -7,11 +7,11 @@ export const getMasterAfdeling = async () => {
   const dbLocal = TaskServices.getAllData('TM_AFD').filter((item) => {
     const location = user.LOCATION.split(',')
     if (user.REFERENCE_LOCATION == 'AFD') {
-      return location.includes(item.AFD_CODE_GIS);
+      return location.includes(item?.AFD_CODE_GIS);
     } else if (user.REFERENCE_LOCATION == 'BA') {
-      return location.includes(item.WERKS)
+      return location.includes(item?.WERKS)
     } else {
-      return location.includes(item.COMP_CODE)
+      return location.includes(item?.COMP_CODE)
     }
   });
   let downloadProgress = {

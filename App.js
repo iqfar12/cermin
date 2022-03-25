@@ -16,7 +16,6 @@ export default function App() {
 
   useEffect(() => {
     const locked = async () => {
-      await lockTimezone();
       await NetInfo.fetch();
     }
     AppState.addEventListener('change', locked)

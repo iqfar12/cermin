@@ -218,7 +218,6 @@ const SplashScreen = () => {
     await PermissionsAndroid.request(PermissionsAndroid.PERMISSIONS.WRITE_EXTERNAL_STORAGE)
     await PermissionsAndroid.request(PermissionsAndroid.PERMISSIONS.ACCESS_FINE_LOCATION)
     await requestAdvanceStoragePermission();
-    await lockTimezone();
   };
 
   const loadModel = async () => {

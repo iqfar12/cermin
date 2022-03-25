@@ -144,15 +144,6 @@ const HomeScreen = ({route}) => {
     getPermission();
   }, []);
 
-  const checkTimesetting = async () => {
-    const res = await checkTimezoneSetting();
-    console.log(res, 'time setting');
-  }
-
-  useEffect(() => {
-    checkTimesetting();
-  }, [])
-
   const showModal = () => {
     if (sync) {
       return (

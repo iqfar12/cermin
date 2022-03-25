@@ -19,11 +19,11 @@ const AttendanceChartCard = ({ onPress }) => {
       item.name = user.EMPLOYEE_FULLNAME
       item.nik = user.EMPLOYEE_NIK
       if (user.REFERENCE_LOCATION == 'AFD') {
-        item.location = users.AFD_CODE;
+        item.location = users?.AFD_CODE;
       } else if (user.REFERENCE_LOCATION == 'BA') {
-        item.location = users.WERKS
+        item.location = users?.WERKS
       } else if (user.REFERENCE_LOCATION == 'COMP') {
-        item.location = users.COMP_CODE
+        item.location = users?.COMP_CODE
       }
       return item
     }).filter((item) => {
@@ -76,11 +76,11 @@ const AttendanceChartCard = ({ onPress }) => {
     const location = user.LOCATION.split(',');
     let data = res;
     if (user.REFERENCE_LOCATION == 'AFD') {
-      data = res.filter((item) => location.includes(item.AFD_CODE))
+      data = res.filter((item) => location.includes(item?.AFD_CODE))
     } else if (user.REFERENCE_LOCATION == 'BA') {
-      data = res.filter((item) => location.includes(item.WERKS))
+      data = res.filter((item) => location.includes(item?.WERKS))
     } else if (user.REFERENCE_LOCATION == 'COMP') {
-      data = res.filter((item) => location.includes(item.COMP_CODE))
+      data = res.filter((item) => location.includes(item?.COMP_CODE))
     } else {
       // TODO: HO Need Filter!!
       data = res
