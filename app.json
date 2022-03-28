@@ -1,0 +1,32 @@
+{
+  "expo": {
+    "name": "cermin",
+    "slug": "cermin",
+    "version": "1.0.0",
+    "assetBundlePatterns": [
+      "**/*"
+    ],
+    "hooks": {
+      "postPublish": [
+        {
+          "file": "sentry-expo/upload-sourcemaps",
+          "config": {
+            "organization": "infini-oase-teknologi-gm",
+            "project": "cermin",
+            "authToken": "cace0af561234c44bfc0afe628faba20b3a7fb0416bd442bb39dbf41841931e3"
+          }
+        }
+      ]
+    },
+    "android": {
+      "package": "com.cermin.app"
+    },
+    "ios": {
+      "bundleIdentifier": "com.cermin.app"
+    },
+    "plugins": [
+      "sentry-expo"
+    ]
+  },
+  "name": "cermin"
+}
