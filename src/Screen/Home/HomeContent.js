@@ -18,6 +18,8 @@ import Icon from '@expo/vector-icons/MaterialIcons';
 import { useNavigation } from '@react-navigation/native';
 import SyncNotif from '../../Component/SyncNotif';
 import TaskServices from '../../Database/TaskServices';
+import WarningTimeModal from '../../Component/WarningTimeModal';
+import { checkTimezoneSetting } from '../../Utils/StoragePermisssion';
 
 const HomeContent = () => {
   const navigation = useNavigation();
@@ -25,18 +27,18 @@ const HomeContent = () => {
   const MasterEmployee = TaskServices.getAllData('TM_EMPLOYEE');
   const MasterAttendance = TaskServices.getAllData('TR_ATTENDANCE');
   const user = TaskServices.getCurrentUser();
-
+  const [warningTime, setWarningTime] = useState(false);
 
   const ListEmployee = useMemo(() => {
     const res = MasterEmployee.filter((item) => item.TYPE === 'E')
     const location = user.LOCATION.split(',');
     let data = res;
     if (user.REFERENCE_LOCATION == 'AFD') {
-      data = res.filter((item) => location.includes(item.AFD_CODE))
+      data = res.filter((item) => location.includes(item?.AFD_CODE))
     } else if (user.REFERENCE_LOCATION == 'BA') {
-      data = res.filter((item) => location.includes(item.WERKS))
+      data = res.filter((item) => location.includes(item?.WERKS))
     } else if (user.REFERENCE_LOCATION == 'COMP') {
-      data = res.filter((item) => location.includes(item.COMP_CODE))
+      data = res.filter((item) => location.includes(item?.COMP_CODE))
     } else {
       // TODO: HO Need Filter!!
       data = res
@@ -58,11 +60,11 @@ const HomeContent = () => {
     const location = user.LOCATION.split(',');
     let data = res;
     if (user.REFERENCE_LOCATION == 'AFD') {
-      data = res.filter((item) => location.includes(item.AFD_CODE))
+      data = res.filter((item) => location.includes(item?.AFD_CODE))
     } else if (user.REFERENCE_LOCATION == 'BA') {
-      data = res.filter((item) => location.includes(item.WERKS))
+      data = res.filter((item) => location.includes(item?.WERKS))
     } else if (user.REFERENCE_LOCATION == 'COMP') {
-      data = res.filter((item) => location.includes(item.COMP_CODE))
+      data = res.filter((item) => location.includes(item?.COMP_CODE))
     } else {
       // TODO: HO Need Filter!!
       data = res
@@ -90,7 +92,12 @@ const HomeContent = () => {
       iconName: 'add-task',
       title: 'Masuk',
       iconColor: '#3D9F70',
-      onNavigation: () => {
+      onNavigation: async () => {
+        const res = await checkTimezoneSetting();
+        if (!res) {
+          setWarningTime(true)
+          return
+        }
         const nav = {
           ID: 0,
           SOURCE: 'Home'
@@ -105,7 +112,12 @@ const HomeContent = () => {
       iconName: 'logout',
       title: 'Pulang',
       iconColor: '#DC1B0F',
-      onNavigation: () => {
+      onNavigation: async () => {
+        const res = await checkTimezoneSetting();
+        if (!res) {
+          setWarningTime(true)
+          return
+        }
         const nav = {
           ID: 0,
           SOURCE: 'Home'
@@ -120,7 +132,12 @@ const HomeContent = () => {
       iconName: 'local-cafe',
       title: 'Istirahat',
       iconColor: '#FFB81C',
-      onNavigation: () => {
+      onNavigation: async () => {
+        const res = await checkTimezoneSetting();
+        if (!res) {
+          setWarningTime(true)
+          return
+        }
         const nav = {
           ID: 0,
           SOURCE: 'Home'
@@ -158,9 +175,11 @@ const HomeContent = () => {
   }, [date]);
 
   useEffect(() => {
-    setTimeout(() => {
+    let timeout = setTimeout(() => {
       setDate(new Date());
     }, 5000);
+
+    return () => clearTimeout(timeout)
   }, [date]);
 
   const renderPermittedCardList = ({ item, index }) => {
@@ -185,8 +204,15 @@ const HomeContent = () => {
     }
   };
 
+  const showModal = () => {
+    if (warningTime) {
+      return <WarningTimeModal visible={warningTime} onPress={() => setWarningTime(false)} />
+    }
+  }
+
   return (
     <View style={styles.container}>
+      {showModal()}
       <ScrollView
         scrollEnabled={false}
         showsVerticalScrollIndicator={false}

@@ -3,7 +3,7 @@ import {StyleSheet, Text, View, ActivityIndicator} from 'react-native';
 import {Fonts} from '../Utils/Fonts';
 import Icon from '@expo/vector-icons/MaterialIcons';
 
-const ProgressSyncBar = ({title, progress, total, sync}) => {
+const ProgressSyncBar = ({title, progress, total, sync, isSuccess = true}) => {
   return (
     <View style={styles.container}>
       <View style={styles.top}>
@@ -19,7 +19,7 @@ const ProgressSyncBar = ({title, progress, total, sync}) => {
             </Text>
           </Text>
           {!sync ? (
-            <Icon name={'check'} size={25} color={'#195FBA'} />
+            <Icon name={isSuccess ? 'check' : 'close'} size={25} color={isSuccess ? '#195FBA' : '#DC1B0F'} />
           ) : (
             <ActivityIndicator size={'small'} color={'#DADADA'} />
           )}

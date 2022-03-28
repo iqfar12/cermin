@@ -98,13 +98,13 @@ const RegisterScreen = ({ route }) => {
     SoundPlayer.playSoundFile(filename(), 'mp3');
   };
 
-  useEffect(() => {
-    if (isFocused && !hint) {
-      setTimeout(() => {
-        playSound();
-      }, 1000);
-    }
-  }, [isFocused, step, hint]);
+  // useEffect(() => {
+  //   if (isFocused && !hint) {
+  //     setTimeout(() => {
+  //       playSound();
+  //     }, 1000);
+  //   }
+  // }, [isFocused, step, hint]);
 
   const isRegistered = async () => {
     setIsLoading(true);
@@ -608,13 +608,13 @@ const RegisterScreen = ({ route }) => {
   };
 
   const takePicture = async () => {
+    setDetect(false);
     const option = {
       quality: 1,
     };
     try {
       const image = await camera.takePictureAsync();
       setIsLoading(true);
-      setDetect(false);
       if (image) {
         console.log(image, 'position');
         // const res = await detectCorner(image);
@@ -660,7 +660,7 @@ const RegisterScreen = ({ route }) => {
   const condition2 = event => {
     const { x, y } = event?.faces[0]?.NOSE_BASE;
     console.log(x);
-    if (x >= 130 && x <= 145) {
+    if (x >= 130 && x <= 160) {
       // Left
       console.log('left');
       takePicture();
@@ -670,7 +670,7 @@ const RegisterScreen = ({ route }) => {
   const condition3 = event => {
     const { x, y } = event?.faces[0]?.NOSE_BASE;
     console.log(x);
-    if (x >= 205 && x <= 245) {
+    if (x >= 205 && x <= 255) {
       // Left
       console.log('right');
       takePicture();
@@ -683,9 +683,9 @@ const RegisterScreen = ({ route }) => {
       if (val === 1) {
         condition1(event)
       } else if (val === 2) {
-        condition2(event)
+        cameraFront ? condition2(event) : condition3(event)
       } else if (val === 3) {
-        condition3(event)
+        cameraFront ? condition3(event) : condition2(event)
       } else {
         condition4(event)
       }
@@ -704,7 +704,8 @@ const RegisterScreen = ({ route }) => {
       const raw = new Uint8Array(img);
       const imageTensor = decodeJpeg(raw)
 
-      const detect = await faceapi.detectSingleFace(imageTensor, new faceapi.TinyFaceDetectorOptions({inputSize: 608, scoreThreshold: 0.5})).withFaceLandmarks().withFaceDescriptor();
+      const detectThresold = cameraFront ? 0.4 : 0.5
+      const detect = await faceapi.detectSingleFace(imageTensor, new faceapi.TinyFaceDetectorOptions({inputSize: 608, scoreThreshold: detectThresold})).withFaceLandmarks().withFaceDescriptor();
       let range = 1.0;
       if (val === 1) {
         setMainDescriptor(detect.descriptor);
@@ -724,7 +725,8 @@ const RegisterScreen = ({ route }) => {
       // } else {
       //   position = await detectUp(image);
       // }
-      if (range <= 0.3) {
+      const threshold = cameraFront ? 0.4 : 0.3
+      if (range <= threshold) {
         setImages([...images, resize]);
         if (step < 2) {
           setStep(step + 1);
@@ -771,11 +773,8 @@ const RegisterScreen = ({ route }) => {
                 <View style={styles.hintImage}>
                   <Image style={styles.image} source={GuideRight} />
                 </View>
-                <View style={styles.hintImage}>
-                  <Image style={styles.image} source={GuideUp} />
-                </View>
               </View>
-              <Text style={styles.hintText}>
+              <Text sDateTimetyle={styles.hintText}>
                 {
                   'Posisikan kepala anda sesuai dengan bingkai pada layar anda.\nPastikan Mata dan Hidung Sejajar dengan garis dan tidak berkedip ketika mengambil foto\n \nKedua mata harus terlihat di layar dan lihat kamera saat mengambil foto'
                 }
@@ -909,11 +908,11 @@ const RegisterScreen = ({ route }) => {
               ref={ref => setCamera(ref)}
               type={cameraFront ? 'front' : 'back'}
               autoFocus={'on'}
-              onCameraReady={() => {
-                setTimeout(() => {
-                  setDetect(true)
-                }, step > 0 ? 2000 : 3000)
-              }}
+              // onCameraReady={() => {
+              //   setTimeout(() => {
+              //     setDetect(true)
+              //   }, step > 0 ? 2000 : 3000)
+              // }}
               onFacesDetected={detect && !hint && !failed ? onFaceDetected : null}
               faceDetectorSettings={{
                 mode: 2,
@@ -943,13 +942,17 @@ const RegisterScreen = ({ route }) => {
             />
           </View>
           <TouchableOpacity
-            style={styles.takeButton}
-            onPress={takePicture}
-            // disabled={camera === undefined}
-            disabled={true}
+            style={[styles.takeButton, {backgroundColor: detect ? 'rgba(220, 27, 15, 0.5)' : 'rgba(25, 95, 186, 0.5)'}]}
+            // onPress={takePicture}
+            onPress={() => {
+              setDetect(true);
+              playSound();
+            }}
+            disabled={camera === undefined || detect}
+            // disabled={true}
             activeOpacity={0.5}
           >
-            <View style={styles.circle} />
+            <View style={[styles.circle, {backgroundColor: detect ? '#DC1B0F' : '#195FBA'}]} />
           </TouchableOpacity>
           <TouchableOpacity onPress={() => setCameraFront(!cameraFront)} activeOpacity={0.8} style={styles.switchCamera}>
             <Icon name={'flip-camera-ios'} size={35} color={'#A0A0A0'} />
@@ -992,7 +995,7 @@ const styles = StyleSheet.create({
     width: '20%',
     height: undefined,
     aspectRatio: 1 / 1,
-    backgroundColor: 'rgba(220, 27, 15, 0.5)',
+    // backgroundColor: 'rgba(220, 27, 15, 0.5)',
     borderRadius: 100,
   },
   circle: {

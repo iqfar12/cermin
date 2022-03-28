@@ -81,7 +81,7 @@ const PreviewRecognition = ({ route }) => {
     <>
       <StatusBar translucent backgroundColor={'rgba(0, 0, 0, 0)'} />
       <View style={styles.container}>
-        <ScrollView showsVerticalScrollIndicator={false} style={styles.scroll}>
+        <ScrollView scrollEnabled={false} showsVerticalScrollIndicator={false} style={styles.scroll}>
           <View style={styles.previewImage}>
             <View style={styles.bigImage}>
               <Image
@@ -181,7 +181,7 @@ const styles = StyleSheet.create({
     backgroundColor: '#FFF',
     borderTopLeftRadius: 15,
     borderTopRightRadius: 15,
-    marginTop: -15,
+    marginTop: -60,
     zIndex: 100,
     paddingVertical: 25,
     borderWidth: 1,
