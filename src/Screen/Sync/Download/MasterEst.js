@@ -3,7 +3,7 @@ import axios from 'axios';
 
 export const getMasterEst = async () => {
   const user = TaskServices.getCurrentUser();
-  const url = 'https://apis-dev1.tap-agri.com/crm-msa-attendance/estate';
+  const url =  user.SERVER + '/crm-msa-attendance/estate';
   const dbLocal = TaskServices.getAllData('TM_EST').filter((item) => {
     const location = user.LOCATION.split(',');
     if (user.REFERENCE_LOCATION == 'AFD') {

@@ -4,7 +4,7 @@ import axios from 'axios';
 export const AbsenceCode = async () => {
     const user = TaskServices.getCurrentUser();
     const dbLocal = TaskServices.getAllData('TM_ABSENCE_TYPE');
-    const url = 'https://apis-dev1.tap-agri.com/crm-msa-attendance/absences';
+    const url =  user.SERVER + '/crm-msa-attendance/absences';
 
     let downloadProgress = {
         count: 0,

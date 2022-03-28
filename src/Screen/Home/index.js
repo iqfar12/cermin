@@ -31,6 +31,7 @@ import NoConnectionModal from '../../Component/NoConnectionModal';
 import WarningModal from '../../Component/WarningModal';
 import SuccessModal from '../../Component/SuccessModal';
 import { dateGenerator } from '../../Utils/DateConverter';
+import { checkTimezoneSetting } from '../../Utils/StoragePermisssion';
 
 moment.locale('id');
 const HomeScreen = ({route}) => {

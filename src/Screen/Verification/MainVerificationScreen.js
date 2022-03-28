@@ -9,6 +9,8 @@ import {
   Image,
   AppState,
   BackHandler,
+  Linking,
+  ToastAndroid,
 } from 'react-native';
 import { Camera, requestCameraPermissionsAsync } from 'expo-camera';
 import * as FaceDetector from 'expo-face-detector';
@@ -17,7 +19,7 @@ import { useIsFocused, useNavigation } from '@react-navigation/native';
 import Icon from 'react-native-vector-icons/Feather';
 import axios from 'axios';
 import { Endpoint } from '../../Utils/Endpoint';
-import * as fs from 'expo-file-system';
+import * as fs from 'react-native-fs';
 import * as faceapi from 'face-api.js';
 import { decodeJpeg } from '@tensorflow/tfjs-react-native';
 import '../../../platform';
@@ -29,6 +31,8 @@ import ExpoIcon from '@expo/vector-icons/MaterialIcons';
 import { Fonts } from '../../Utils/Fonts';
 import TaskServices from '../../Database/TaskServices';
 import geolocation from '@react-native-community/geolocation';
+import NotFoundModal from '../../Component/NotFoundModal';
+import { op } from '@tensorflow/tfjs';
 
 const CircleMask = () => {
   return (
@@ -52,16 +56,19 @@ const CircleMask = () => {
 };
 
 const MainVerificationScreen = ({ route }) => {
+  const pathSsd = fs.DocumentDirectoryPath + '/ssd_model';
+  const pathFaceLandmarks = fs.DocumentDirectoryPath + '/face_landmark_model';
+  const pathFaceRecognition = fs.DocumentDirectoryPath + '/face_recognition_model';
+  const pathTiny = fs.DocumentDirectoryPath + '/tiny_model';
   const [camera, setCamera] = useState();
   const [ready, setReady] = useState(false);
   const [isMotion, setIsMotion] = useState(false);
   const [motionCount, setMotionCount] = useState(0);
-  const [isLoading, setIsLoading] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
   const [isTake, setTake] = useState(false);
   const isFocused = useIsFocused();
   const navigation = useNavigation();
-  const [step, setStep] = useState(shuffleArr());
-  const [faceId, setFaceId] = useState(0);
+  const [step, setStep] = useState(shuffleArr([2, 3, 2, 3]));
   const [front, setFront] = useState(true);
   const MasterEmployee = TaskServices.getAllData('TM_EMPLOYEE');
   const [coordinate, setCoordinate] = useState({
@@ -69,7 +76,23 @@ const MainVerificationScreen = ({ route }) => {
     longitude: 0,
   });
   const [focus, setFocus] = useState(true);
-  console.log(route.params, 'params');
+  const [notFound, setNotFound] = useState(false);
+
+  const Employee = useMemo(() => {
+    const res = MasterEmployee.find((item) => item.EMPLOYEE_NIK.split('/').join('') == route.params?.nik.split('/').join(''))
+    if (res) {
+      return res
+    }
+    return undefined
+  }, [MasterEmployee, route.params])
+
+  useEffect(() => {
+    if (Employee === undefined) {
+      setNotFound(true)
+    } else {
+      setNotFound(false)
+    }
+  }, [Employee])
 
   useEffect(() => {
     const onChangeState = () => {
@@ -88,7 +111,9 @@ const MainVerificationScreen = ({ route }) => {
 
   useEffect(() => {
     const onBackHandler = () => {
-      navigation.navigate('Home')
+      // navigation.navigate('Home')
+      // BackHandler.exitApp();
+      openUrl(false, 'Aborted');
       return true
     }
 
@@ -113,16 +138,6 @@ const MainVerificationScreen = ({ route }) => {
     const res = MasterEmployee.filter((item) => item.FACE_DESCRIPTOR !== null)
     const location = user.LOCATION.split(',');
     let data = res;
-    if (user.REFERENCE_LOCATION == 'AFD') {
-      data = res.filter((item) => location.includes(item.AFD_CODE))
-    } else if (user.REFERENCE_LOCATION == 'BA') {
-      data = res.filter((item) => location.includes(item.WERKS))
-    } else if (user.REFERENCE_LOCATION == 'COMP') {
-      data = res.filter((item) => location.includes(item.COMP_CODE))
-    } else {
-      // TODO: HO Need Filter!!
-      data = res
-    }
     return data.map((item) => JSON.parse(item.FACE_DESCRIPTOR))
   }, [MasterEmployee]);
 
@@ -173,44 +188,197 @@ const MainVerificationScreen = ({ route }) => {
         condition4(event);
       }
     }
-
-    const faceID = event?.faces[0]?.faceID;
-    if (faceId !== faceID) {
-      // setIsMotion(false);
-      // setMotionCount(0);
-      randomize();
-    }
-    setFaceId(faceID);
   };
 
   useEffect(() => {
     if (motionCount > 0) {
       setTimeout(() => {
         takePicture();
-      }, 1500)
+      }, 2500)
     }
   }, [motionCount]);
 
   const randomize = () => {
-    setStep(shuffleArr());
-    // console.log(step, 'steps');
+    setStep(shuffleArr([2, 3, 2, 3]));
     setMotionCount(0);
   };
 
   useEffect(() => {
     let timeout = setTimeout(() => {
       randomize();
-    }, 10000);
+    }, 7000);
 
     return () => clearTimeout(timeout);
   }, [step]);
 
+  const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/';
+
+  // Use a lookup table to find the index.
+  const lookup = typeof Uint8Array === 'undefined' ? [] : new Uint8Array(256);
+  for (let i = 0; i < chars.length; i++) {
+    lookup[chars.charCodeAt(i)] = i;
+  }
+
+  const decode = (base64) => {
+    let bufferLength = base64.length * 0.75,
+      len = base64.length,
+      i,
+      p = 0,
+      encoded1,
+      encoded2,
+      encoded3,
+      encoded4;
+
+    if (base64[base64.length - 1] === '=') {
+      bufferLength--;
+      if (base64[base64.length - 2] === '=') {
+        bufferLength--;
+      }
+    }
+
+    const arraybuffer = new ArrayBuffer(bufferLength),
+      bytes = new Uint8Array(arraybuffer);
+
+    for (i = 0; i < len; i += 4) {
+      encoded1 = lookup[base64.charCodeAt(i)];
+      encoded2 = lookup[base64.charCodeAt(i + 1)];
+      encoded3 = lookup[base64.charCodeAt(i + 2)];
+      encoded4 = lookup[base64.charCodeAt(i + 3)];
+
+      bytes[p++] = (encoded1 << 2) | (encoded2 >> 4);
+      bytes[p++] = ((encoded2 & 15) << 4) | (encoded3 >> 2);
+      bytes[p++] = ((encoded3 & 3) << 6) | (encoded4 & 63);
+    }
+
+    return arraybuffer;
+  };
+
+  const fetchData = async () => {
+    console.log('downloaded model')
+    if (
+      faceapi.nets.ssdMobilenetv1.isLoaded &&
+      faceapi.nets.faceLandmark68Net.isLoaded &&
+      faceapi.nets.faceRecognitionNet.isLoaded &&
+      faceapi.nets.tinyFaceDetector.isLoaded
+    ) {
+      console.log('Loaded')
+      setIsLoading(false);
+      return
+    }
+    const tinyFile = await fs.readFile(pathTiny, 'base64');
+    const ssdFile = await fs.readFile(pathSsd, 'base64');
+    const landmarkFile = await fs.readFile(pathFaceLandmarks, 'base64');
+    const recognitionFile = await fs.readFile(pathFaceRecognition, 'base64');
+
+    const tinyBuffer = decode(tinyFile);
+    const ssdBuffer = decode(ssdFile);
+    const landmarkBuffer = decode(landmarkFile);
+    const recognitionBuffer = decode(recognitionFile);
+
+    const tinyWeight = new Float32Array(tinyBuffer);
+    const ssdWeight = new Float32Array(ssdBuffer);
+    const landmarkWeight = new Float32Array(landmarkBuffer);
+    const recognitionWeight = new Float32Array(recognitionBuffer);
+
+    try {
+      if (!faceapi.nets.ssdMobilenetv1.isLoaded ||
+        !faceapi.nets.faceLandmark68Net.isLoaded ||
+        !faceapi.nets.faceRecognitionNet.isLoaded ||
+        !faceapi.nets.tinyFaceDetector.isLoaded)
+      await Promise.all([
+        faceapi.nets.ssdMobilenetv1.load(ssdWeight),
+        faceapi.nets.faceLandmark68Net.load(landmarkWeight),
+        faceapi.nets.tinyFaceDetector.load(tinyWeight),
+        faceapi.nets.faceRecognitionNet.load(recognitionWeight),
+      ]);
+      console.log(
+        faceapi.nets.ssdMobilenetv1._name,
+        faceapi.nets.faceLandmark68Net.getDefaultModelName(),
+        faceapi.nets.faceRecognitionNet.getDefaultModelName(),
+        faceapi.nets.tinyFaceDetector.getDefaultModelName(),
+      );
+    } catch (error) {
+      console.log(error, 'error network');
+    }
+    setIsLoading(false);
+
+    console.log(
+      faceapi.nets.ssdMobilenetv1.isLoaded,
+      faceapi.nets.faceLandmark68Net.isLoaded,
+      faceapi.nets.faceRecognitionNet.isLoaded,
+      faceapi.nets.tinyFaceDetector.isLoaded,
+    );
+  };
+
+  const loadModel = async () => {
+    if (
+      !faceapi.nets.ssdMobilenetv1.isLoaded &&
+      !faceapi.nets.faceLandmark68Net.isLoaded &&
+      !faceapi.nets.faceRecognitionNet.isLoaded &&
+      !faceapi.nets.tinyFaceDetector.isLoaded
+    ) {
+      const model =
+        'https://faceapimodel.oss-ap-southeast-5.aliyuncs.com/weights';
+      try {
+        await Promise.all([
+          faceapi.nets.ssdMobilenetv1.loadFromUri(model),
+          faceapi.nets.faceLandmark68Net.loadFromUri(model),
+          faceapi.nets.faceRecognitionNet.loadFromUri(model),
+          faceapi.nets.tinyFaceDetector.loadFromUri(model),
+        ]);
+        console.log(
+          faceapi.nets.ssdMobilenetv1._name,
+          faceapi.nets.faceLandmark68Net.getDefaultModelName(),
+          faceapi.nets.faceRecognitionNet.getDefaultModelName(),
+          faceapi.nets.tinyFaceDetector.getDefaultModelName(),
+        );
+      } catch (error) {
+        console.log(error, 'error network');
+      }
+      setIsLoading(false);
+
+      console.log(
+        faceapi.nets.ssdMobilenetv1.isLoaded,
+        faceapi.nets.faceLandmark68Net.isLoaded,
+        faceapi.nets.faceRecognitionNet.isLoaded,
+        faceapi.nets.tinyFaceDetector.isLoaded,
+      );
+    }
+  };
+
+  const isReady = async () => {
+    await faceapi.tf.ready().finally(async () => {
+
+      console.log(faceapi.tf.getBackend());
+      const isSSDExist = await fs.exists(pathSsd);
+      const isLandmarkExist = await fs.exists(pathFaceLandmarks);
+      const isFaceRecognition = await fs.exists(pathFaceRecognition);
+      const isTinyExist = await fs.exists(pathTiny);
+      if (!isFaceRecognition || !isLandmarkExist || !isSSDExist || !isTinyExist) {
+        await loadModel();
+      } else {
+        await fetchData();
+      }
+    });
+  }
+
+  useEffect(() => {
+    isReady();
+  }, [])
+
+  const openUrl = async (status = false, log = '') => {
+    const url = `${route.params.package}://${route.params.route}` + `?nik=${route.params.nik}&status=${status}&log=${log}`;
+    // const url = 'guinea://Home'
+    console.log(url);
+    // const canOpen = await Linking.canOpenURL(url);
+    // if (canOpen) {
+      await Linking.openURL(url)
+    // } else {
+    //   ToastAndroid.show("Link Not Valid", ToastAndroid.LONG)
+    // }
+  }
+
   const RecognitionOffline = async (image, gambar) => {
-    // const res = {
-    //   _distance: 0.38753125995316545,
-    //   _label: 'Iqfar',
-    // };
-    // return res;
     try {
       await faceapi.tf.ready()
       const img = faceapi.tf.util.encodeString(image, 'base64').buffer;
@@ -238,35 +406,50 @@ const MainVerificationScreen = ({ route }) => {
         if (results._label != 'unknown') {
           setIsLoading(false);
           console.log(results);
-          navigation.replace('Preview Recognition', {
-            data: {
-              label: results._label,
-              accuracy: results._distance,
-              coord: coordinate
-            },
-            image: gambar,
-          });
+          if (results._label.split('/').join('') == Employee.EMPLOYEE_NIK.split('/').join('')) {
+            await openUrl(true, 'Face Verified')
+          } else {
+            await openUrl(false, 'Face Not Match')
+          }
+          // navigation.replace('Preview Verification', {
+          //   data: {
+          //     label: results._label,
+          //     accuracy: results._distance,
+          //     coord: coordinate
+          //   },
+          //   image: gambar,
+          // });
         } else {
-          unknownRedirect(gambar);
+          console.log('No Results');
+          setIsLoading(false)
+          await openUrl(false, 'No Results Detected')
+          // unknownRedirect(gambar);
         }
       } else {
-        unknownRedirect(gambar);
+        console.log('No Detection')
+        setIsLoading(false)
+        await openUrl(false, 'No Face Detected')
+        // unknownRedirect(gambar);
       }
     } catch (error) {
-      unknownRedirect(gambar)
+      console.log(error, 'error verification')
+      setIsLoading(false)
+      await openUrl(false, 'Detection Error')
+      // unknownRedirect(gambar)
     }
 
   };
 
   const unknownRedirect = image => {
     setIsLoading(false);
-    navigation.navigate('Preview Recognition', {
+    navigation.navigate('Preview Verification', {
       data: undefined,
       image,
     });
   };
 
   const takePicture = async () => {
+    setMotionCount(0)
     if (!camera) return;
     const image = await camera.takePictureAsync();
     if (image) {
@@ -275,18 +458,28 @@ const MainVerificationScreen = ({ route }) => {
       const results = await manipulateAsync(image.uri, [{ resize }], {
         base64: true,
       });
-      // // console.log(results.uri, results.height, results.width);
-      // // if (online) {
-      //   // recognizeOnline(results);
-      // // } else {
-      await RecognitionOffline(results.base64, results);
-      // }
+      await RecognitionOffline(results.base64, image);
     }
   };
+
+  const onPressNotFoundModal = async () => {
+    openUrl(false, 'Not Sync on Cermin App')
+    setNotFound(false);
+  }
 
   const showModal = () => {
     if (isLoading) {
       return <LoadingModal />;
+    }
+    if (notFound) {
+      return (
+        <NotFoundModal
+          visible={notFound}
+          title={'Data Karwayan Tidak Ditemukan'}
+          content={'Data Karyawan yang akan anda validasi tidak ditemukan\nSilahkan untuk mencek login akun dan Sync Ulang pada aplikasi Cermin'}
+          onPress={onPressNotFoundModal} />
+      )
+
     }
   };
 
@@ -311,19 +504,28 @@ const MainVerificationScreen = ({ route }) => {
           <Icon
             name={'chevron-left'}
             size={25}
-            color={'#6C6C6C'}
+            color={'#FFF'}
             style={styles.back}
             onPress={() => navigation.goBack()}
           />
           <TouchableOpacity activeOpacity={0.8} onPress={() => navigation.goBack()}>
             <Text style={styles.title}>Kembali</Text>
           </TouchableOpacity>
-          <ExpoIcon
-            name={'photo-camera'}
-            size={25}
-            color={'#195FBA'}
-            style={styles.switch}
-            onPress={() => setFront(!front)} />
+        </View>
+        <View style={styles.personContainer}>
+          <Text style={styles.personName}>{Employee?.EMPLOYEE_FULLNAME}</Text>
+          <View style={styles.nikContainer}>
+            <Text style={styles.nik}>{Employee?.EMPLOYEE_NIK}</Text>
+            <Text style={styles.nik}> | </Text>
+            <View style={styles.nikContainer}>
+              <ExpoIcon
+                name={'place'}
+                size={20}
+                color={'#FFF'}
+              />
+              <Text style={styles.nik}>{Employee?.WERKS}</Text>
+            </View>
+          </View>
         </View>
         {isFocused && focus ? (
           <View style={styles.wrapper}>
@@ -335,19 +537,17 @@ const MainVerificationScreen = ({ route }) => {
               type={front ? 'front' : 'back'}
               ratio={'4:3'}
               faceDetectorSettings={{
-                mode: FaceDetector.FaceDetectorMode.fast,
-                detectLandmarks: FaceDetector.FaceDetectorLandmarks.none,
-                runClassifications: FaceDetector.FaceDetectorClassifications.none,
+                mode: 2,
+                detectLandmarks: 2,
+                runClassifications: 2,
                 minDetectionInterval: 500,
                 tracking: true,
               }}
               onCameraReady={() => setReady(true)}
               onMountError={err => console.log(err, 'error mount')}
-              // onFacesDetected={ready && focus ? onFacesDetected : null}
+              onFacesDetected={ready && focus && !isLoading ? onFacesDetected : null}
             >
-              <CircleMask />
               <Image style={styles.frame} source={FrontFrame} />
-              <Image style={styles.frame} source={FrontLine} />
             </Camera>
           </View>
         ) : null}
@@ -355,9 +555,12 @@ const MainVerificationScreen = ({ route }) => {
           <View style={styles.hintImage}>
             <Image style={styles.image} source={GuideFront} />
           </View>
-          <Text style={styles.subTitle}>
-            {motionCount > 0 ? 'Lihat Ke Arah Kamera' : wording(step[motionCount])}
-          </Text>
+          <View style={styles.subContainer}>
+            <Text style={styles.subTitle}>
+              {motionCount > 0 ? 'Lihat Ke Arah Kamera' : wording(step[motionCount])}
+            </Text>
+            <Text style={styles.subText}>Pastikan mata melihat kamera</Text>
+          </View>
         </View>
       </View>
     </View>
@@ -374,7 +577,6 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: '#FFF',
     position: 'relative',
-    // marginTop: 30,
   },
   masking: {
     aspectRatio: 1 / 1,
@@ -417,7 +619,7 @@ const styles = StyleSheet.create({
     color: '#6C6C6C'
   },
   header: {
-    backgroundColor: '#FFF',
+    backgroundColor: '#195FBA',
     flexDirection: 'row',
     alignItems: 'center',
     paddingVertical: 16,
@@ -437,7 +639,7 @@ const styles = StyleSheet.create({
     alignSelf: 'center',
   },
   title: {
-    color: '#6C6C6C',
+    color: '#FFF',
     fontSize: 20,
     marginLeft: 50,
   },
@@ -448,21 +650,49 @@ const styles = StyleSheet.create({
     position: 'absolute',
   },
   hintImage: {
-    width: '25%',
+    width: '20%',
     height: undefined,
     aspectRatio: 1 / 1,
     alignItems: 'center',
     justifyContent: 'center',
+    padding: 5,
+    paddingRight: 20
   },
   image: {
     flex: 1,
     resizeMode: 'contain'
   },
   body: {
+    flexDirection: 'row',
     alignItems: 'center',
     borderTopWidth: 1,
     borderColor: '#C5C5C5',
     paddingTop: 20,
-    marginTop: 10,
+    justifyContent: 'center',
+  },
+  personContainer: {
+    backgroundColor: '#195FBA',
+    justifyContent: 'center',
+    alignItems: 'center',
+    paddingBottom: 10,
+  },
+  personName: {
+    fontFamily: Fonts.bold,
+    fontSize: 24,
+    color: '#FFF',
+  },
+  nikContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  nik: {
+    fontFamily: Fonts.book,
+    fontSize: 18,
+    color: '#FFF',
+  },
+  subText: {
+    fontFamily: Fonts.book,
+    fontSize: 16,
+    color: '#6C6C6C',
   }
 });

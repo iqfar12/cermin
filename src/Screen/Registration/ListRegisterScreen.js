@@ -34,11 +34,11 @@ const ListRegisterScreen = () => {
         const res = MasterEmployee.filter((item) => item.REGISTER_STATUS == 'NONE' || item.REGISTER_STATUS == 'REJECTED')
         let data = res;
         if (user.REFERENCE_LOCATION == 'AFD') {
-            data = res.filter((item) => location.includes(item.AFD_CODE))
+            data = res.filter((item) => location.includes(item?.AFD_CODE))
         } else if (user.REFERENCE_LOCATION == 'BA') {
-            data = res.filter((item) => location.includes(item.WERKS))
+            data = res.filter((item) => location.includes(item?.WERKS))
         } else if (user.REFERENCE_LOCATION == 'COMP') {
-            data = res.filter((item) => location.includes(item.COMP_CODE))
+            data = res.filter((item) => location.includes(item?.COMP_CODE))
         } else {
             // TODO: HO Need Filter!!
             data = res
@@ -85,11 +85,11 @@ const ListRegisterScreen = () => {
     const renderListCard = ({ item, index }) => {
         const location = () => {
             if (user.REFERENCE_LOCATION == 'AFD') {
-                return item.AFD_CODE
+                return item?.AFD_CODE
             } else if (user.REFERENCE_LOCATION == 'BA') {
-                return item.WERKS
+                return item?.WERKS
             } else {
-                return item.COMP_CODE
+                return item?.COMP_CODE
             }
         }
         const isPermission = user.PERMISSION.map((item) => item.includes('mobile-registrasi')).includes(true);

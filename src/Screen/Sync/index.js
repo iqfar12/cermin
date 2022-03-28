@@ -30,6 +30,7 @@ import axios from 'axios';
 import SuccessModal from '../../Component/SuccessModal';
 import { uploadAbsence } from './Upload/UploadAbsence';
 import { dateGenerator } from '../../Utils/DateConverter';
+import FailedModal from '../../Component/FailedModal';
 
 const Percentage = ({ value = 0 }) => {
   return (
@@ -100,7 +101,7 @@ const SyncScreen = () => {
   })
 
   const resetState = () => {
-   setAttendance({
+    setAttendance({
       progress: 0,
       total: 0,
       status: 0
@@ -214,8 +215,8 @@ const SyncScreen = () => {
 
     await postSync();
     // setTimeout(() => {
-      setSync(false);
-      setLoop(false);
+    setSync(false);
+    setLoop(false);
     // }, 3000)
   };
 
@@ -257,7 +258,8 @@ const SyncScreen = () => {
 
   const onSync = async () => {
     const isConnected = await NetInfo.fetch();
-    if (isConnected.isConnected) {
+    console.log(isConnected)
+    if (isConnected.isConnected || isConnected.type == 'wifi' || isConnected.isWifiEnabled === true) {
       resetState()
       setLoop(true);
       setSync(true);
@@ -287,6 +289,10 @@ const SyncScreen = () => {
     }
   }, [animation]);
 
+  const SyncStatus = useMemo(() => {
+    return attendance.progress === attendance.total && uploadEmployee.progress === uploadEmployee.total
+  }, [attendance, uploadEmployee]);
+
   const showModal = () => {
     if (connection) {
       return (
@@ -297,6 +303,16 @@ const SyncScreen = () => {
       );
     }
     if (success) {
+      if (!SyncStatus) {
+        return (
+          <FailedModal
+            visible={success}
+            title={'Sync Gagal'}
+            content={'Ada Data Sync yang Gagal\nHarap Mengulangi Sync sampai berhasil'}
+            onPress={() => setSuccess(false)}
+          />
+        )
+      }
       return (
         <SuccessModal
           visible={success}
@@ -367,12 +383,14 @@ const SyncScreen = () => {
               total={uploadEmployee.total}
               progress={uploadEmployee.progress}
               sync={sync}
+              isSuccess={uploadEmployee.total === uploadEmployee.progress}
             />
             <ProgressSyncBar
               title={'Master Data Absen'}
               total={attendance.total}
               progress={attendance.progress}
               sync={sync}
+              isSuccess={attendance.total === attendance.progress}
             />
           </View>
 
