@@ -13,6 +13,7 @@ const TM_USERS = {
     NAME: 'string?',
     JOB_DESC: 'string?',
     ROLE_NAME: 'string?',
+    ROLE_ID: 'int?',
     COMP_CODE: 'string?',
     COMP_NAME: 'string?',
     REFERENCE_LOCATION: 'string?',
@@ -25,6 +26,7 @@ const TM_USERS = {
     DELETE_USER: 'string?',
     LAST_SYNC: 'date?',
     SERVER: 'string?',
+    PERMISSION: { type: 'list', objectType: 'string', optional: true }
   },
 };
 
@@ -88,6 +90,15 @@ const T_DUPLICATE = {
     DESCRIPTION: 'string?',
     EMPLOYEE_NIK: 'string?',
     IMAGES: 'string?',
+  }
+}
+
+const T_NAVIGATE = {
+  name: 'T_NAVIGATE',
+  primaryKey: 'ID',
+  properties: {
+    ID: 'int?',
+    SOURCE: 'string?'
   }
 }
 
@@ -254,6 +265,7 @@ export default {
   TR_IMAGES,
   TR_NOTIFICATION,
   T_DUPLICATE,
+  T_NAVIGATE,
 
   SCHEMA_VERSION,
 };

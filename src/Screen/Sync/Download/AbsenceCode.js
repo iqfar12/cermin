@@ -8,7 +8,7 @@ export const AbsenceCode = async () => {
 
     let downloadProgress = {
         count: 0,
-        total: dbLocal.length,
+        total: user.LAST_SYNC !== null ? dbLocal.length : 0,
     };
     try {
         let params = new URLSearchParams();

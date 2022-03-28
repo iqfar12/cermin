@@ -14,6 +14,7 @@ import SubmitButton from '../../Component/SubmitButton';
 import { Fonts } from '../../Utils/Fonts';
 import TaskServices from '../../Database/TaskServices';
 import { UuidGenerator } from '../../Utils/UuidGenerator';
+import { dateGenerator } from '../../Utils/DateConverter';
 
 const PreviewRecognition = ({ route }) => {
   const navigation = useNavigation();
@@ -25,6 +26,7 @@ const PreviewRecognition = ({ route }) => {
     const res = MasterEmployee.find((item) => item.EMPLOYEE_NIK == data?.label);
     return res
   }, [data, MasterEmployee])
+  const {ID, SOURCE} = TaskServices.getAllData('T_NAVIGATE')[0];
 
   const onAttendance = async () => {
     if (Results === undefined) {
@@ -41,7 +43,7 @@ const PreviewRecognition = ({ route }) => {
         EMPLOYEE_ID: Results.ID,
         TYPE: '1',
         ABSENCE_CODE: code || 'K',
-        DATETIME: new Date(),
+        DATETIME: dateGenerator(),
         ACCURACY: data?.accuracy,
         LATITUDE: data?.coord?.latitude || 0.00,
         LONGITUDE: data?.coord?.longitude || 0.00,
@@ -55,20 +57,24 @@ const PreviewRecognition = ({ route }) => {
 
       await TaskServices.saveData('TR_ATTENDANCE', body);
 
-      navigation.replace('Take Picture Recognition');
+      // navigation.replace('Take Picture Recognition');
+      navigation.navigate(SOURCE)
     }
   }
 
   useEffect(() => {
+    let timeout;
     if (Results !== undefined) {
       if (count > 0) {
-        setTimeout(() => {
+        timeout = setTimeout(() => {
           setCount(count - 1)
         }, 1000)
       } else {
         onAttendance();
       }
     }
+
+    return () => clearTimeout(timeout)
   }, [count])
 
   return (
@@ -104,7 +110,7 @@ const PreviewRecognition = ({ route }) => {
             <View style={styles.buttonContainer}>
               <TouchableOpacity
                 activeOpacity={0.8}
-                onPress={() => navigation.replace('Take Picture Recognition', { data: data })}
+                onPress={() => navigation.replace('Take Picture Recognition')}
                 style={styles.retake}
               >
                 <Text style={styles.retakeTxt}>Ambil Ulang</Text>

@@ -5,6 +5,7 @@ import { Fonts } from '../../Utils/Fonts';
 import SubHeader from '../../Component/SubHeader';
 import Icon from '@expo/vector-icons/MaterialIcons'
 import TaskServices from '../../Database/TaskServices';
+import { dateGenerator } from '../../Utils/DateConverter';
 
 const RightComponent = ({ navigation }) => {
     return (
@@ -18,30 +19,6 @@ const RightComponent = ({ navigation }) => {
         </TouchableOpacity>
     );
 };
-
-const DummyData = [
-    {
-        id: 0,
-    },
-    {
-        id: 0,
-    },
-    {
-        id: 0,
-    },
-    {
-        id: 0,
-    },
-    {
-        id: 0,
-    },
-    {
-        id: 0,
-    },
-    {
-        id: 0,
-    },
-]
 
 const ListRegisterScreen = () => {
     const navigation = useNavigation();
@@ -60,7 +37,7 @@ const ListRegisterScreen = () => {
             data = res.filter((item) => location.includes(item.AFD_CODE))
         } else if (user.REFERENCE_LOCATION == 'BA') {
             data = res.filter((item) => location.includes(item.WERKS))
-        } else if (user.REFERENCE_LOCATION == 'COMPANY') {
+        } else if (user.REFERENCE_LOCATION == 'COMP') {
             data = res.filter((item) => location.includes(item.COMP_CODE))
         } else {
             // TODO: HO Need Filter!!
@@ -74,7 +51,7 @@ const ListRegisterScreen = () => {
         }
     }, [MasterEmployee, search, isFocused])
 
-    const onRegister = async (data) => {       
+    const onRegister = async (data) => {
         const body = {
           ID: data?.ID,
           TYPE: 'E',
@@ -90,11 +67,11 @@ const ListRegisterScreen = () => {
           WERKS: data?.WERKS,
           REGISTER_STATUS: 'PROCESS',
           FACE_DESCRIPTOR: data?.FACE_DESCRIPTOR,
-          INSERT_TIME: new Date(),
+          INSERT_TIME: dateGenerator(),
           INSERT_USER: user?.USER_NAME,
-          REGISTER_TIME: new Date(),
+          REGISTER_TIME: dateGenerator(),
           REGISTER_USER: user.USER_NAME,
-          UPDATE_TIME: new Date(),
+          UPDATE_TIME: dateGenerator(),
           UPDATE_USER: user.USER_NAME,
           DELETE_TIME: null,
           DELETE_USER: null,
@@ -106,8 +83,18 @@ const ListRegisterScreen = () => {
       };
 
     const renderListCard = ({ item, index }) => {
+        const location = () => {
+            if (user.REFERENCE_LOCATION == 'AFD') {
+                return item.AFD_CODE
+            } else if (user.REFERENCE_LOCATION == 'BA') {
+                return item.WERKS
+            } else {
+                return item.COMP_CODE
+            }
+        }
+        const isPermission = user.PERMISSION.map((item) => item.includes('mobile-registrasi')).includes(true);
         return (
-            <TouchableOpacity activeOpacity={0.8} onPress={() => onRegister(item)} style={styles.card}>
+            <TouchableOpacity activeOpacity={0.8} disabled={!isPermission} onPress={() => onRegister(item)} style={styles.card}>
                 <View style={styles.cardLeft}>
                     <Text style={styles.name}>{item.EMPLOYEE_FULLNAME}</Text>
                     <Text style={styles.nik}>{item.EMPLOYEE_NIK} </Text>
@@ -115,7 +102,7 @@ const ListRegisterScreen = () => {
                 <View style={styles.cardRight}>
                     <View style={styles.location}>
                         <Icon name={'location-pin'} size={20} color={'#C5C5C5'} />
-                        <Text style={styles.locationTxt}>{item.WERKS}</Text>
+                        <Text style={styles.locationTxt}>{location()}</Text>
                     </View>
                     <Icon name={'keyboard-arrow-right'} size={25} color={'#2F78D7'} />
                 </View>

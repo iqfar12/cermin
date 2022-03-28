@@ -1,6 +1,6 @@
 import React, { useMemo, useState } from 'react'
 import { StyleSheet, Text, View, TouchableOpacity, TextInput, FlatList, Platform } from 'react-native'
-import { useNavigation } from '@react-navigation/native';
+import { useNavigation, useIsFocused } from '@react-navigation/native';
 import { Fonts } from '../../Utils/Fonts';
 import SubHeader from '../../Component/SubHeader';
 import Icon from '@expo/vector-icons/MaterialIcons'
@@ -26,14 +26,21 @@ const HistoryAttendance = () => {
     const [date, setDate] = useState(new Date());
     const [showDate, setShowDate] = useState(false);
     const user = TaskServices.getCurrentUser();
+    const isFocused = useIsFocused();
 
     const ListAttendance = useMemo(() => {
         const location = user.LOCATION.split(',');
         const res = MasterAttendance.map((item) => {
-            const user = MasterEmployee.find((data) => data.ID == item.EMPLOYEE_ID);
-            item.name = user.EMPLOYEE_FULLNAME
-            item.nik = user.EMPLOYEE_NIK
-            item.location = user.AFD_CODE;
+            const users = MasterEmployee.find((data) => data.ID == item.EMPLOYEE_ID);
+            item.name = users.EMPLOYEE_FULLNAME
+            item.nik = users.EMPLOYEE_NIK
+            if (user.REFERENCE_LOCATION == 'AFD') {
+                item.location = users.AFD_CODE;
+            } else if (user.REFERENCE_LOCATION == 'BA') {
+                item.location = users.WERKS
+            } else if (user.REFERENCE_LOCATION == 'COMP') {
+                item.location = users.COMP_CODE
+            }
             return item
         }).filter((item) => {
             const absenDate = dateConverter(item.DATETIME);
@@ -44,9 +51,9 @@ const HistoryAttendance = () => {
         if (user.REFERENCE_LOCATION == 'AFD') {
             data = res.filter((item) => location.includes(item.location))
         } else if (user.REFERENCE_LOCATION == 'BA') {
-            data = res.filter((item) => location.includes(item.location.substr(0, 4)))
-        } else if (user.REFERENCE_LOCATION == 'COMPANY') {
-            data = res.filter((item) => location.includes(item.location.substr(0, 2)))
+            data = res.filter((item) => location.includes(item.location?.substr(0, 4)))
+        } else if (user.REFERENCE_LOCATION == 'COMP') {
+            data = res.filter((item) => location.includes(item.location?.substr(0, 2)))
         } else {
             // TODO: HO Need Filter!!
             data = res
@@ -55,9 +62,7 @@ const HistoryAttendance = () => {
             return data.filter((item) => item.name.toLowerCase().includes(search.toLowerCase()) || item.nik.toLowerCase().includes(search.toLowerCase()))
         }
         return data
-    }, [MasterAttendance, search, date])
-
-    console.log(ListAttendance);
+    }, [MasterAttendance, search, date, isFocused])
 
     const GroupingListMember = useMemo(() => {
         const group = ListAttendance.reduce(function (r, a) {
@@ -71,15 +76,30 @@ const HistoryAttendance = () => {
             const rest = item.find((item) => item.TYPE == '2');
             const agenda = item.find((item) => item.TYPE == '4');
 
+            let insertTime = new Date();
+            if (attendanceIn !== undefined) {
+                insertTime = attendanceIn.INSERT_TIME
+            }
+            if (attendanceOut !== undefined) {
+                insertTime = attendanceOut.INSERT_TIME
+            }
+            if (rest !== undefined) {
+                insertTime = rest.INSERT_TIME
+            }
+            if (agenda !== undefined) {
+                insertTime = agenda.INSERT_TIME
+            }
+
             return {
                 NAME: item[0].name,
                 LOCATION: item[0].location,
                 NIK: item[0].nik,
                 EMPLOYEE_ID: item[0].EMPLOYEE_ID,
-                ATTENDANCE_IN: attendanceIn !== undefined ? attendanceIn.DATETIME : null,
-                ATTENDANCE_OUT: attendanceOut !== undefined ? attendanceOut.DATETIME : null,
-                REST: rest !== undefined ? rest.DATETIME : null,
-                AGENDA: agenda !== undefined ? agenda.DATETIME : null,
+                ATTENDANCE_IN: attendanceIn !== undefined ? attendanceIn.INSERT_TIME : null,
+                ATTENDANCE_OUT: attendanceOut !== undefined ? attendanceOut.INSERT_TIME : null,
+                REST: rest !== undefined ? rest.INSERT_TIME : null,
+                AGENDA: agenda !== undefined ? agenda.INSERT_TIME : null,
+                INSERT_TIME: insertTime
             }
         });
         return res
@@ -93,7 +113,7 @@ const HistoryAttendance = () => {
             data = res.filter((item) => location.includes(item.AFD_CODE))
         } else if (user.REFERENCE_LOCATION == 'BA') {
             data = res.filter((item) => location.includes(item.WERKS))
-        } else if (user.REFERENCE_LOCATION == 'COMPANY') {
+        } else if (user.REFERENCE_LOCATION == 'COMP') {
             data = res.filter((item) => location.includes(item.COMP_CODE))
         } else {
             // TODO: HO Need Filter!!
@@ -102,6 +122,15 @@ const HistoryAttendance = () => {
 
         return data;
     }, [MasterEmployee, user])
+
+    const setRoute = async () => {
+        const nav = {
+            ID: 0,
+            SOURCE: 'History Attendance'
+        }
+
+        await TaskServices.saveData('T_NAVIGATE', nav)
+    }
 
     const renderListCard = ({ item, index }) => {
         // const user = MasterEmployee.find((data) => data.ID == item.EMPLOYEE_ID);
@@ -117,7 +146,7 @@ const HistoryAttendance = () => {
         //     }
         // }
         return (
-            <TouchableOpacity activeOpacity={0.8} onPress={() => navigation.navigate('Detail History Attendance', { id: item.EMPLOYEE_ID })} style={styles.card}>
+            <TouchableOpacity activeOpacity={0.8} onPress={() => navigation.navigate('Detail History Attendance', { id: item.EMPLOYEE_ID, date: item.INSERT_TIME })} style={styles.card}>
                 <View style={styles.top}>
                     <Text style={styles.name}>{item.NIK}<Text style={styles.nik}> | {item.NAME}</Text></Text>
                     <Icon name={'radio-button-unchecked'} size={25} color={'#FFB81C'} />
@@ -155,19 +184,28 @@ const HistoryAttendance = () => {
                     </View>
                     <View style={styles.buttonContainer}>
                         {item.ATTENDANCE_IN === null &&
-                            <TouchableOpacity activeOpacity={0.8} onPress={() =>  navigation.navigate('Take Picture Recognition')} style={styles.stateButtonLogout}>
+                            <TouchableOpacity activeOpacity={0.8} onPress={() => {
+                                setRoute()
+                                navigation.navigate('Take Picture Recognition')
+                            }} style={styles.stateButtonLogout}>
                                 <Icon name={'login'} size={25} color={'#FFF'} />
                                 <Text style={styles.stateButtonTxt}>Masuk</Text>
                             </TouchableOpacity>
                         }
                         {item.ATTENDANCE_OUT === null &&
-                            <TouchableOpacity activeOpacity={0.8} onPress={() => navigation.navigate('Attendance Out')} style={styles.stateButtonLogout}>
+                            <TouchableOpacity activeOpacity={0.8} onPress={() => {
+                                setRoute()
+                                navigation.navigate('Attendance Out')
+                            }} style={styles.stateButtonLogout}>
                                 <Icon name={'logout'} size={25} color={'#FFF'} />
                                 <Text style={styles.stateButtonTxt}>Pulang</Text>
                             </TouchableOpacity>
                         }
                         {item.REST === null &&
-                            <TouchableOpacity activeOpacity={0.8} onPress={() => navigation.navigate('Attendance Rest')} style={styles.stateButtonRest}>
+                            <TouchableOpacity activeOpacity={0.8} onPress={() => {
+                                setRoute()
+                                navigation.navigate('Attendance Rest')
+                            }} style={styles.stateButtonRest}>
                                 <Icon name={'local-cafe'} size={25} color={'#FFF'} />
                                 <Text style={styles.stateButtonTxt}>Istirahat</Text>
                             </TouchableOpacity>

@@ -6,9 +6,10 @@ import { Fonts } from '../../Utils/Fonts';
 import moment from 'moment';
 import Icon from '@expo/vector-icons/MaterialIcons';
 import TaskServices from '../../Database/TaskServices';
+import { dateConverter } from '../../Utils/DateConverter';
 
-const DetailHistoryAttendance = ({route}) => {
-    const {id} = route.params;
+const DetailHistoryAttendance = ({ route }) => {
+    const { id, date } = route.params;
     const navigation = useNavigation();
     const [menu, setMenu] = useState(0);
     const Employee = TaskServices.getAllData('TM_EMPLOYEE')
@@ -19,10 +20,12 @@ const DetailHistoryAttendance = ({route}) => {
     }, [Employee])
 
     const ListAttendance = useMemo(() => {
-        return MasterAttendance.filter((item) => item.EMPLOYEE_ID == id);
-    }, [MasterAttendance])
-
-    console.log(ListAttendance);
+        return MasterAttendance.filter((item) => {
+            const absenceDate = dateConverter(item.INSERT_TIME);
+            const selectedDate = dateConverter(date)
+            return item.EMPLOYEE_ID == id && absenceDate == selectedDate
+        });
+    }, [MasterAttendance, id, date])
 
     const renderListCard = ({ item, index }) => {
         const type = () => {
@@ -49,7 +52,7 @@ const DetailHistoryAttendance = ({route}) => {
         }
         return (
             <View style={styles.card}>
-                <Text style={styles.time}>{moment(item.DATETIME).format('HH:mm')}</Text>
+                <Text style={styles.time}>{moment(item.INSERT_TIME).format('HH:mm')}</Text>
                 <Icon name={type()} size={30} color={color()} />
                 <Text style={styles.text}>{item.DESCRIPTION}</Text>
             </View>
@@ -60,7 +63,10 @@ const DetailHistoryAttendance = ({route}) => {
         <>
             <SubHeader title={'Kembali'} onBack={() => navigation.goBack()} />
             <View style={styles.header}>
-                <Text style={styles.headerTitle}>{Karyawan?.EMPLOYEE_NIK}</Text>
+                <View style={styles.topHeader}>
+                    <Text style={styles.headerTitle}>{Karyawan?.EMPLOYEE_NIK}</Text>
+                    <Text style={styles.headerTitle}>{moment(date).format('DD/MM/YYYY')}</Text>
+                </View>
                 <View style={styles.SubHeaderContainer}>
                     <Icon name={'location-pin'} size={25} color={'#FFF'} />
                     <Text style={styles.location}>{Karyawan?.AFD_CODE}</Text>
@@ -96,6 +102,11 @@ const styles = StyleSheet.create({
         flex: 1,
         backgroundColor: '#E5E5E5',
     },
+    topHeader: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        justifyContent: 'space-between',
+    },  
     header: {
         borderTopWidth: 1,
         borderColor: 'rgba(0, 0, 0, 0.1)',

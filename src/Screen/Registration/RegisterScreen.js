@@ -40,7 +40,7 @@ import * as faceapi from 'face-api.js';
 import SubHeader from '../../Component/SubHeader';
 import { Fonts } from '../../Utils/Fonts';
 import Icon from '@expo/vector-icons/MaterialIcons';
-import { shuffleAllArray } from '../../Utils/Shuffle';
+import { shuffleAllArray, shuffleBackArray } from '../../Utils/Shuffle';
 import SoundPlayer from 'react-native-sound-player';
 import WarningModal from '../../Component/WarningModal';
 import { decodeJpeg } from '@tensorflow/tfjs-react-native';
@@ -60,9 +60,11 @@ const RegisterScreen = ({ route }) => {
   const isFocused = useIsFocused();
   const [isAlready, setIsAlready] = useState(false);
   const [message, setMessage] = useState('');
-  const [RandomPhase, setRandomPhase] = useState(shuffleAllArray([1, 2, 3, 4]));
+  const [RandomPhase, setRandomPhase] = useState(shuffleBackArray([1, 2, 3]));
   const [cameraFront, setCameraFront] = useState(true);
   const [ready, setReady] = useState(true);
+  const [detect, setDetect] = useState(false);
+  const [mainDescriptor, setMainDescriptor] = useState([]);
 
   useEffect(() => {
     const onChangeState = () => {
@@ -97,12 +99,12 @@ const RegisterScreen = ({ route }) => {
   };
 
   useEffect(() => {
-    if (isFocused) {
+    if (isFocused && !hint) {
       setTimeout(() => {
         playSound();
       }, 1000);
     }
-  }, [isFocused, step]);
+  }, [isFocused, step, hint]);
 
   const isRegistered = async () => {
     setIsLoading(true);
@@ -278,82 +280,94 @@ const RegisterScreen = ({ route }) => {
   };
 
   const detectUp = async image => {
-    try {
-      const res = await faceapi.detectSingleFace(image,
-        new faceapi.TinyFaceDetectorOptions({ inputSize: 416, scoreThreshold: 0.4 })
-      ).withFaceLandmarks()
-      if (res) {
-        const eye_right = getMeanPosition(res.landmarks.getRightEye());
-        const eye_left = getMeanPosition(res.landmarks.getLeftEye());
-        const nose = getMeanPosition(res.landmarks.getNose());
-        const mouth = getMeanPosition(res.landmarks.getMouth());
-        const jaw = getTop(res.landmarks.getJawOutline());
-
-        const rx = (jaw - mouth[1]) / res.detection.box.height + 0.5;
-        const ry =
-          (eye_left[0] + (eye_right[0] - eye_left[0]) / 2 - nose[0]) /
-          res.detection.box.width;
-        if (rx > 0.17 && rx < 0.3) {
-          return { valid: true, message: 'Correct' }
-        } else {
-          return { valid: false, message: 'Posisi Kurang Tepat' }
-        }
-      } else {
-        return { valid: false, message: 'No Face Detected' };
-      }
-    } catch (error) {
-      console.log(error, 'error');
-      return {
-        valid: false, message: 'Error Image'
-      }
-    }
     // try {
-    //   const res = await FaceDetector.detectFacesAsync(image.uri, {
-    //     mode: FaceDetector.FaceDetectorMode.fast,
-    //     detectLandmarks: FaceDetector.FaceDetectorLandmarks.none,
-    //     runClassifications: FaceDetector.FaceDetectorClassifications.none,
-    //   });
-    //   if (res.faces.length > 0) {
-    //     const { bounds } = res.faces[0];
-    //     const { origin, size } = bounds;
-    //     const crop = {
-    //       originX: origin.x,
-    //       originY: origin.y,
-    //       height: size.height,
-    //       width: size.width,
-    //     };
-    //     const resize = { width: 160, height: 160 };
+    //   const res = await faceapi.detectSingleFace(image,
+    //     new faceapi.TinyFaceDetectorOptions({ inputSize: 416, scoreThreshold: 0.4 })
+    //   ).withFaceLandmarks().withFaceDescriptor();
+    //   if (res) {
+    //     const eye_right = getMeanPosition(res.landmarks.getRightEye());
+    //     const eye_left = getMeanPosition(res.landmarks.getLeftEye());
+    //     const nose = getMeanPosition(res.landmarks.getNose());
+    //     const mouth = getMeanPosition(res.landmarks.getMouth());
+    //     const jaw = getTop(res.landmarks.getJawOutline());
 
-    //     const result = await manipulateAsync(image.uri, [{ crop }, { resize }]);
-    //     const corner = await FaceDetector.detectFacesAsync(result.uri, {
-    //       mode: FaceDetector.FaceDetectorMode.fast,
-    //       detectLandmarks: FaceDetector.FaceDetectorLandmarks.none,
-    //       runClassifications: FaceDetector.FaceDetectorClassifications.none,
-    //     });
-    //     const jaw = corner.faces[0].BOTTOM_MOUTH.y;
-    //     if (jaw <= 136) {
-    //       // Top
-    //       console.log('top');
-    //       return { valid: true, message: 'Correct' };
+    //     const rx = (jaw - mouth[1]) / res.detection.box.height + 0.5;
+    //     const ry =
+    //       (eye_left[0] + (eye_right[0] - eye_left[0]) / 2 - nose[0]) /
+    //       res.detection.box.width;
+    //     if (rx > 0.17 && rx < 0.3) {
+    //       return { valid: true, message: 'Correct' }
     //     } else {
-    //       return { valid: false, message: 'Posisi Salah' };
+    //       return { valid: false, message: 'Posisi Kurang Tepat' }
     //     }
     //   } else {
     //     return { valid: false, message: 'No Face Detected' };
     //   }
     // } catch (error) {
     //   console.log(error, 'error');
-    //   return { valid: false, message: 'Error Image' };
+    //   return {
+    //     valid: false, message: 'Error Image'
+    //   }
     // }
+    try {
+      const res = await FaceDetector.detectFacesAsync(image.uri, {
+        mode: FaceDetector.FaceDetectorMode.fast,
+        detectLandmarks: FaceDetector.FaceDetectorLandmarks.none,
+        runClassifications: FaceDetector.FaceDetectorClassifications.none,
+      });
+      if (res.faces.length > 0) {
+        const { bounds } = res.faces[0];
+        const { origin, size } = bounds;
+        const crop = {
+          originX: origin.x,
+          originY: origin.y,
+          height: size.height,
+          width: size.width,
+        };
+        const resize = { width: 160, height: 160 };
+
+        const result = await manipulateAsync(image.uri, [{ crop }, { resize }]);
+        const corner = await FaceDetector.detectFacesAsync(result.uri, {
+          mode: FaceDetector.FaceDetectorMode.fast,
+          detectLandmarks: FaceDetector.FaceDetectorLandmarks.none,
+          runClassifications: FaceDetector.FaceDetectorClassifications.none,
+        });
+        const jaw = corner.faces[0].BOTTOM_MOUTH.y;
+        console.log(jaw);
+        if (jaw <= 138 && jaw >= 120) {
+          // Top
+          console.log('top');
+          return { valid: true, message: 'Correct' };
+        } else {
+          return { valid: false, message: 'Posisi Salah' };
+        }
+      } else {
+        return { valid: false, message: 'No Face Detected' };
+      }
+    } catch (error) {
+      console.log(error, 'error');
+      return { valid: false, message: 'Error Image' };
+    }
   };
 
   const detectFront = async image => {
     try {
       const res = await faceapi.detectSingleFace(image,
-        new faceapi.TinyFaceDetectorOptions({ inputSize: 416, scoreThreshold: 0.4 })
-      ).withFaceLandmarks()
+        new faceapi.TinyFaceDetectorOptions({ inputSize: 608, scoreThreshold: 0.4 })
+      ).withFaceLandmarks().withFaceDescriptor();
       if (res) {
-        return { valid: true, message: 'Correct' }
+        const eye_right = getMeanPosition(res.landmarks.getRightEye());
+        const eye_left = getMeanPosition(res.landmarks.getLeftEye());
+        const nose = getMeanPosition(res.landmarks.getNose());
+        const mouth = getMeanPosition(res.landmarks.getMouth());
+        const ry =
+          (eye_left[0] + (eye_right[0] - eye_left[0]) / 2 - nose[0]) /
+          res.detection.box.width;
+        if (ry < -0.05 || ry > 0.04) {
+          return { valid: false, message: 'Posisi Kurang Tepat' }  
+        } else {
+          return { valid: true, message: 'Correct' }
+        }
       } else {
         return { valid: false, message: 'No Face Detected' };
       }
@@ -392,155 +406,157 @@ const RegisterScreen = ({ route }) => {
     //       console.log('center');
     //       return { valid: true, message: 'Correct' };
     //     } else {
-    //       return { valid: false, message: 'Posisi Salah' };
+    //       return { valid: false, message: 'Posisi Salah\nPastikan Mata dan Hidung Sejajar dengan garis' };
     //     }
     //   } else {
     //     return { valid: false, message: 'No Face Detected' };
     //   }
     // } catch (error) {
-    // console.log(error, 'error');
-    // return { valid: false, message: 'Error Image' };
+    //   console.log(error, 'error');
+    //   return { valid: false, message: 'Error Image' };
     // }
   };
 
   const detectLeft = async image => {
-    try {
-      const res = await faceapi.detectSingleFace(image,
-        new faceapi.TinyFaceDetectorOptions({ inputSize: 416, scoreThreshold: 0.4 })
-      ).withFaceLandmarks()
-      if (res) {
-        const eye_right = getMeanPosition(res.landmarks.getRightEye());
-        const eye_left = getMeanPosition(res.landmarks.getLeftEye());
-        const nose = getMeanPosition(res.landmarks.getNose());
-        const mouth = getMeanPosition(res.landmarks.getMouth());
-        const jaw = getTop(res.landmarks.getJawOutline());
-
-        const rx = (jaw - mouth[1]) / res.detection.box.height + 0.5;
-        const ry =
-          (eye_left[0] + (eye_right[0] - eye_left[0]) / 2 - nose[0]) /
-          res.detection.box.width;
-        if (ry > -0.08 && ry < -0.05) {
-          return { valid: true, message: 'Correct' }
-        } else {
-          return { valid: false, message: 'Posisi Kurang Tepat' }
-        }
-      } else {
-        return { valid: false, message: 'No Face Detected' };
-      }
-    } catch (error) {
-      console.log(error, 'error');
-      return {
-        valid: false, message: 'Error Image'
-      }
-    }
     // try {
-    //   const res = await FaceDetector.detectFacesAsync(image.uri, {
-    //     mode: FaceDetector.FaceDetectorMode.fast,
-    //     detectLandmarks: FaceDetector.FaceDetectorLandmarks.none,
-    //     runClassifications: FaceDetector.FaceDetectorClassifications.none,
-    //   });
-    //   if (res.faces.length > 0) {
-    //     const { bounds } = res.faces[0];
-    //     const { origin, size } = bounds;
-    //     const crop = {
-    //       originX: origin.x,
-    //       originY: origin.y,
-    //       height: size.height,
-    //       width: size.width,
-    //     };
-    //     const resize = { width: 160, height: 160 };
+    //   const res = await faceapi.detectSingleFace(image,
+    //     new faceapi.TinyFaceDetectorOptions({ inputSize: 416, scoreThreshold: 0.4 })
+    //   ).withFaceLandmarks().withFaceDescriptor();
+    //   if (res) {
+        // const eye_right = getMeanPosition(res.landmarks.getRightEye());
+        // const eye_left = getMeanPosition(res.landmarks.getLeftEye());
+        // const nose = getMeanPosition(res.landmarks.getNose());
+        // const mouth = getMeanPosition(res.landmarks.getMouth());
+        // const jaw = getTop(res.landmarks.getJawOutline());
 
-    //     const result = await manipulateAsync(image.uri, [{ crop }, { resize }]);
-    //     const corner = await FaceDetector.detectFacesAsync(result.uri, {
-    //       mode: FaceDetector.FaceDetectorMode.fast,
-    //       detectLandmarks: FaceDetector.FaceDetectorLandmarks.none,
-    //       runClassifications: FaceDetector.FaceDetectorClassifications.none,
-    //     });
-    //     const { x, y } = corner.faces[0].NOSE_BASE;
-    //     if (x >= 90) {
-    //       // Left
-    //       console.log('left');
-    //       return { valid: true, message: 'Correct' };
+    //     const rx = (jaw - mouth[1]) / res.detection.box.height + 0.5;
+        // const ry =
+        //   (eye_left[0] + (eye_right[0] - eye_left[0]) / 2 - nose[0]) /
+        //   res.detection.box.width;
+    //     if (ry > -0.08 && ry < -0.05) {
+    //       return { valid: true, message: 'Correct' }
     //     } else {
-    //       return { valid: false, message: 'Posisi Salah' };
+    //       return { valid: false, message: 'Posisi Kurang Tepat' }
     //     }
     //   } else {
     //     return { valid: false, message: 'No Face Detected' };
     //   }
     // } catch (error) {
     //   console.log(error, 'error');
-    //   return { valid: false, message: 'Error Image' };
+    //   return {
+    //     valid: false, message: 'Error Image'
+    //   }
     // }
+    try {
+      const res = await FaceDetector.detectFacesAsync(image.uri, {
+        mode: FaceDetector.FaceDetectorMode.fast,
+        detectLandmarks: FaceDetector.FaceDetectorLandmarks.none,
+        runClassifications: FaceDetector.FaceDetectorClassifications.none,
+      });
+      if (res.faces.length > 0) {
+        const { bounds } = res.faces[0];
+        const { origin, size } = bounds;
+        const crop = {
+          originX: origin.x,
+          originY: origin.y,
+          height: size.height,
+          width: size.width,
+        };
+        const resize = { width: 160, height: 160 };
+
+        const result = await manipulateAsync(image.uri, [{ crop }, { resize }]);
+        const corner = await FaceDetector.detectFacesAsync(result.uri, {
+          mode: FaceDetector.FaceDetectorMode.fast,
+          detectLandmarks: FaceDetector.FaceDetectorLandmarks.none,
+          runClassifications: FaceDetector.FaceDetectorClassifications.none,
+        });
+        const { x, y } = corner.faces[0].NOSE_BASE;
+        console.log(x, 'x');
+        if (x >= 85 && x <= 100) {
+          // Left
+          console.log('left');
+          return { valid: true, message: 'Correct' };
+        } else {
+          return { valid: false, message: 'Posisi Salah\nPastikan Mata dan Hidung Sejajar dengan garis\nPastikan Mata dan Hidung Sejajar dengan garis' };
+        }
+      } else {
+        return { valid: false, message: 'No Face Detected' };
+      }
+    } catch (error) {
+      console.log(error, 'error');
+      return { valid: false, message: 'Error Image' };
+    }
   };
 
   const detectRight = async image => {
-    try {
-      const res = await faceapi.detectSingleFace(image,
-        new faceapi.TinyFaceDetectorOptions({ inputSize: 416, scoreThreshold: 0.4 })
-      ).withFaceLandmarks();
-      if (res) {
-        const eye_right = getMeanPosition(res.landmarks.getRightEye());
-        const eye_left = getMeanPosition(res.landmarks.getLeftEye());
-        const nose = getMeanPosition(res.landmarks.getNose());
-        const mouth = getMeanPosition(res.landmarks.getMouth());
-        const jaw = getTop(res.landmarks.getJawOutline());
-
-        const rx = (jaw - mouth[1]) / res.detection.box.height + 0.5;
-        const ry =
-          (eye_left[0] + (eye_right[0] - eye_left[0]) / 2 - nose[0]) /
-          res.detection.box.width;
-        if (ry > 0.04 && ry < 0.08) {
-          return { valid: true, message: 'Correct' }
-        } else {
-          return { valid: false, message: 'Posisi Kurang Tepat' }
-        }
-      } else {
-        return { valid: false, message: 'No Face Detected' };
-      }
-    } catch (error) {
-      console.log(error, 'error');
-      return {
-        valid: false, message: 'Error Image'
-      }
-    }
     // try {
-    //   const res = await FaceDetector.detectFacesAsync(image.uri, {
-    //     mode: FaceDetector.FaceDetectorMode.fast,
-    //     detectLandmarks: FaceDetector.FaceDetectorLandmarks.none,
-    //     runClassifications: FaceDetector.FaceDetectorClassifications.none,
-    //   });
-    //   if (res.faces.length > 0) {
-    //     const { bounds } = res.faces[0];
-    //     const { origin, size } = bounds;
-    //     const crop = {
-    //       originX: origin.x,
-    //       originY: origin.y,
-    //       height: size.height,
-    //       width: size.width,
-    //     };
-    //     const resize = { width: 160, height: 160 };
+    //   const res = await faceapi.detectSingleFace(image,
+    //     new faceapi.TinyFaceDetectorOptions({ inputSize: 416, scoreThreshold: 0.4 })
+    //   ).withFaceLandmarks().withFaceDescriptor();
+    //   if (res) {
+    //     const eye_right = getMeanPosition(res.landmarks.getRightEye());
+    //     const eye_left = getMeanPosition(res.landmarks.getLeftEye());
+    //     const nose = getMeanPosition(res.landmarks.getNose());
+    //     const mouth = getMeanPosition(res.landmarks.getMouth());
+    //     const jaw = getTop(res.landmarks.getJawOutline());
 
-    //     const result = await manipulateAsync(image.uri, [{ crop }, { resize }]);
-    //     const corner = await FaceDetector.detectFacesAsync(result.uri, {
-    //       mode: FaceDetector.FaceDetectorMode.fast,
-    //       detectLandmarks: FaceDetector.FaceDetectorLandmarks.none,
-    //       runClassifications: FaceDetector.FaceDetectorClassifications.none,
-    //     });
-    //     const { x, y } = corner.faces[0].NOSE_BASE;
-    //     if (x <= 65) {
-    //       // Right
-    //       console.log('right');
-    //       return { valid: true, message: 'Correct' };
+    //     const rx = (jaw - mouth[1]) / res.detection.box.height + 0.5;
+    //     const ry =
+    //       (eye_left[0] + (eye_right[0] - eye_left[0]) / 2 - nose[0]) /
+    //       res.detection.box.width;
+    //     if (ry > 0.04 && ry < 0.08) {
+    //       return { valid: true, message: 'Correct' }
     //     } else {
-    //       return { valid: false, message: 'Posisi Salah' };
+    //       return { valid: false, message: 'Posisi Kurang Tepat' }
     //     }
     //   } else {
     //     return { valid: false, message: 'No Face Detected' };
     //   }
     // } catch (error) {
     //   console.log(error, 'error');
-    //   return { valid: false, message: 'Error Image' };
+    //   return {
+    //     valid: false, message: 'Error Image'
+    //   }
     // }
+    try {
+      const res = await FaceDetector.detectFacesAsync(image.uri, {
+        mode: FaceDetector.FaceDetectorMode.fast,
+        detectLandmarks: FaceDetector.FaceDetectorLandmarks.none,
+        runClassifications: FaceDetector.FaceDetectorClassifications.none,
+      });
+      if (res.faces.length > 0) {
+        const { bounds } = res.faces[0];
+        const { origin, size } = bounds;
+        const crop = {
+          originX: origin.x,
+          originY: origin.y,
+          height: size.height,
+          width: size.width,
+        };
+        const resize = { width: 160, height: 160 };
+
+        const result = await manipulateAsync(image.uri, [{ crop }, { resize }]);
+        const corner = await FaceDetector.detectFacesAsync(result.uri, {
+          mode: FaceDetector.FaceDetectorMode.fast,
+          detectLandmarks: FaceDetector.FaceDetectorLandmarks.none,
+          runClassifications: FaceDetector.FaceDetectorClassifications.none,
+        });
+        const { x, y } = corner.faces[0].NOSE_BASE;
+        console.log(x)
+        if (x <= 65 && x >= 50) {
+          // Right
+          console.log('right');
+          return { valid: true, message: 'Correct' };
+        } else {
+          return { valid: false, message: 'Posisi Salah\nPastikan Mata dan Hidung Sejajar dengan garis' };
+        }
+      } else {
+        return { valid: false, message: 'No Face Detected' };
+      }
+    } catch (error) {
+      console.log(error, 'error');
+      return { valid: false, message: 'Error Image' };
+    }
   };
 
   const detectCorner = async image => {
@@ -598,6 +614,7 @@ const RegisterScreen = ({ route }) => {
     try {
       const image = await camera.takePictureAsync();
       setIsLoading(true);
+      setDetect(false);
       if (image) {
         console.log(image, 'position');
         // const res = await detectCorner(image);
@@ -614,14 +631,70 @@ const RegisterScreen = ({ route }) => {
   };
 
   useEffect(() => {
-    if (images.length === 4) {
+    if (images.length === 3) {
       setIsLoading(true);
       register();
     }
   }, [images]);
 
+  const condition4 = event => {
+    const jaw = event?.faces[0]?.BOTTOM_MOUTH.y;
+    console.log(jaw);
+    if (jaw >= 300 && jaw <= 330) {
+      // Top
+      console.log('top');
+      takePicture()
+    }
+  };
+
+  const condition1 = event => {
+    const { x, y } = event?.faces[0]?.NOSE_BASE;
+    console.log(x);
+    if (x >= 185 && x <= 200) {
+      // Center
+      console.log('center');
+      takePicture();
+    }
+  };
+
+  const condition2 = event => {
+    const { x, y } = event?.faces[0]?.NOSE_BASE;
+    console.log(x);
+    if (x >= 130 && x <= 145) {
+      // Left
+      console.log('left');
+      takePicture();
+    }
+  };
+
+  const condition3 = event => {
+    const { x, y } = event?.faces[0]?.NOSE_BASE;
+    console.log(x);
+    if (x >= 205 && x <= 245) {
+      // Left
+      console.log('right');
+      takePicture();
+    }
+  };
+
+  const onFaceDetected = event => {
+    const val = RandomPhase[step];
+    if (event.faces.length > 0) {
+      if (val === 1) {
+        condition1(event)
+      } else if (val === 2) {
+        condition2(event)
+      } else if (val === 3) {
+        condition3(event)
+      } else {
+        condition4(event)
+      }
+    }
+  }
+
   const cropImage = async image => {
     try {
+      const val = RandomPhase[step];
       const resize = await manipulateAsync(image.uri, [
         { resize: { width: 768, height: 1024 } },
       ], { base64: true });
@@ -631,46 +704,35 @@ const RegisterScreen = ({ route }) => {
       const raw = new Uint8Array(img);
       const imageTensor = decodeJpeg(raw)
 
-      let position = undefined;
-      //   await RNFS.copyFile(mobilenet.uri, pathMobilenet);
-      const val = RandomPhase[step];
+      const detect = await faceapi.detectSingleFace(imageTensor, new faceapi.TinyFaceDetectorOptions({inputSize: 608, scoreThreshold: 0.5})).withFaceLandmarks().withFaceDescriptor();
+      let range = 1.0;
       if (val === 1) {
-        position = await detectFront(imageTensor);
-      } else if (val === 2) {
-        position = await detectLeft(imageTensor);
-      } else if (val === 3) {
-        position = await detectRight(imageTensor);
+        setMainDescriptor(detect.descriptor);
+        const {valid} = await detectFront(imageTensor);
+        range = valid ? 0.0 : 0.9
       } else {
-        position = await detectUp(imageTensor);
+        range = faceapi.euclideanDistance(mainDescriptor, detect.descriptor)
       }
-      if (position !== undefined && position.valid) {
-        // const result = await manipulateAsync(resize.uri, [
-        //   {
-        //     crop: {
-        //       width: box._width + 50,
-        //       height: box._height + 50,
-        //       originX: box._x,
-        //       originY: box._y,
-        //     },
-        //   },
-        //   {
-        //     resize: {
-        //       width: box._width + 50,
-        //       height: box._height + 50,
-        //     },
-        //   },
-        // ]);
+      console.log(range, 'range');
+      // const val = RandomPhase[step];
+      // if (val === 1) {
+      //   position = await detectFront(image);
+      // } else if (val === 2) {
+      //   position = await detectLeft(image);
+      // } else if (val === 3) {
+      //   position = await detectRight(image);
+      // } else {
+      //   position = await detectUp(image);
+      // }
+      if (range <= 0.3) {
         setImages([...images, resize]);
-        if (step < 3) {
+        if (step < 2) {
           setStep(step + 1);
-          // setHint(true);
         }
-        //  else {
-        //   await register();
-        // }
-      } else {
+      }
+      else {
         setFailed(true);
-        setMessage(position?.message);
+        setMessage('Gambar Blur atau Tidak Terdeteksi\n \nJika Pesan ini Muncul Berkali-kali silahkan mulai dari awal');
       }
       setIsLoading(false);
     } catch (error) {
@@ -715,7 +777,7 @@ const RegisterScreen = ({ route }) => {
               </View>
               <Text style={styles.hintText}>
                 {
-                  'Posisikan kepala anda sesuai dengan bingkai pada layar anda, pastikan mata tidak berkedip ketika mengambil foto\n \nKedua mata harus terlihat di layar dan lihat kamera saat mengambil foto'
+                  'Posisikan kepala anda sesuai dengan bingkai pada layar anda.\nPastikan Mata dan Hidung Sejajar dengan garis dan tidak berkedip ketika mengambil foto\n \nKedua mata harus terlihat di layar dan lihat kamera saat mengambil foto'
                 }
               </Text>
               <TouchableOpacity
@@ -737,23 +799,6 @@ const RegisterScreen = ({ route }) => {
           visible={failed}
           onPress={() => setFailed(false)}
         />
-        // <Modal transparent visible={failed}>
-        //   <View style={styles.modalContainer}>
-        //     <View style={styles.wrappers}>
-        //       <Text style={styles.hintText}>
-        // Gambar Tidak Valid Pastikan Gambar Anda sesuai petunjuk dan
-        // Harap Coba lagi {'\n\n'} {message}
-        //       </Text>
-        //       <TouchableOpacity
-        //         activeOpacity={0.8}
-        //         onPress={() => setFailed(false)}
-        //         style={styles.failedButton}
-        //       >
-        //         <Text style={styles.hintButtonTitle}>Coba Lagi</Text>
-        //       </TouchableOpacity>
-        //     </View>
-        //   </View>
-        // </Modal>
       );
     }
     if (isAlready) {
@@ -852,7 +897,7 @@ const RegisterScreen = ({ route }) => {
           </View>
           <View style={styles.right}>
             <Text style={styles.step}>
-              {step + 1}/4 Hadap {Direction()}
+              {step + 1}/3 Hadap {Direction()}
             </Text>
             <Text style={styles.stepTxt}>Pastikan mata melihat kamera</Text>
           </View>
@@ -864,16 +909,29 @@ const RegisterScreen = ({ route }) => {
               ref={ref => setCamera(ref)}
               type={cameraFront ? 'front' : 'back'}
               autoFocus={'on'}
+              onCameraReady={() => {
+                setTimeout(() => {
+                  setDetect(true)
+                }, step > 0 ? 2000 : 3000)
+              }}
+              onFacesDetected={detect && !hint && !failed ? onFaceDetected : null}
+              faceDetectorSettings={{
+                mode: 2,
+                detectLandmarks: 2,
+                runClassifications: 2,
+                minDetectionInterval: 500,
+                tracking: false,
+              }}
             />
             <Image style={styles.frame} source={Frame()} />
-            <Image style={styles.line} source={Line()} />
+            {/* <Image style={styles.line} source={Line()} /> */}
           </View>
         ) : <View style={styles.wrapper}>
             <View
               style={styles.preview}
             />
             <Image style={styles.frame} source={Frame()} />
-            <Image style={styles.line} source={Line()} />
+            {/* <Image style={styles.line} source={Line()} /> */}
           </View>}
         <View style={styles.cameraContainer}>
           <View activeOpacity={0.8} style={styles.switchCamera}>
@@ -887,7 +945,8 @@ const RegisterScreen = ({ route }) => {
           <TouchableOpacity
             style={styles.takeButton}
             onPress={takePicture}
-            disabled={camera === undefined}
+            // disabled={camera === undefined}
+            disabled={true}
             activeOpacity={0.5}
           >
             <View style={styles.circle} />

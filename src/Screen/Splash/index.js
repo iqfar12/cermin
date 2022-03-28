@@ -1,5 +1,5 @@
 import React, { useEffect } from 'react';
-import { StyleSheet, Text, View, StatusBar, PermissionsAndroid } from 'react-native';
+import { StyleSheet, Text, View, StatusBar, PermissionsAndroid, Linking } from 'react-native';
 import LottieView from 'lottie-react-native';
 import { Splash } from '../../assets';
 import { Fonts } from '../../Utils/Fonts';
@@ -12,16 +12,23 @@ import '@tensorflow/tfjs-react-native';
 import fs from 'react-native-fs';
 import axios from 'axios';
 import RNFetchBlob from 'rn-fetch-blob'
-
+import { requestAdvanceStoragePermission } from '../../Utils/StoragePermisssion';
 
 const SplashScreen = () => {
-  console.log('splash');
   const user = TaskServices.getCurrentUser();
   const navigation = useNavigation();
   const pathSsd = fs.DocumentDirectoryPath + '/ssd_model';
   const pathFaceLandmarks = fs.DocumentDirectoryPath + '/face_landmark_model';
   const pathFaceRecognition = fs.DocumentDirectoryPath + '/face_recognition_model';
   const pathTiny = fs.DocumentDirectoryPath + '/tiny_model';
+
+  const handleLinking = (event) => {
+    console.log(event);
+  }
+
+  useEffect(() => {
+    Linking.addEventListener('url', handleLinking)
+  }, []);
 
   const isReady = async () => {
     await faceapi.tf.ready().finally(async () => {
@@ -210,6 +217,7 @@ const SplashScreen = () => {
     await requestCameraPermissionsAsync();
     await PermissionsAndroid.request(PermissionsAndroid.PERMISSIONS.WRITE_EXTERNAL_STORAGE)
     await PermissionsAndroid.request(PermissionsAndroid.PERMISSIONS.ACCESS_FINE_LOCATION)
+    await requestAdvanceStoragePermission();
   };
 
   const loadModel = async () => {

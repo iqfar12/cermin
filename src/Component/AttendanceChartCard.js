@@ -15,10 +15,16 @@ const AttendanceChartCard = ({ onPress }) => {
   const ListAttendance = useMemo(() => {
     const location = user.LOCATION.split(',');
     const res = MasterAttendance.map((item) => {
-      const user = MasterEmployee.find((data) => data.ID == item.EMPLOYEE_ID);
+      const users = MasterEmployee.find((data) => data.ID == item.EMPLOYEE_ID);
       item.name = user.EMPLOYEE_FULLNAME
       item.nik = user.EMPLOYEE_NIK
-      item.location = user.AFD_CODE;
+      if (user.REFERENCE_LOCATION == 'AFD') {
+        item.location = users.AFD_CODE;
+      } else if (user.REFERENCE_LOCATION == 'BA') {
+        item.location = users.WERKS
+      } else if (user.REFERENCE_LOCATION == 'COMP') {
+        item.location = users.COMP_CODE
+      }
       return item
     }).filter((item) => {
       const absenDate = dateConverter(item.DATETIME);
@@ -29,9 +35,9 @@ const AttendanceChartCard = ({ onPress }) => {
     if (user.REFERENCE_LOCATION == 'AFD') {
       data = res.filter((item) => location.includes(item.location))
     } else if (user.REFERENCE_LOCATION == 'BA') {
-      data = res.filter((item) => location.includes(item.location.substr(0, 4)))
-    } else if (user.REFERENCE_LOCATION == 'COMPANY') {
-      data = res.filter((item) => location.includes(item.location.substr(0, 2)))
+      data = res.filter((item) => location.includes(item.location?.substr(0, 4)))
+    } else if (user.REFERENCE_LOCATION == 'COMP') {
+      data = res.filter((item) => location.includes(item.location?.substr(0, 2)))
     } else {
       // TODO: HO Need Filter!!
       data = res
@@ -73,7 +79,7 @@ const AttendanceChartCard = ({ onPress }) => {
       data = res.filter((item) => location.includes(item.AFD_CODE))
     } else if (user.REFERENCE_LOCATION == 'BA') {
       data = res.filter((item) => location.includes(item.WERKS))
-    } else if (user.REFERENCE_LOCATION == 'COMPANY') {
+    } else if (user.REFERENCE_LOCATION == 'COMP') {
       data = res.filter((item) => location.includes(item.COMP_CODE))
     } else {
       // TODO: HO Need Filter!!
@@ -94,7 +100,7 @@ const AttendanceChartCard = ({ onPress }) => {
   }, [ListEmployee, ListAttendance])
 
   const CompleteAttendance = useMemo(() => {
-    const completed = GroupingListMember.filter((item) => item.ATTENDANCE_IN !== null && item.ATTENDANCE_OUT !== null && item.REST !== null)
+    const completed = GroupingListMember.filter((item) => item.ATTENDANCE_IN !== null && item.ATTENDANCE_OUT !== null)
 
     if (completed.length === 0) {
       return 0

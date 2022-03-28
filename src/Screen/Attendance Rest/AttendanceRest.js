@@ -29,6 +29,7 @@ import ExpoIcon from '@expo/vector-icons/MaterialIcons';
 import { Fonts } from '../../Utils/Fonts';
 import geolocation from '@react-native-community/geolocation';
 import TaskServices from '../../Database/TaskServices';
+import SoundPlayer from 'react-native-sound-player';
 
 const CircleMask = () => {
   return (
@@ -60,7 +61,7 @@ const AttendanceRest = ({ route }) => {
   const [isTake, setTake] = useState(false);
   const isFocused = useIsFocused();
   const navigation = useNavigation();
-  const [step, setStep] = useState(shuffleArr());
+  const [step, setStep] = useState(shuffleArr([2, 3, 2, 3]));
   const [faceId, setFaceId] = useState(0);
   const [front, setFront] = useState(true);
   const [coordinate, setCoordinate] = useState({
@@ -69,6 +70,10 @@ const AttendanceRest = ({ route }) => {
   });
   const MasterEmployee = TaskServices.getAllData('TM_EMPLOYEE');
   const [focus, setFocus] = useState(true);
+
+  useEffect(() => {
+    return () => setReady(false);
+  }, [])
 
   useEffect(() => {
     const onChangeState = () => {
@@ -105,7 +110,7 @@ const AttendanceRest = ({ route }) => {
       data = res.filter((item) => location.includes(item.AFD_CODE))
     } else if (user.REFERENCE_LOCATION == 'BA') {
       data = res.filter((item) => location.includes(item.WERKS))
-    } else if (user.REFERENCE_LOCATION == 'COMPANY') {
+    } else if (user.REFERENCE_LOCATION == 'COMP') {
       data = res.filter((item) => location.includes(item.COMP_CODE))
     } else {
       // TODO: HO Need Filter!!
@@ -131,7 +136,7 @@ const AttendanceRest = ({ route }) => {
     if (rightEye < 0.06 && leftEye < 0.06 && !isTake) {
       setTake(true);
       setIsMotion(true);
-      setMotionCount(motionCount + 1);
+      setMotionCount(1);
     }
   };
 
@@ -139,7 +144,7 @@ const AttendanceRest = ({ route }) => {
     const basePosition = event?.faces[0]?.NOSE_BASE?.x;
     if (basePosition <= 140) {
       setIsMotion(true);
-      setMotionCount(motionCount + 1);
+      setMotionCount(1);
     }
   };
 
@@ -147,49 +152,81 @@ const AttendanceRest = ({ route }) => {
     const basePosition = event?.faces[0]?.NOSE_BASE?.x;
     if (basePosition >= 250) {
       setIsMotion(true);
-      setMotionCount(motionCount + 1);
+      setMotionCount(1);
     }
   };
 
   const condition3 = event => {
     const mouth = event?.faces[0]?.smilingProbability;
-    if (mouth > 0.9) {
+    if (mouth > 0.9 && !isTake) {
+      setTake(true)
       setIsMotion(true);
-      setMotionCount(motionCount + 1);
+      setMotionCount(1);
     }
   };
 
   const onFacesDetected = event => {
     let val = step[motionCount];
-    if (val === 0) {
-      condition1(event);
-    } else if (val === 1) {
-      condition2(event);
-    } else if (val === 2) {
-      condition3(event);
-    } else {
-      condition4(event);
+    if (!isTake && motionCount === 0) {
+      if (val === 0) {
+        condition1(event);
+      } else if (val === 1) {
+        condition2(event);
+      } else if (val === 2) {
+        condition3(event);
+      } else {
+        condition4(event);
+      }
     }
 
-    const faceID = event?.faces[0]?.faceID;
-    if (faceId !== faceID) {
-      // setIsMotion(false);
-      // setMotionCount(0);
-      randomize();
-    }
-    setFaceId(faceID);
+    // const faceID = event?.faces[0]?.faceID;
+    // if (faceId !== faceID) {
+    //   // setIsMotion(false);
+    //   // setMotionCount(0);
+    //   randomize();
+    // }
+    // setFaceId(faceID);
   };
+
+  const filename = () => {
+    let val = step[motionCount];
+    if (motionCount > 0) {
+      return 'look_camera'
+    }
+    if (val === 0) {
+      return 'look_left';
+    } else if (val === 1) {
+      return 'look_right';
+    } else if (val === 2) {
+      return 'smile';
+    } else {
+      return 'blink';
+    }
+  };
+
+  useEffect(() => {
+    if (isFocused && ready && !isTake) {
+      if (motionCount > 0) {
+        SoundPlayer.playSoundFile(filename(), 'mp3')
+      } else {
+        setTimeout(() => {
+          SoundPlayer.playSoundFile(filename(), 'mp3')
+        }, 1000)
+      }
+    }
+  }, [isFocused, motionCount, step, ready])
+
 
   useEffect(() => {
     if (motionCount > 0) {
       setTimeout(() => {
         takePicture();
-      }, 1500)
+      }, 2500)
     }
   }, [motionCount]);
 
   const randomize = () => {
-    setStep(shuffleArr());
+    setStep(shuffleArr([2, 3, 2, 3]));
     // console.log(step, 'steps');
     setMotionCount(0);
   };
@@ -197,7 +234,7 @@ const AttendanceRest = ({ route }) => {
   useEffect(() => {
     let timeout = setTimeout(() => {
       randomize();
-    }, 10000);
+    }, 7000);
 
     return () => clearTimeout(timeout);
   }, [step]);
@@ -221,8 +258,8 @@ const AttendanceRest = ({ route }) => {
         .detectSingleFace(
           imageTensor,
           new faceapi.TinyFaceDetectorOptions({
-            inputSize: 416,
-            scoreThreshold: 0.43,
+            inputSize: 608,
+            scoreThreshold: 0.3,
           }),
         )
         .withFaceLandmarks()
@@ -231,7 +268,7 @@ const AttendanceRest = ({ route }) => {
         const descriptors = Descriptor.map(item =>
           faceapi.LabeledFaceDescriptors.fromJSON(item),
         );
-        const faceMatcher = new faceapi.FaceMatcher(descriptors, 0.43);
+        const faceMatcher = new faceapi.FaceMatcher(descriptors, 0.45);
         const results = faceMatcher.findBestMatch(detection.descriptor);
         console.log(results);
         if (results._label != 'unknown') {
@@ -264,6 +301,7 @@ const AttendanceRest = ({ route }) => {
   };
 
   const takePicture = async () => {
+    if (isLoading) return;
     if (!camera) return;
     const image = await camera.takePictureAsync({ base64: true });
     if (image) {
@@ -276,7 +314,7 @@ const AttendanceRest = ({ route }) => {
       //   if (online) {
       // recognizeOnline(results);
       //   } else {
-      await RecognitionOffline(results.base64, results);
+      await RecognitionOffline(results.base64, image);
       //   }
     }
   };
@@ -330,6 +368,7 @@ const AttendanceRest = ({ route }) => {
     }
   };
 
+  const { ID, SOURCE } = TaskServices.getAllData('T_NAVIGATE')[0];
   return (
     <View style={{ flex: 1 }}>
       {showModal()}
@@ -341,9 +380,9 @@ const AttendanceRest = ({ route }) => {
             size={25}
             color={'#6C6C6C'}
             style={styles.back}
-            onPress={() => navigation.goBack()}
+            onPress={() => navigation.navigate('Home')}
           />
-          <TouchableOpacity activeOpacity={0.8} onPress={() => navigation.goBack()}>
+          <TouchableOpacity activeOpacity={0.8} onPress={() => navigation.navigate(SOURCE)}>
             <Text style={styles.title}>Kembali</Text>
           </TouchableOpacity>
           <ExpoIcon
@@ -363,19 +402,19 @@ const AttendanceRest = ({ route }) => {
               type={front ? 'front' : 'back'}
               ratio={'4:3'}
               faceDetectorSettings={{
-                mode: FaceDetector.FaceDetectorMode.fast,
-                detectLandmarks: FaceDetector.FaceDetectorLandmarks.none,
-                runClassifications: FaceDetector.FaceDetectorClassifications.none,
+                mode: 2,
+                detectLandmarks: 2,
+                runClassifications: 2,
                 minDetectionInterval: 500,
                 tracking: true,
               }}
               onCameraReady={() => setReady(true)}
-              onMountError={err => console.log(err, 'error mount')}
-              onFacesDetected={ready && focus ? onFacesDetected : null}
+              onMountError={err => setReady(false)}
+              onFacesDetected={ready && focus && isFocused ? onFacesDetected : null}
             >
               <CircleMask />
               <Image style={styles.frame} source={FrontFrame} />
-              <Image style={styles.frame} source={FrontLine} />
+              {/* <Image style={styles.frame} source={FrontLine} /> */}
             </Camera>
           </View>
         ) : null}

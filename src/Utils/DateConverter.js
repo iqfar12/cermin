@@ -5,3 +5,11 @@ export const dateConverter = (date) => {
     const year = dateNow.getFullYear();
     return day + month + year
 }
+
+export const dateGenerator = () => {
+    let date = new Date();
+    let hours = date.getHours();
+    let localDate = date.setHours(hours + 7)
+
+    return new Date(localDate)
+}
