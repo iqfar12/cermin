@@ -1,4 +1,4 @@
-import React, {useEffect, useState} from 'react';
+import React, { useEffect, useState } from 'react';
 import {
   StyleSheet,
   Text,
@@ -10,16 +10,17 @@ import {
   Platform,
   ActivityIndicator,
   StatusBar,
+  Image,
 } from 'react-native';
-import {useNavigation} from '@react-navigation/native';
+import { useNavigation } from '@react-navigation/native';
 import * as faceapi from 'face-api.js';
 import '@tensorflow/tfjs-react-native';
 import '../../../platform';
 import * as fs from 'expo-file-system';
 import axios from 'axios';
-import {Endpoint} from '../../Utils/Endpoint';
-import {RecognitionOffline} from '../../Utils/RecognitionOffline';
-import {Camera, requestCameraPermissionsAsync} from 'expo-camera';
+import { Endpoint } from '../../Utils/Endpoint';
+import { RecognitionOffline } from '../../Utils/RecognitionOffline';
+import { Camera, requestCameraPermissionsAsync } from 'expo-camera';
 import * as IntentLauncher from 'expo-intent-launcher';
 import TaskServices from '../../Database/TaskServices';
 import HeaderHome from './HeaderHome';
@@ -34,7 +35,7 @@ import { dateGenerator } from '../../Utils/DateConverter';
 import { checkTimezoneSetting } from '../../Utils/StoragePermisssion';
 
 moment.locale('id');
-const HomeScreen = ({route}) => {
+const HomeScreen = ({ route }) => {
   const [sync, setSync] = useState(false);
   const [status, setStatus] = useState({
     loading: true,
@@ -155,24 +156,24 @@ const HomeScreen = ({route}) => {
                   <ActivityIndicator size={'large'} color={'#000'} />
                 </View>
               ) : (
-                <>
-                  <Text style={styles.message}>{status.message}</Text>
-                  <TouchableOpacity
-                    style={styles.button}
-                    activeOpacity={0.8}
-                    onPress={() => {
-                      setSync(false);
-                      setStatus({
-                        ...status,
-                        loading: false,
-                        message: '',
-                      });
-                    }}
-                  >
-                    <Text style={styles.buttonTitle}>Oke</Text>
-                  </TouchableOpacity>
-                </>
-              )}
+                  <>
+                    <Text style={styles.message}>{status.message}</Text>
+                    <TouchableOpacity
+                      style={styles.button}
+                      activeOpacity={0.8}
+                      onPress={() => {
+                        setSync(false);
+                        setStatus({
+                          ...status,
+                          loading: false,
+                          message: '',
+                        });
+                      }}
+                    >
+                      <Text style={styles.buttonTitle}>Oke</Text>
+                    </TouchableOpacity>
+                  </>
+                )}
             </View>
           </View>
         </Modal>

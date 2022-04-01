@@ -1,7 +1,7 @@
-import React, { useEffect } from 'react';
-import { StyleSheet, Text, View, StatusBar, PermissionsAndroid, Linking } from 'react-native';
+import React, { useEffect, useState } from 'react';
+import { StyleSheet, Text, View, StatusBar, PermissionsAndroid, Linking, Image } from 'react-native';
 import LottieView from 'lottie-react-native';
-import { Splash } from '../../assets';
+import { Splash, Logo1 } from '../../assets';
 import { Fonts } from '../../Utils/Fonts';
 import TaskServices from '../../Database/TaskServices';
 import { useNavigation } from '@react-navigation/native';
@@ -21,6 +21,7 @@ const SplashScreen = () => {
   const pathFaceLandmarks = fs.DocumentDirectoryPath + '/face_landmark_model';
   const pathFaceRecognition = fs.DocumentDirectoryPath + '/face_recognition_model';
   const pathTiny = fs.DocumentDirectoryPath + '/tiny_model';
+  const [logo, setLogo] = useState(false);
 
   const handleLinking = (event) => {
     console.log(event);
@@ -134,13 +135,13 @@ const SplashScreen = () => {
       .writeFile(pathFaceLandmarks, base64FaceLandmark, 'base64')
       .then(() => console.log('succes write face landmark'));
 
-    const faceRecognition = await axios.get(urlFaceRecognition, {responseType: 'arraybuffer'});
+    const faceRecognition = await axios.get(urlFaceRecognition, { responseType: 'arraybuffer' });
     const base64FaceRecognition = encode(faceRecognition.data);
     await fs
       .writeFile(pathFaceRecognition, base64FaceRecognition, 'base64')
       .then(() => console.log('succes write face recognition'));
 
-    const tiny = await axios.get(urlTiny, {responseType: 'arraybuffer'});
+    const tiny = await axios.get(urlTiny, { responseType: 'arraybuffer' });
     const base64Tiny = encode(tiny.data);
     await fs
       .writeFile(pathTiny, base64Tiny, 'base64')
@@ -153,12 +154,12 @@ const SplashScreen = () => {
     const ssdFile = await fs.readFile(pathSsd, 'base64');
     const landmarkFile = await fs.readFile(pathFaceLandmarks, 'base64');
     const recognitionFile = await fs.readFile(pathFaceRecognition, 'base64');
-    
+
     const tinyBuffer = decode(tinyFile);
     const ssdBuffer = decode(ssdFile);
     const landmarkBuffer = decode(landmarkFile);
     const recognitionBuffer = decode(recognitionFile);
-    
+
     const tinyWeight = new Float32Array(tinyBuffer);
     const ssdWeight = new Float32Array(ssdBuffer);
     const landmarkWeight = new Float32Array(landmarkBuffer);
@@ -270,18 +271,33 @@ const SplashScreen = () => {
 
   const checkLogin = async () => {
     console.log(user, 'user');
-    if (user !== undefined && user.ACCESS_TOKEN !== null) {
-      navigation.replace('Home');
-    } else {
-      navigation.replace('Login');
-    }
+    setLogo(true);
+    setTimeout(() => {
+      if (user !== undefined && user.ACCESS_TOKEN !== null) {
+        navigation.replace('Home');
+      } else {
+        navigation.replace('Login');
+      }
+    }, 2000)
   };
 
   return (
     <View style={styles.container}>
       <StatusBar backgroundColor={'#FFF'} />
-      <LottieView source={Splash} autoPlay={true} loop={true} autoSize={true} />
-      <Text style={styles.title}>Face Recognition</Text>
+      {!logo ? 
+        <>
+          <LottieView source={Splash} autoPlay={true} loop={true} autoSize={true} />
+          <Text style={styles.title}>Face Recognition</Text>
+        </>
+        :
+        <>
+          <View style={styles.logo}>
+            <Image style={styles.image} source={Logo1} />
+          </View>
+          <Text style={styles.logoTitle}>CERMIN</Text>
+          <Text style={styles.logoTxt}>Face Recognition Machine</Text>
+        </>
+      }
       <Text style={styles.copyright}>©copyright by Triputra Agro Persada </Text>
     </View>
   );
@@ -312,4 +328,26 @@ const styles = StyleSheet.create({
     bottom: 0,
     marginBottom: 35,
   },
+  image: {
+    flex: 1,
+    resizeMode: 'contain'
+  },
+  logo: {
+    width: '60%',
+    height: undefined,
+    aspectRatio: 1 / 1,
+    alignItems: 'center',
+  },
+  logoTitle: {
+    color: '#195FBA',
+    fontSize: 40,
+    fontFamily: Fonts.bold,
+    lineHeight: 40,
+    letterSpacing: 15,
+  },
+  logoTxt: {
+    fontSize: 16,
+    color: '#000',
+    fontFamily: Fonts.bold,
+  }
 });

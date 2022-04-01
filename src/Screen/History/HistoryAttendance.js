@@ -105,6 +105,8 @@ const HistoryAttendance = () => {
         return res
     }, [ListAttendance]);
 
+    console.log(GroupingListMember);
+
     const ListEmployee = useMemo(() => {
         const res = MasterEmployee.filter((item) => item.TYPE === 'E').filter((item) => item.REGISTER_STATUS == 'NONE');
         const location = user.LOCATION.split(',');
@@ -173,6 +175,12 @@ const HistoryAttendance = () => {
                             <View style={styles.state}>
                                 <Text style={styles.stateTitle}>{'Istirahat'}</Text>
                                 <Text style={styles.stateTime}>{moment(item.REST).format('HH:mm')}</Text>
+                            </View>
+                        }
+                        {item.AGENDA !== null &&
+                            <View style={styles.state}>
+                                <Text style={styles.stateTitle}>{'Izin'}</Text>
+                                <Text style={styles.stateTime}>{moment(item.AGENDA).format('HH:mm')}</Text>
                             </View>
                         }
                     </View>
