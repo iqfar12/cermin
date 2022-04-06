@@ -670,7 +670,7 @@ const RegisterScreen = ({ route }) => {
   const condition3 = event => {
     const { x, y } = event?.faces[0]?.NOSE_BASE;
     console.log(x);
-    if (x >= 205 && x <= 255) {
+    if (x >= 205 && x <= 265) {
       // Left
       console.log('right');
       takePicture();

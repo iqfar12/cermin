@@ -57,7 +57,7 @@ const SplashScreen = () => {
     lookup[chars.charCodeAt(i)] = i;
   }
 
-  const decode = (base64: string): ArrayBuffer => {
+  const decode = (base64) => {
     let bufferLength = base64.length * 0.75,
       len = base64.length,
       i,
@@ -91,7 +91,7 @@ const SplashScreen = () => {
     return arraybuffer;
   };
 
-  const encode = (arraybuffer: ArrayBuffer): string => {
+  const encode = (arraybuffer) => {
     let bytes = new Uint8Array(arraybuffer),
       i,
       len = bytes.length,
@@ -272,32 +272,30 @@ const SplashScreen = () => {
   const checkLogin = async () => {
     console.log(user, 'user');
     setLogo(true);
-    setTimeout(() => {
-      if (user !== undefined && user.ACCESS_TOKEN !== null) {
-        navigation.replace('Home');
-      } else {
-        navigation.replace('Login');
-      }
-    }, 2000)
+    if (user !== undefined && user.ACCESS_TOKEN !== null) {
+      navigation.replace('Home');
+    } else {
+      navigation.replace('Login');
+    }
   };
 
   return (
     <View style={styles.container}>
       <StatusBar backgroundColor={'#FFF'} />
-      {!logo ? 
+      {/* {!logo ? 
         <>
           <LottieView source={Splash} autoPlay={true} loop={true} autoSize={true} />
           <Text style={styles.title}>Face Recognition</Text>
         </>
         :
-        <>
-          <View style={styles.logo}>
-            <Image style={styles.image} source={Logo1} />
-          </View>
-          <Text style={styles.logoTitle}>CERMIN</Text>
-          <Text style={styles.logoTxt}>Face Recognition Machine</Text>
-        </>
-      }
+        <> */}
+      <View style={styles.logo}>
+        <Image style={styles.image} source={Logo1} />
+      </View>
+      <Text style={styles.logoTitle}>CERMIN</Text>
+      <Text style={styles.logoTxt}>Face Recognition Machine</Text>
+      {/* </> */}
+      {/* // } */}
       <Text style={styles.copyright}>©copyright by Triputra Agro Persada </Text>
     </View>
   );

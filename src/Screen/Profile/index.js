@@ -13,6 +13,7 @@ import NetInfo from '@react-native-community/netinfo';
 import NoConnectionModal from '../../Component/NoConnectionModal';
 import axios from 'axios';
 import NotSyncModal from '../../Component/NotSyncModal';
+import { ImageToBase64 } from '../../Utils/ImageConverter';
 
 const ProfileScreen = () => {
   const navigation = useNavigation();
@@ -56,6 +57,7 @@ const ProfileScreen = () => {
   const [resetModal, setResetModal] = useState(false);
   const [connection, setConnection] = useState(false);
   const MasterEmployee = TaskServices.getAllData('TM_EMPLOYEE');
+  const MasterImages = TaskServices.getAllData('TR_IMAGES');
   const [syncModal, setSyncModal] = useState(false);
   const MasterAttendance = TaskServices.getAllData('TR_ATTENDANCE');
   const isFocused = useIsFocused();
@@ -126,13 +128,26 @@ const ProfileScreen = () => {
     setBackUpModal(true)
   };
 
+  const DataExportRegister = useMemo(() => {
+    return MasterEmployee.filter((item) => item.REGISTER_STATUS == 'PROCESS').map((item) => {
+      const images = MasterImages.filter((image) => image.MODEL_ID == item.ID)
+      item.IMAGES = images.map((image) => ({
+        ID: image.ID,
+        FILE_NAME: image.FILE_NAME,
+        NAME: image.NAME,
+        BASE64: image.BASE64
+      }))
+      return item
+    })
+  }, [MasterEmployee, MasterImages])
+
+
   const onExport = async () => {
     const Attendance = TaskServices.getAllData('TR_ATTENDANCE');
-    const images = TaskServices.getAllData('TR_IMAGES');
     const AFD = TaskServices.getAllData('TM_AFD');
     const data = {
       TR_ATTENDANCE: Attendance,
-      // TR_IMAGES: images,
+      TM_EMPLOYEE: DataExportRegister,
       // TM_AFD: AFD,
     };
     const packagePath =

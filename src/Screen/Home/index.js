@@ -184,6 +184,8 @@ const HomeScreen = ({ route }) => {
   const user = TaskServices.getAllData('TM_USERS')[0];
 
   const navigation = useNavigation();
+  const MasterLog = TaskServices.getAllData('T_LOG');
+  console.log(MasterLog)
   return (
     <>
       <StatusBar backgroundColor={'#195FBA'} />

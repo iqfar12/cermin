@@ -1,6 +1,7 @@
 import TaskServices from "../../../Database/TaskServices"
 import axios from "axios";
 import { dateGenerator } from "../../../Utils/DateConverter";
+import { loggingError } from "../../../Utils/ErrorLogging";
 
 export const uploadAbsence = async () => {
     const dbLocal = TaskServices.getAllData('TR_ATTENDANCE')
@@ -55,6 +56,7 @@ export const uploadAbsence = async () => {
                     }
                 } catch (error) {
                     console.log(error.response, 'error upload attendance')
+                    loggingError(error, 'Error Upload Attendance')
                 }
             })
         )

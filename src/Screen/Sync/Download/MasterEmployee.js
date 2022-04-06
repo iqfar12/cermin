@@ -1,6 +1,7 @@
 import TaskServices from '../../../Database/TaskServices';
 import axios from 'axios';
 import { dateGenerator } from '../../../Utils/DateConverter';
+import { loggingError } from '../../../Utils/ErrorLogging';
 
 export const getMasterEmployee = async () => {
   const user = TaskServices.getCurrentUser();
@@ -117,6 +118,7 @@ export const getMasterEmployee = async () => {
       }
     } catch (error) {
       console.log(error, 'error');
+      loggingError(error, 'Error Get Employee')
     }
   }
 

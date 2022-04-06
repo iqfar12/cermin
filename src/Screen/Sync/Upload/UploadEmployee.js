@@ -1,6 +1,7 @@
 import TaskServices from "../../../Database/TaskServices"
 import axios from "axios";
 import { dateGenerator } from "../../../Utils/DateConverter";
+import { loggingError } from "../../../Utils/ErrorLogging";
 
 export const uploadSyncEmployee = async () => {
     const dbLocal = TaskServices.getAllData('TM_EMPLOYEE').filter((item) => item.SYNC_TIME === null);
@@ -73,6 +74,7 @@ export const uploadSyncEmployee = async () => {
                     }
                 } catch (error) {
                     console.log(error, 'error register')
+                    loggingError(error, 'Error Upload Register Employee')
                 }
             })
         )

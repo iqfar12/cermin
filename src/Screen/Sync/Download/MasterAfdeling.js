@@ -1,5 +1,6 @@
 import axios from 'axios';
 import TaskServices from '../../../Database/TaskServices';
+import { loggingError } from '../../../Utils/ErrorLogging';
 
 export const getMasterAfdeling = async () => {
   const user = TaskServices.getCurrentUser();
@@ -70,6 +71,7 @@ export const getMasterAfdeling = async () => {
       }
     } catch (error) {
       console.log(error, 'error');
+      loggingError(error, 'Error Afdeling')
     }
   }
 
