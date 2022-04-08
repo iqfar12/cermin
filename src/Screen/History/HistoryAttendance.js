@@ -74,11 +74,11 @@ const HistoryAttendance = () => {
             return r;
         }, Object.create(null));
         const res = Object.values(group).map((item) => {
-            const attendanceIn = item.find((item) => item.TYPE == '1');
-            const attendanceOut = item.find((item) => item.TYPE == '3');
-            const rest = item.find((item) => item.TYPE == '2');
-            const agenda = item.find((item) => item.TYPE == '4');
-
+            const attendanceIn = item.find((data) => data.TYPE == '1');
+            const attendanceOut = item.find((data) => data.TYPE == '3');
+            const rest = item.find((data) => data.TYPE == '2');
+            const agenda = item.find((data) => data.TYPE == '4');
+            const isSync = !item.map((data) => data.SYNC_TIME).includes(null)
             let insertTime = new Date();
             if (attendanceIn !== undefined) {
                 insertTime = attendanceIn.INSERT_TIME
@@ -99,7 +99,8 @@ const HistoryAttendance = () => {
                 ATTENDANCE_OUT: attendanceOut !== undefined ? attendanceOut.INSERT_TIME : null,
                 REST: rest !== undefined ? rest.INSERT_TIME : null,
                 AGENDA: agenda !== undefined ? agenda.INSERT_TIME : null,
-                INSERT_TIME: insertTime
+                INSERT_TIME: insertTime,
+                SYNC: isSync
             }
         });
         return res
@@ -145,7 +146,7 @@ const HistoryAttendance = () => {
             <TouchableOpacity activeOpacity={0.8} onPress={() => navigation.navigate('Detail History Attendance', { id: item.EMPLOYEE_ID, date: item.INSERT_TIME })} style={styles.card}>
                 <View style={styles.top}>
                     <Text style={styles.name}>{item.NIK}<Text style={styles.nik}> | {item.NAME}</Text></Text>
-                    <Icon name={'radio-button-unchecked'} size={25} color={'#FFB81C'} />
+                    <Icon name={item.SYNC ? 'done' : 'radio-button-unchecked'} size={25} color={item.SYNC ? '#195FBA' : '#FFB81C'} />
                 </View>
                 <View style={styles.subTop}>
                     <View style={styles.location}>
