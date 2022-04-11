@@ -7,7 +7,7 @@ export const uploadSyncEmployee = async () => {
     const dbLocal = TaskServices.getAllData('TM_EMPLOYEE').filter((item) => item.SYNC_TIME === null);
     const user = TaskServices.getCurrentUser();
     const url =  user.SERVER + '/crm-msa-attendance/employee/register';
-    // const url = 'http://192.168.0.108:4000/employee/register';
+    // const url = 'http://192.168.100.40:4000/employee/register';
     const MasterImages = TaskServices.getAllData('TR_IMAGES')
 
     let uploadCount = {
@@ -16,69 +16,131 @@ export const uploadSyncEmployee = async () => {
     }
 
     if (dbLocal.length > 0) {
-        await Promise.all(
-            dbLocal.map(async (item) => {
-                let formData = new FormData();
-                const images = MasterImages.filter((data) => data.MODEL_ID == item.ID);
-                images.forEach((item, index) => {
-                    if (index < 4) {
-                        formData.append('images', {
-                            uri: `file://${item.URL}`,
-                            name: `${item.FILE_NAME}_${index}.jpeg`,
-                            type: 'image/jpeg'
-                        })
-                    }
-                })
-                if (item.TYPE == 'E') {
-                    formData.append('id', item.ID)
-                } else {
-                    formData.append('employeeNik', item.EMPLOYEE_NIK)
-                    formData.append('employeeFullname', item.EMPLOYEE_FULLNAME)
-                    if (item.AFD_CODE !== null) {
-                        formData.append('afdCode', item.AFD_CODE)
-                    }
-                    if (item.COMP_CODE !== null) {
-                        formData.append('compCode', item.COMP_CODE)
-                    }
-                    if (item.WERKS !== null) {
-                        formData.append('werks', item.WERKS)
-                    }
-                }
-                console.log(formData, 'body')
-                try {
-                    const res = await axios.post(url, formData, {
-                        headers: {
-                            'Authorization': 'Bearer ' + user.ACCESS_TOKEN,
-                            'Content-Type': 'multipart/form-data'
-                        }
-                    });
-                    if (res) {
-                        console.log(res.data, 'res upload')
-
-                        uploadCount = {
-                            ...uploadCount,
-                            count: uploadCount.count + 1
-                        }
-
-                        let data = {
-                            ID: item.ID,
-                            SYNC_TIME: dateGenerator(),
-                            SYNC_STATUS: 1,
-                        }
-
-                        if (item.TYPE == 'N') {
-                            data.REGISTER_STATUS = 'Success'
-                        }
-
-                     TaskServices.saveData('TM_EMPLOYEE', data)
-                    }
-                } catch (error) {
-                    console.log(error, 'error register')
-                    loggingError(error, 'Error Upload Register Employee')
+        for (const person of dbLocal) {
+            let formData = new FormData();
+            const images = MasterImages.filter((data) => data.MODEL_ID == person.ID);
+            images.map((item, index) => {
+                if (index < 4) {
+                    formData.append('images', {
+                        uri: `file://${item.URL}`,
+                        name: `${item.FILE_NAME}_${index}.jpeg`,
+                        type: 'image/jpeg'
+                    })
                 }
             })
-        )
+            if (person.TYPE == 'E') {
+                formData.append('id', person.ID)
+            } else {
+                formData.append('employeeNik', person.EMPLOYEE_NIK)
+                formData.append('employeeFullname', person.EMPLOYEE_FULLNAME)
+                if (person.AFD_CODE !== null) {
+                    formData.append('afdCode', person.AFD_CODE)
+                }
+                if (person.COMP_CODE !== null) {
+                    formData.append('compCode', person.COMP_CODE)
+                }
+                if (person.WERKS !== null) {
+                    formData.append('werks', person.WERKS)
+                }
+            }
+
+            try {
+                const res = await axios.post(url, formData, {
+                    headers: {
+                        'Authorization': 'Bearer ' + user.ACCESS_TOKEN,
+                        'Content-Type': 'multipart/form-data'
+                    }
+                });
+                if (res) {
+                    console.log(res.data, 'res upload')
+
+                    uploadCount = {
+                        ...uploadCount,
+                        count: uploadCount.count + 1
+                    }
+
+                    let data = {
+                        ID: person.ID,
+                        SYNC_TIME: dateGenerator(),
+                        SYNC_STATUS: 1,
+                    }
+
+                    if (person.TYPE == 'N') {
+                        data.REGISTER_STATUS = 'Success'
+                    }
+
+                 TaskServices.saveData('TM_EMPLOYEE', data)
+                }
+            } catch (error) {
+                console.log(error, 'error register')
+                loggingError(error, 'Error Upload Register Employee')
+            }
+        }
     }
+
+    // if (dbLocal.length > 0) {
+    //     await Promise.all(
+    //         dbLocal.map(async (item) => {
+    //             let formData = new FormData();
+    //             const images = MasterImages.filter((data) => data.MODEL_ID == item.ID);
+    //             images.forEach((item, index) => {
+    //                 if (index < 4) {
+    //                     formData.append('images', {
+    //                         uri: `file://${item.URL}`,
+    //                         name: `${item.FILE_NAME}_${index}.jpeg`,
+    //                         type: 'image/jpeg'
+    //                     })
+    //                 }
+    //             })
+    //             if (item.TYPE == 'E') {
+    //                 formData.append('id', item.ID)
+    //             } else {
+    //                 formData.append('employeeNik', item.EMPLOYEE_NIK)
+    //                 formData.append('employeeFullname', item.EMPLOYEE_FULLNAME)
+    //                 if (item.AFD_CODE !== null) {
+    //                     formData.append('afdCode', item.AFD_CODE)
+    //                 }
+    //                 if (item.COMP_CODE !== null) {
+    //                     formData.append('compCode', item.COMP_CODE)
+    //                 }
+    //                 if (item.WERKS !== null) {
+    //                     formData.append('werks', item.WERKS)
+    //                 }
+    //             }
+    //             try {
+    //                 const res = await axios.post(url, formData, {
+    //                     headers: {
+    //                         'Authorization': 'Bearer ' + user.ACCESS_TOKEN,
+    //                         'Content-Type': 'multipart/form-data'
+    //                     }
+    //                 });
+    //                 if (res) {
+    //                     console.log(res.data, 'res upload')
+
+    //                     uploadCount = {
+    //                         ...uploadCount,
+    //                         count: uploadCount.count + 1
+    //                     }
+
+    //                     let data = {
+    //                         ID: item.ID,
+    //                         SYNC_TIME: dateGenerator(),
+    //                         SYNC_STATUS: 1,
+    //                     }
+
+    //                     if (item.TYPE == 'N') {
+    //                         data.REGISTER_STATUS = 'Success'
+    //                     }
+
+    //                  TaskServices.saveData('TM_EMPLOYEE', data)
+    //                 }
+    //             } catch (error) {
+    //                 console.log(error, 'error register')
+    //                 loggingError(error, 'Error Upload Register Employee')
+    //             }
+    //         })
+    //     )
+    // }
 
     return uploadCount
 }

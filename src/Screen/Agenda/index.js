@@ -110,7 +110,7 @@ const LeaveScreen = () => {
             ACCURACY: 99.9,
             LATITUDE: coord.latitude,
             LONGITUDE: coord.longitude,
-            MANUAL_INPUT: 1,
+            MANUAL_INPUT: 0,
             DESCRIPTION: descrip,
             INSERT_TIME: new Date(),
             INSERT_USER: user.EMPLOYEE_NIK,

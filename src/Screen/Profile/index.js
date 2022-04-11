@@ -129,7 +129,7 @@ const ProfileScreen = () => {
   };
 
   const DataExportRegister = useMemo(() => {
-    return MasterEmployee.filter((item) => item.REGISTER_STATUS == 'PROCESS').map((item) => {
+    return MasterEmployee.filter((item) => item.REGISTER_STATUS !== 'NONE').map((item) => {
       const images = MasterImages.filter((image) => image.MODEL_ID == item.ID)
       item.IMAGES = images.map((image) => ({
         ID: image.ID,
