@@ -19,34 +19,11 @@ const RightComponent = ({ navigation }) => {
     );
 };
 
-const DummyData = [
-    {
-        id: 0,
-    },
-    {
-        id: 0,
-    },
-    {
-        id: 0,
-    },
-    {
-        id: 0,
-    },
-    {
-        id: 0,
-    },
-    {
-        id: 0,
-    },
-    {
-        id: 0,
-    },
-]
-
 const HistoryAgenda = () => {
     const navigation = useNavigation();
     const MasterAttendance = TaskServices.getAllData('TR_ATTENDANCE');
     const MasterEmployee = TaskServices.getAllData('TM_EMPLOYEE');
+    const MasterAbsenceCode = TaskServices.getAllData('TM_ABSENCE_TYPE')
     const [search, setSearch] = useState('');
 
     const ListAgenda = useMemo(() => {
@@ -60,18 +37,31 @@ const HistoryAgenda = () => {
 
     const renderListCard = ({ item, index }) => {
         const user = MasterEmployee.find((data) => data.ID == item.EMPLOYEE_ID)
+        const type = MasterAbsenceCode.find((data) => data.CODE == item.ABSENCE_CODE)?.DESCRIPTION
         return (
             <View style={styles.card}>
-                <View style={styles.cardLeft}>
-                    <Text style={styles.name}>{user?.EMPLOYEE_FULLNAME}</Text>
-                    <Text style={styles.nik}>{user?.EMPLOYEE_NIK} </Text>
-                </View>
-                <View style={styles.cardRight}>
-                    <View style={styles.location}>
-                        <Icon name={'location-pin'} size={20} color={'#C5C5C5'} />
-                        <Text style={styles.locationTxt}>{user?.WERKS}</Text>
+                <View style={styles.topCard}>
+                    <View style={styles.cardLeft}>
+                        <Text numberOfLines={1} ellipsizeMode={'tail'} style={styles.name}>{user?.EMPLOYEE_FULLNAME}</Text>
+                        <Text style={styles.nik}>{user?.EMPLOYEE_NIK} </Text>
                     </View>
-                    <Icon name={'radio-button-unchecked'} size={25} color={'#FFB81C'} />
+                    <View style={styles.cardRight}>
+                        <View style={styles.location}>
+                            <Icon name={'location-pin'} size={20} color={'#C5C5C5'} />
+                            <Text style={styles.locationTxt}>{user?.WERKS}</Text>
+                        </View>
+                        <Icon name={item.SYNC_TIME !== null ? 'done' : 'radio-button-unchecked'} size={25} color={item.SYNC_TIME !== null ? '#195FBA' : '#FFB81C'} />
+                    </View>
+                </View>
+                <View style={styles.bottom}>
+                    <View style={styles.bottomComponent}>
+                        <Text style={styles.title}>Tipe Ijin</Text>
+                        <Text style={styles.txt} numberOfLines={4} ellipsizeMode={'tail'}>{type}</Text>
+                    </View>
+                    <View style={styles.bottomComponent}>
+                        <Text style={styles.title}>Keterangan</Text>
+                        <Text style={styles.txt} numberOfLines={4} ellipsizeMode={'tail'}>{item.DESCRIPTION}</Text>
+                    </View>
                 </View>
             </View>
         )
@@ -102,11 +92,11 @@ const HistoryAgenda = () => {
                         </View>
                     </View> */}
                     <FlatList
-                     data={ListAgenda}
-                     renderItem={renderListCard}
-                     keyExtractor={(_, i) => i.toString()}
-                     contentContainerStyle={styles.list}
-                     showsVerticalScrollIndicator={false}
+                        data={ListAgenda}
+                        renderItem={renderListCard}
+                        keyExtractor={(_, i) => i.toString()}
+                        contentContainerStyle={styles.list}
+                        showsVerticalScrollIndicator={false}
                     />
                 </View>
             </View>
@@ -197,8 +187,6 @@ const styles = StyleSheet.create({
         marginRight: 10,
     },
     card: {
-        flexDirection: 'row',
-        alignItems: 'center',
         elevation: 0.5,
         backgroundColor: '#FFF',
         borderRadius: 20,
@@ -207,11 +195,16 @@ const styles = StyleSheet.create({
         paddingVertical: 16,
         marginBottom: 10,
     },
+    topCard: {
+        flexDirection: 'row',
+        alignItems: 'center',
+    },
     cardLeft: {
         borderRightWidth: 1,
         borderColor: '#C5C5C5',
         paddingRight: 50,
         marginRight: 20,
+        maxWidth: '55%'
     },
     name: {
         fontSize: 16,
@@ -241,5 +234,27 @@ const styles = StyleSheet.create({
     list: {
         paddingTop: 24,
         paddingBottom: 200,
+    },
+    bottom: {
+        marginTop: 10, 
+        borderColor: '#C5C5C5',
+        borderTopWidth: 1,
+        flexDirection: 'row',
+        alignItems: 'center',
+    },
+    bottomComponent: {
+        paddingTop: 10,
+        width: '50%',
+        alignItems: 'center',
+    },
+    title: {
+        fontFamily: Fonts.bold,
+        color: '#000',
+        paddingBottom: 5,
+    },
+    txt: {
+        fontFamily: Fonts.book,
+        color: '#6C6C6C',
+        fontSize: 12,
     }
 })

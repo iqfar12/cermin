@@ -23,6 +23,7 @@ import TaskServices from '../../Database/TaskServices';
 import * as expoFS from 'expo-file-system';
 import SoundPlayer from 'react-native-sound-player';
 import { dateGenerator } from '../../Utils/DateConverter';
+import { ImageToBase64 } from '../../Utils/ImageConverter';
 
 
 const PreviewScreen = ({route}) => {
@@ -84,6 +85,7 @@ const PreviewScreen = ({route}) => {
     await fs.mkdir(namePath);
     preview.forEach(async (item, index) => {
       const path = namePath + `/${data?.EMPLOYEE_FULLNAME}_${index}.jpeg`;
+      const base64 = await ImageToBase64(item.uri)
       await fs.copyFile(item.uri, path);
       const id = UuidGenerator();
       const body = {
@@ -97,6 +99,7 @@ const PreviewScreen = ({route}) => {
         INSERT_USER: user.NAME,
         SYNC_STATUS: null,
         SYNC_TIME: null,
+        BASE64: base64,
       };
 
       await TaskServices.saveData('TR_IMAGES', body)

@@ -1,6 +1,7 @@
 import fs from 'react-native-fs';
 import axios from 'axios';
 import * as faceapi from 'face-api.js';
+import { loggingError } from '../../../Utils/ErrorLogging';
 
 
 export const getModel = async () => {
@@ -20,7 +21,7 @@ export const getModel = async () => {
         lookup[chars.charCodeAt(i)] = i;
     }
 
-    const decode = (base64: string): ArrayBuffer => {
+    const decode = (base64) => {
         let bufferLength = base64.length * 0.75,
             len = base64.length,
             i,
@@ -54,7 +55,7 @@ export const getModel = async () => {
         return arraybuffer;
     };
 
-    const encode = (arraybuffer: ArrayBuffer): string => {
+    const encode = (arraybuffer) => {
         let bytes = new Uint8Array(arraybuffer),
             i,
             len = bytes.length,
@@ -113,6 +114,7 @@ export const getModel = async () => {
             }
         }).catch((error) => {
             console.log(error, 'error')
+            loggingError(error, 'Error Get Model SSD')
         })
 
     const faceLandmark = await axios.get(urlFaceLandmark, { responseType: 'arraybuffer' });
@@ -127,6 +129,7 @@ export const getModel = async () => {
             }
         }).catch((error) => {
             console.log(error, 'error')
+            loggingError(error, 'Error Get Model FaceLandmark')
         })
 
     const faceRecognition = await axios.get(urlFaceRecognition, { responseType: 'arraybuffer' });
@@ -141,6 +144,7 @@ export const getModel = async () => {
             }
         }).catch((error) => {
             console.log(error, 'error')
+            loggingError(error, 'Error Get Model Face Recognition')
         })
 
     const tiny = await axios.get(urlTiny, { responseType: 'arraybuffer' });
@@ -155,6 +159,7 @@ export const getModel = async () => {
             }
         }).catch((error) => {
             console.log(error, 'error')
+            loggingError(error, 'Error Get Model Tiny')
         })
 
     return donwloadCount

@@ -1,4 +1,4 @@
-const SCHEMA_VERSION = 35;
+const SCHEMA_VERSION = 1;
 
 // TR = Transaksi
 // TM = Master
@@ -233,6 +233,7 @@ const TR_IMAGES = {
     INSERT_USER: 'string?',
     SYNC_STATUS: 'string?',
     SYNC_TIME: 'date?',
+    BASE64: 'string?'
   },
 };
 
@@ -251,6 +252,18 @@ const TR_NOTIFICATION = {
   },
 };
 
+const T_LOG = {
+  name: 'T_LOG',
+  primaryKey: 'ID',
+  properties: {
+    ID: 'int?',
+    ERROR: 'string?',
+    TICKET_NUMBER: 'string?',
+    DATETIME: 'date?',
+    DESCRIPTION: 'string?'
+  }
+}
+
 export default {
   TM_USERS,
   TM_PERMISSIONS,
@@ -266,6 +279,7 @@ export default {
   TR_NOTIFICATION,
   T_DUPLICATE,
   T_NAVIGATE,
+  T_LOG,
 
   SCHEMA_VERSION,
 };

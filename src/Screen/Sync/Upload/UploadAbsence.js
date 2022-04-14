@@ -1,6 +1,7 @@
 import TaskServices from "../../../Database/TaskServices"
 import axios from "axios";
 import { dateGenerator } from "../../../Utils/DateConverter";
+import { loggingError } from "../../../Utils/ErrorLogging";
 
 export const uploadAbsence = async () => {
     const dbLocal = TaskServices.getAllData('TR_ATTENDANCE')
@@ -15,50 +16,96 @@ export const uploadAbsence = async () => {
     }
 
     if (dbLocal.length > 0) {
-        await Promise.all(
-            dbLocal.map(async (item) => {
-                let body = {
-                    employeeId: item.EMPLOYEE_ID,
-                    description: item.DESCRIPTION,
-                    longIn: item.LONGITUDE,
-                    latIn: item.LATITUDE,
-                    datetime: item.DATETIME,
-                    type: parseInt(item.TYPE, 10),
-                    absenceCode: item.ABSENCE_CODE,
-                    accuracy: Math.abs((1 - item.ACCURACY) * 100),
-                    insertTime: item.DATETIME,
-                    manualInput: item.MANUAL_INPUT === 0 ? "N" : "Y"
-                }
-                console.log(body, 'body')
-                try {
-                    const res = await axios.post(url, body, {
-                        headers: {
-                            Authorization: 'Bearer ' + user.ACCESS_TOKEN
-                        }
-                    })
-                    if (res) {
-
-                        console.log(res.data, 'attendance')
-
-                        uploadCount = {
-                            ...uploadCount,
-                            count: uploadCount.count + 1
-                        }
-
-                        let data = {
-                            ID: item.ID,
-                            SYNC_TIME: dateGenerator(),
-                            SYNC_STATUS: "1"
-                        }
-
-                        TaskServices.saveData('TR_ATTENDANCE', data)
+        for (const attendance of dbLocal) {
+            let body = {
+                employeeId: attendance.EMPLOYEE_ID,
+                description: attendance.DESCRIPTION,
+                longIn: attendance.LONGITUDE,
+                latIn: attendance.LATITUDE,
+                datetime: attendance.DATETIME,
+                type: parseInt(attendance.TYPE, 10),
+                absenceCode: attendance.ABSENCE_CODE,
+                accuracy: Math.abs((1 - attendance.ACCURACY) * 100),
+                insertTime: attendance.DATETIME,
+                manualInput: attendance.MANUAL_INPUT === 0 ? "N" : "Y"
+            }
+            console.log(body, 'body')
+            try {
+                const res = await axios.post(url, body, {
+                    headers: {
+                        Authorization: 'Bearer ' + user.ACCESS_TOKEN
                     }
-                } catch (error) {
-                    console.log(error.response, 'error upload attendance')
+                })
+                if (res) {
+
+                    console.log(res.data, 'attendance')
+
+                    uploadCount = {
+                        ...uploadCount,
+                        count: uploadCount.count + 1
+                    }
+
+                    let data = {
+                        ID: attendance.ID,
+                        SYNC_TIME: dateGenerator(),
+                        SYNC_STATUS: "1"
+                    }
+
+                    TaskServices.saveData('TR_ATTENDANCE', data)
                 }
-            })
-        )
+            } catch (error) {
+                console.log(error.response, 'error upload attendance')
+                loggingError(error, 'Error Upload Attendance')
+            }
+        }
     }
+
+    // if (dbLocal.length > 0) {
+    //     await Promise.all(
+    //         dbLocal.map(async (item) => {
+    //             let body = {
+    //                 employeeId: item.EMPLOYEE_ID,
+    //                 description: item.DESCRIPTION,
+    //                 longIn: item.LONGITUDE,
+    //                 latIn: item.LATITUDE,
+    //                 datetime: item.DATETIME,
+    //                 type: parseInt(item.TYPE, 10),
+    //                 absenceCode: item.ABSENCE_CODE,
+    //                 accuracy: Math.abs((1 - item.ACCURACY) * 100),
+    //                 insertTime: item.DATETIME,
+    //                 manualInput: item.MANUAL_INPUT === 0 ? "N" : "Y"
+    //             }
+    //             console.log(body, 'body')
+    //             try {
+    //                 const res = await axios.post(url, body, {
+    //                     headers: {
+    //                         Authorization: 'Bearer ' + user.ACCESS_TOKEN
+    //                     }
+    //                 })
+    //                 if (res) {
+
+    //                     console.log(res.data, 'attendance')
+
+    //                     uploadCount = {
+    //                         ...uploadCount,
+    //                         count: uploadCount.count + 1
+    //                     }
+
+    //                     let data = {
+    //                         ID: item.ID,
+    //                         SYNC_TIME: dateGenerator(),
+    //                         SYNC_STATUS: "1"
+    //                     }
+
+    //                     TaskServices.saveData('TR_ATTENDANCE', data)
+    //                 }
+    //             } catch (error) {
+    //                 console.log(error.response, 'error upload attendance')
+    //                 loggingError(error, 'Error Upload Attendance')
+    //             }
+    //         })
+    //     )
+    // }
 
     return uploadCount
 }
