@@ -12,7 +12,7 @@ import BottomModal from "../../Component/BottomModal";
 import TaskServices from "../../Database/TaskServices";
 import MenuModal from "../../Component/MenuModal";
 import { UuidGenerator } from "../../Utils/UuidGenerator";
-import { dateGenerator } from "../../Utils/DateConverter";
+import { dateGenerator, dateConverter } from "../../Utils/DateConverter";
 import Geolocation from '@react-native-community/geolocation';
 
 const RightComponent = ({ navigation }) => {
@@ -35,6 +35,7 @@ const LeaveScreen = () => {
     const [userSearch, setUserSearch] = useState('');
     const MasterEmployee = TaskServices.getAllData('TM_EMPLOYEE');
     const MasterAbsenceType = TaskServices.getAllData('TM_ABSENCE_TYPE');
+    const MasterAttendance = TaskServices.getAllData('TR_ATTENDANCE');
     const [user, setUser] = useState();
     const [descrip, setDescrip] = useState('')
     const [leaveType, setLeaveType] = useState();
@@ -55,13 +56,20 @@ const LeaveScreen = () => {
         })
     }, [])
 
+    const AlreadyAgenda = useMemo(() => {
+        let currentDate = dateConverter(new Date())
+        let data = MasterAttendance.filter((item) => dateConverter(item.DATETIME) === currentDate).filter((item) => item.TYPE == '4')
+        return data.map((item) => item.EMPLOYEE_ID)
+    }, [MasterAttendance])
+
     const ListEmployee = useMemo(() => {
+        let data = MasterEmployee.filter((item) => !AlreadyAgenda.includes(item.ID))
         if (userSearch !== '') {
-            return MasterEmployee.filter((item) =>
-                item.EMPLOYEE_NIK.split(' ').join('').includes(userSearch) ||
+            return data.filter((item) =>
+                item.EMPLOYEE_NIK.split('/').join('').includes(userSearch.split('/').join('')) ||
                 item.EMPLOYEE_FULLNAME.toLowerCase().includes(userSearch.toLowerCase()))
         } else {
-            return MasterEmployee;
+            return data;
         }
     }, [MasterEmployee, userSearch])
 
@@ -102,7 +110,7 @@ const LeaveScreen = () => {
             ACCURACY: 99.9,
             LATITUDE: coord.latitude,
             LONGITUDE: coord.longitude,
-            MANUAL_INPUT: 1,
+            MANUAL_INPUT: 0,
             DESCRIPTION: descrip,
             INSERT_TIME: new Date(),
             INSERT_USER: user.EMPLOYEE_NIK,

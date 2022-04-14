@@ -1,5 +1,6 @@
 import TaskServices from '../../../Database/TaskServices';
 import axios from 'axios';
+import { loggingError } from '../../../Utils/ErrorLogging';
 
 export const getMasterEst = async () => {
   const user = TaskServices.getCurrentUser();
@@ -65,6 +66,7 @@ export const getMasterEst = async () => {
     }
   } catch (error) {
     console.log(error, 'error');
+    loggingError(error, 'Error Estate')
   }
 
   return downloadProgress;

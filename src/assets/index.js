@@ -35,8 +35,12 @@ import Email from './Email.png';
 import NotSync from './ic-no-data.png';
 import ic_batas_waktu from './ic-batas-waktu.png';
 import ic_no_data from './ic-no-data.png';
+import Logo1 from './TAP-FR-Logo-01.png';
+import Logo2 from './TAP-FR-Logo-02.png';
 
 export {
+  Logo1,
+  Logo2,
   ic_no_data,
   ic_batas_waktu,
   NotSync,

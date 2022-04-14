@@ -1,5 +1,6 @@
 import TaskServices from '../../../Database/TaskServices';
 import axios from 'axios';
+import { loggingError } from '../../../Utils/ErrorLogging';
 
 export const getMasterCompany = async () => {
   const user = TaskServices.getCurrentUser();
@@ -56,6 +57,7 @@ export const getMasterCompany = async () => {
     }
   } catch (error) {
     console.log(error, 'error');
+    loggingError(error, 'Error Company')
   }
 
   return downloadProgress;
