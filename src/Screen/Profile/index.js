@@ -13,6 +13,9 @@ import NetInfo from '@react-native-community/netinfo';
 import NoConnectionModal from '../../Component/NoConnectionModal';
 import axios from 'axios';
 import NotSyncModal from '../../Component/NotSyncModal';
+import { ImageToBase64 } from '../../Utils/ImageConverter';
+import LoadingModal from '../../Component/LoadingModal';
+import FailedModal from '../../Component/FailedModal';
 
 const ProfileScreen = () => {
   const navigation = useNavigation();
@@ -51,11 +54,15 @@ const ProfileScreen = () => {
       },
     },
   ];
+  const [failedExportModal, setFailedExportModal] = useState(false);
+  const [failedBackupModal, setFailedBackupModal] = useState(false);
   const [backupModal, setBackUpModal] = useState(false);
   const [exportModal, setExportModal] = useState(false);
   const [resetModal, setResetModal] = useState(false);
   const [connection, setConnection] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
   const MasterEmployee = TaskServices.getAllData('TM_EMPLOYEE');
+  const MasterImages = TaskServices.getAllData('TR_IMAGES');
   const [syncModal, setSyncModal] = useState(false);
   const MasterAttendance = TaskServices.getAllData('TR_ATTENDANCE');
   const isFocused = useIsFocused();
@@ -105,6 +112,7 @@ const ProfileScreen = () => {
   };
 
   const onBackup = async () => {
+    setIsLoading(true)
     const realm = TaskServices.getPath();
     const packagePath =
       'file:///storage/emulated/0/Android/media/com.cermin';
@@ -120,19 +128,42 @@ const ProfileScreen = () => {
     // await fs.mkdir(databasePath);
     const backupPath =
       'file:///storage/emulated/0/Android/media/com.cermin/Local/Database/data.realm';
-    await fs.copyFile(realm, backupPath);
-    // await expoFS.copyAsync(realm, backupPath);
-    console.log('success');
-    setBackUpModal(true)
+
+    try {
+      await fs.copyFile(realm, backupPath);
+      // await expoFS.copyAsync(realm, backupPath);
+      setIsLoading(false)
+      console.log('success');
+      setBackUpModal(true)
+    } catch (error) {
+      setIsLoading(false)
+      setFailedBackupModal(true)
+      console.error(error, 'error backup');
+    }
+
   };
 
+  const DataExportRegister = useMemo(() => {
+    return MasterEmployee.filter((item) => item.REGISTER_STATUS == 'PROCESS').map((item) => {
+      const images = MasterImages.filter((image) => image.MODEL_ID == item.ID)
+      item.IMAGES = images.map((image) => ({
+        ID: image.ID,
+        FILE_NAME: image.FILE_NAME,
+        NAME: image.NAME,
+        BASE64: image.BASE64
+      }))
+      return item
+    })
+  }, [MasterEmployee, MasterImages])
+
+
   const onExport = async () => {
+    setIsLoading(true)
     const Attendance = TaskServices.getAllData('TR_ATTENDANCE');
-    const images = TaskServices.getAllData('TR_IMAGES');
     const AFD = TaskServices.getAllData('TM_AFD');
     const data = {
       TR_ATTENDANCE: Attendance,
-      // TR_IMAGES: images,
+      TM_EMPLOYEE: DataExportRegister,
       // TM_AFD: AFD,
     };
     const packagePath =
@@ -141,14 +172,23 @@ const ProfileScreen = () => {
       'file:///storage/emulated/0/Android/media/com.cermin/Local';
     const databasePath =
       'file:///storage/emulated/0/Android/media/com.cermin/Local/Database';
-    await fs.mkdir(packagePath);
-    await fs.mkdir(LocalPath);
-    await fs.mkdir(databasePath);
-    const exportPath =
-      'file:///storage/emulated/0/Android/media/com.cermin/Local/Database/database.json';
-    await fs.writeFile(exportPath, JSON.stringify(data), 'utf8');
-    console.log('success');
-    setExportModal(true)
+    
+    try {
+      await fs.mkdir(packagePath);
+      await fs.mkdir(LocalPath);
+      await fs.mkdir(databasePath);
+      const exportPath =
+        'file:///storage/emulated/0/Android/media/com.cermin/Local/Database/database.json';
+      await fs.writeFile(exportPath, JSON.stringify(data), 'utf8');
+      setIsLoading(false)
+      console.log('success');
+      setExportModal(true)
+    } catch (error) {
+      setIsLoading(false)
+      setFailedExportModal(true)
+      console.error(error, 'error export');
+    }  
+
   };
 
   const renderMenu = data => {
@@ -196,6 +236,15 @@ const ProfileScreen = () => {
         setSyncModal(false);
         navigation.navigate('Sync');
       }} />
+    }
+    if (isLoading) {
+      return <LoadingModal />
+    }
+    if (failedExportModal) {
+      return <FailedModal visible={failedExportModal} content={'Export Data Gagal, Harap Coba Lagi'} title={'Export Gagal'} onPress={() => setFailedExportModal(false)} />
+    }
+    if (failedBackupModal) {
+      return <FailedModal visible={failedBackupModal} content={'Backup Data Gagal, Harap Coba Lagi'} title={'Backup Gagal'} onPress={() => setFailedBackupModal(false)} />
     }
   }
 

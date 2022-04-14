@@ -293,6 +293,15 @@ const SyncScreen = () => {
     return attendance.progress === attendance.total && uploadEmployee.progress === uploadEmployee.total
   }, [attendance, uploadEmployee]);
 
+  const MasterLog = TaskServices.getAllData('T_LOG')
+  const FailedCode = useMemo(() => {
+    if (MasterLog.length > 0) {
+      return MasterLog[MasterLog.length - 1].TICKET_NUMBER
+    } else {
+      return '#1'
+    }
+  }, [MasterLog])
+
   const showModal = () => {
     if (connection) {
       return (
@@ -308,7 +317,7 @@ const SyncScreen = () => {
           <FailedModal
             visible={success}
             title={'Sync Gagal'}
-            content={'Ada Data Sync yang Gagal\nHarap Mengulangi Sync sampai berhasil'}
+            content={'Ada Data Sync yang Gagal\nHarap Mengulangi Sync sampai berhasil\n' + FailedCode}
             onPress={() => setSuccess(false)}
           />
         )

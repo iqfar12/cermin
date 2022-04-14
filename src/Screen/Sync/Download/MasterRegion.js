@@ -1,5 +1,6 @@
 import TaskServices from '../../../Database/TaskServices';
 import axios from 'axios';
+import { loggingError } from '../../../Utils/ErrorLogging';
 
 export const getMasterRegion = async () => {
   const user = TaskServices.getCurrentUser();
@@ -50,6 +51,7 @@ export const getMasterRegion = async () => {
     }
   } catch (error) {
     console.log(error, 'error');
+    loggingError(error, 'Error Get Master Region')
   }
 
   return downloadProgress;
