@@ -1,91 +1,33 @@
 {
   "project_info": {
-    "project_number": "754155837355",
-    "project_id": "face-recognition-eadd8",
-    "storage_bucket": "face-recognition-eadd8.appspot.com"
+    "project_number": "95509207858",
+    "project_id": "cermin-1c4bd",
+    "storage_bucket": "cermin-1c4bd.appspot.com"
   },
   "client": [
     {
       "client_info": {
-        "mobilesdk_app_id": "1:754155837355:android:4908db1ec5912596eea4ee",
+        "mobilesdk_app_id": "1:95509207858:android:20238a215a58f5b37e152b",
         "android_client_info": {
           "package_name": "com.cermin.app"
         }
       },
       "oauth_client": [
         {
-          "client_id": "754155837355-tcudl5hpkrppr7i8tai1knb9kvknepps.apps.googleusercontent.com",
+          "client_id": "95509207858-6un80819mrfn8o7ugtsosro58j92ipjb.apps.googleusercontent.com",
           "client_type": 3
         }
       ],
       "api_key": [
         {
-          "current_key": "AIzaSyBRhNfhy_Q1FjInECI_07f_Lp5N9SF1xFM"
+          "current_key": "AIzaSyAUHulYK4Lmlr4PW5i4yXbd69MxM0tlpEI"
         }
       ],
       "services": {
         "appinvite_service": {
           "other_platform_oauth_client": [
             {
-              "client_id": "754155837355-tcudl5hpkrppr7i8tai1knb9kvknepps.apps.googleusercontent.com",
-              "client_type": 3
-            }
-          ]
-        }
-      }
-    },
-    {
-      "client_info": {
-        "mobilesdk_app_id": "1:754155837355:android:fde9e425ba78ed7feea4ee",
-        "android_client_info": {
-          "package_name": "com.fromsa"
-        }
-      },
-      "oauth_client": [
-        {
-          "client_id": "754155837355-tcudl5hpkrppr7i8tai1knb9kvknepps.apps.googleusercontent.com",
-          "client_type": 3
-        }
-      ],
-      "api_key": [
-        {
-          "current_key": "AIzaSyBRhNfhy_Q1FjInECI_07f_Lp5N9SF1xFM"
-        }
-      ],
-      "services": {
-        "appinvite_service": {
-          "other_platform_oauth_client": [
-            {
-              "client_id": "754155837355-tcudl5hpkrppr7i8tai1knb9kvknepps.apps.googleusercontent.com",
-              "client_type": 3
-            }
-          ]
-        }
-      }
-    },
-    {
-      "client_info": {
-        "mobilesdk_app_id": "1:754155837355:android:7698cb1d03d34453eea4ee",
-        "android_client_info": {
-          "package_name": "com.testexpo"
-        }
-      },
-      "oauth_client": [
-        {
-          "client_id": "754155837355-tcudl5hpkrppr7i8tai1knb9kvknepps.apps.googleusercontent.com",
-          "client_type": 3
-        }
-      ],
-      "api_key": [
-        {
-          "current_key": "AIzaSyBRhNfhy_Q1FjInECI_07f_Lp5N9SF1xFM"
-        }
-      ],
-      "services": {
-        "appinvite_service": {
-          "other_platform_oauth_client": [
-            {
-              "client_id": "754155837355-tcudl5hpkrppr7i8tai1knb9kvknepps.apps.googleusercontent.com",
+              "client_id": "95509207858-6un80819mrfn8o7ugtsosro58j92ipjb.apps.googleusercontent.com",
               "client_type": 3
             }
           ]
