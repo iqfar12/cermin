@@ -13,6 +13,10 @@ import com.facebook.react.bridge.ReactContextBaseJavaModule;
 import com.facebook.react.bridge.ReactMethod;
 import com.facebook.react.module.annotations.ReactModule;
 
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.OutputStream;
+
 public class PermissionManager extends ReactContextBaseJavaModule
 {
     public PermissionManager(ReactApplicationContext reactContext){
@@ -79,6 +83,47 @@ public class PermissionManager extends ReactContextBaseJavaModule
                 res = Settings.System.getInt(context.getContentResolver(), Settings.Global.AUTO_TIME, 0) == 1;
             }
             promise.resolve(res);
+        } catch (Exception e) {
+            promise.reject(e);
+        }
+    }
+
+    private Uri getFileUri(String filepath, boolean isDirectoryAllowed) throws IORejectionException {
+        Uri uri = Uri.parse(filepath);
+        if (uri.getScheme() == null) {
+            // No prefix, assuming that provided path is absolute path to file
+            File file = new File(filepath);
+            if (!isDirectoryAllowed && file.isDirectory()) {
+                    throw new IORejectionException("EISDIR", "EISDIR: illegal operation on a directory, read '" + filepath + "'");
+            }
+            uri = Uri.parse("file://" + filepath);
+        }
+        return uri;
+    }
+
+    private OutputStream getOutputStream(String filepath, boolean append) throws IORejectionException {
+        Uri uri = getFileUri(filepath, false);
+        OutputStream stream;
+        try {
+            stream = context.getContentResolver().openOutputStream(uri, append ? "wa" : "w");
+        } catch (FileNotFoundException ex) {
+            throw new IORejectionException("ENOENT", "ENOENT: " + ex.getMessage() + ", open '" + filepath + "'");
+        }
+        if (stream == null) {
+            throw new IORejectionException("ENOENT", "ENOENT: could not open an output stream for '" + filepath + "'");
+        }
+        return stream;
+    }
+
+    @ReactMethod
+    public void writeFile (String path, String content, Promise promise) {
+        try {
+            byte[] bytes = content.getBytes();
+            OutputStream outputStream = getOutputStream(path, false);
+            outputStream.write(bytes);
+            outputStream.close();
+
+            promise.resolve("Write Success");
         } catch (Exception e) {
             promise.reject(e);
         }

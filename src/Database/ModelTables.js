@@ -1,4 +1,4 @@
-const SCHEMA_VERSION = 1;
+const SCHEMA_VERSION = 38;
 
 // TR = Transaksi
 // TM = Master

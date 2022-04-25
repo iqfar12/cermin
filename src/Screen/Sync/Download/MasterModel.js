@@ -95,13 +95,13 @@ export const getModel = async () => {
 
     console.log('download model');
     const urlSsd =
-        'https://cermindev1.tap-agri.com/models/ssd_mobilenetv1.weights';
+        'https://cerminqa.tap-agri.com/models/ssd_mobilenetv1.weights';
     const urlFaceLandmark =
-        'https://cermindev1.tap-agri.com/models/face_landmark_68_model.weights';
+        'https://cerminqa.tap-agri.com/models/face_landmark_68_model.weights';
     const urlFaceRecognition =
-        'https://cermindev1.tap-agri.com/models/face_recognition_model.weights';
+        'https://cerminqa.tap-agri.com/models/face_recognition_model.weights';
     const urlTiny =
-        'https://cermindev1.tap-agri.com/models/tiny_face_detector_model.weights';
+        'https://cerminqa.tap-agri.com/models/tiny_face_detector_model.weights';
     const ssd = await axios.get(urlSsd, { responseType: 'arraybuffer' });
     const base64Ssd = encode(ssd.data);
     await fs
