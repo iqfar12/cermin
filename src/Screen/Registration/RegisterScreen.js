@@ -697,12 +697,16 @@ const RegisterScreen = ({ route }) => {
       const detectThresold = cameraFront ? 0.4 : 0.5
       const detect = await faceapi.detectSingleFace(imageTensor, new faceapi.TinyFaceDetectorOptions({inputSize: 608, scoreThreshold: detectThresold})).withFaceLandmarks().withFaceDescriptor();
       let range = 1.0;
-      if (val === 1) {
-        setMainDescriptor(detect.descriptor);
-        const {valid} = await detectFront(imageTensor);
-        range = valid ? 0.0 : 0.9
+      if (detect.descriptor !== undefined) {
+        if (val === 1) {
+          setMainDescriptor(detect.descriptor);
+          const {valid} = await detectFront(imageTensor);
+          range = valid ? 0.0 : 0.9
+        } else {
+          range = faceapi.euclideanDistance(mainDescriptor, detect.descriptor)
+        }
       } else {
-        range = faceapi.euclideanDistance(mainDescriptor, detect.descriptor)
+        range = 0
       }
       // const val = RandomPhase[step];
       // if (val === 1) {
@@ -900,6 +904,7 @@ const RegisterScreen = ({ route }) => {
               // onCameraReady={() => {
               //   setDetect(true)
               // }}
+              flashMode={'torch'}
               onFacesDetected={detect && !hint && !failed && ready ? onFaceDetected : null}
               faceDetectorSettings={{
                 mode: 2,
