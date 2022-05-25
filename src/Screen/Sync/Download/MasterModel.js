@@ -2,9 +2,11 @@ import fs from 'react-native-fs';
 import axios from 'axios';
 import * as faceapi from 'face-api.js';
 import { loggingError } from '../../../Utils/ErrorLogging';
+import TaskServices from '../../../Database/TaskServices';
 
 
 export const getModel = async () => {
+    const user = TaskServices.getCurrentUser();
 
     let donwloadCount = {
         count: 0,
@@ -93,15 +95,25 @@ export const getModel = async () => {
         return donwloadCount;
     }
 
+    const baseUrl = () => {
+        if (user.SERVER == 'https://apis-dev1.tap-agri.com') {
+            return 'https://cermindev1.tap-agri.com'
+        }
+        if (user.SERVER == 'https://apis-qa.tap-agri.com') {
+            return 'https://cerminqa.tap-agri.com/login'
+        }
+        return 'https://cermin.tap-agri.com'
+    }
+    
     console.log('download model');
     const urlSsd =
-        'https://cerminqa.tap-agri.com/models/ssd_mobilenetv1.weights';
+        baseUrl() + '/models/ssd_mobilenetv1.weights';
     const urlFaceLandmark =
-        'https://cerminqa.tap-agri.com/models/face_landmark_68_model.weights';
+        baseUrl() + '/models/face_landmark_68_model.weights';
     const urlFaceRecognition =
-        'https://cerminqa.tap-agri.com/models/face_recognition_model.weights';
+        baseUrl() + '/models/face_recognition_model.weights';
     const urlTiny =
-        'https://cerminqa.tap-agri.com/models/tiny_face_detector_model.weights';
+        baseUrl() + '/models/tiny_face_detector_model.weights';
     const ssd = await axios.get(urlSsd, { responseType: 'arraybuffer' });
     const base64Ssd = encode(ssd.data);
     await fs
