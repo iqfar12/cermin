@@ -24,13 +24,13 @@ import * as expoFS from 'expo-file-system';
 import SoundPlayer from 'react-native-sound-player';
 import { dateGenerator } from '../../Utils/DateConverter';
 import { ImageToBase64 } from '../../Utils/ImageConverter';
+import { LZW } from '../../Utils/LzwCompressor';
 
 
 const PreviewScreen = ({route}) => {
   const [index, setIndex] = useState(0);
   const navigation = useNavigation();
   const user = TaskServices.getCurrentUser();
-  console.log(route.params, 'params');
   const {preview, data} = route.params;
 
   useEffect(() => {
@@ -55,7 +55,6 @@ const PreviewScreen = ({route}) => {
     });
     // ]);
     formData.append('label', route.params.label);
-    console.log(formData);
     try {
       const res = await axios.post(Endpoint.Register, formData, {
         headers: {
@@ -64,7 +63,6 @@ const PreviewScreen = ({route}) => {
         },
       });
       if (res) {
-        console.log(res.data);
         navigation.navigate('Finish Screen', {
           status: res.status,
           message: 'Daftar Berhasil',

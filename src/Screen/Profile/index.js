@@ -16,6 +16,13 @@ import NotSyncModal from '../../Component/NotSyncModal';
 import { ImageToBase64 } from '../../Utils/ImageConverter';
 import LoadingModal from '../../Component/LoadingModal';
 import FailedModal from '../../Component/FailedModal';
+import { LZW } from '../../Utils/LzwCompressor';
+import { writeFile } from '../../Utils/StoragePermisssion';
+
+function paginate(array, page_size, page_number) {
+  // human-readable page numbers usually start with 1, so we reduce 1 in the first argument
+  return array.slice((page_number - 5) * page_size, page_number * page_size);
+}
 
 const ProfileScreen = () => {
   const navigation = useNavigation();
@@ -34,7 +41,10 @@ const ProfileScreen = () => {
       title: 'Export Data Transaksi',
       arrow: 'chevron-right',
       onNavigation: () => {
-        onExport();
+        setIsLoading(true)
+        onExport()
+        // setTimeout(() => {
+        // }, 1)
       },
     },
     {
@@ -99,7 +109,7 @@ const ProfileScreen = () => {
           }
           navigation.reset({
             index: 0,
-            routes: [{name: 'Login'}],
+            routes: [{ name: 'Login' }],
           });
         }
       } catch (error) {
@@ -143,51 +153,79 @@ const ProfileScreen = () => {
 
   };
 
-  const DataExportRegister = useMemo(() => {
-    return MasterEmployee.filter((item) => item.REGISTER_STATUS == 'PROCESS').map((item) => {
-      const images = MasterImages.filter((image) => image.MODEL_ID == item.ID)
-      item.IMAGES = images.map((image) => ({
-        ID: image.ID,
-        FILE_NAME: image.FILE_NAME,
-        NAME: image.NAME,
-        BASE64: image.BASE64
-      }))
-      return item
-    })
-  }, [MasterEmployee, MasterImages])
+  const onExportAttendance = async () => {
+    
+  }
 
+  const onExportEmployee = async () => {
+    
+    // const dataRegister = DataExportRegister();
+    // for (let i = 0; i < dataRegister.length; i += 5) {
+    //   const data = {
+    //     TM_EMPLOYEE: dataRegister.slice(i, i + 5)
+    //   }
+    //   const exportPath = `file:///storage/emulated/0/Android/media/com.cermin/Local/Database/database_employee${i === 0 ? 1 : (i / 5) + 1}.json`;
+    //   // await fs.writeFile(exportPath, JSON.stringify(data), 'utf8');
+    //   const res = await writeFile(exportPath, JSON.stringify(data))
+    //   console.log(res, i + 5)
+    // }
+  }
 
   const onExport = async () => {
-    setIsLoading(true)
+    console.log("export")
     const Attendance = TaskServices.getAllData('TR_ATTENDANCE');
-    const AFD = TaskServices.getAllData('TM_AFD');
-    const data = {
-      TR_ATTENDANCE: Attendance,
-      TM_EMPLOYEE: DataExportRegister,
-      // TM_AFD: AFD,
-    };
+
+    const DataExportRegister = () => {
+      return MasterEmployee.filter((item) => item.REGISTER_STATUS == 'PROCESS').map((item) => {
+        const images = MasterImages.filter((image) => image.MODEL_ID == item.ID)
+        item.IMAGES = images.map((image) => ({
+          ID: image.ID,
+          FILE_NAME: image.FILE_NAME,
+          NAME: image.NAME,
+          BASE64: image.BASE64
+        }))
+        return item
+      })
+    }
+        
     const packagePath =
-      'file:///storage/emulated/0/Android/media/com.cermin';
+    'file:///storage/emulated/0/Android/media/com.cermin';
     const LocalPath =
-      'file:///storage/emulated/0/Android/media/com.cermin/Local';
+    'file:///storage/emulated/0/Android/media/com.cermin/Local';
     const databasePath =
-      'file:///storage/emulated/0/Android/media/com.cermin/Local/Database';
-    
+    'file:///storage/emulated/0/Android/media/com.cermin/Local/Database';
+    const isPackageExist = await fs.exists(packagePath)
+    const isLocalExist = await fs.exists(LocalPath)
+    const isDatabaseExist = await fs.exists(databasePath)
+    console.log('created')
     try {
-      await fs.mkdir(packagePath);
-      await fs.mkdir(LocalPath);
-      await fs.mkdir(databasePath);
-      const exportPath =
-        'file:///storage/emulated/0/Android/media/com.cermin/Local/Database/database.json';
-      await fs.writeFile(exportPath, JSON.stringify(data), 'utf8');
+      console.log("try")
+      if (!isPackageExist) {
+        await fs.mkdir(packagePath);
+      }
+      if (!isLocalExist) {
+        await fs.mkdir(LocalPath);
+      }
+      if (!isDatabaseExist) {
+        await fs.mkdir(databasePath);
+      }
+      
+      const data = {
+        TR_ATTENDANCE: Attendance,
+        TM_EMPLOYEE: DataExportRegister()
+      }
+
+      const exportPath = 'file:///storage/emulated/0/Android/media/com.cermin/Local/Database/database.json';
+      const res = await writeFile(exportPath, JSON.stringify(data))
+
       setIsLoading(false)
-      console.log('success');
+      console.log('success', res);
       setExportModal(true)
     } catch (error) {
       setIsLoading(false)
       setFailedExportModal(true)
       console.error(error, 'error export');
-    }  
+    }
 
   };
 

@@ -1,6 +1,7 @@
 const { NativeModules } = require('react-native');
 const modules = NativeModules.PermissionManager;
 
+const normalizeFilePath = (path) => (path.startsWith('file://') ? path.slice(7) : path);
 
 export const requestAdvanceStoragePermission = async () => {
     let res;
@@ -32,6 +33,16 @@ export const checkTimezoneSetting = async () => {
         // console.log(res, 'status time setting');
     } catch (error) {
         console.log(error, 'error check ')
+    }
+    return res
+}
+
+export const writeFile = async (path, content) => {
+    let res = "failed";
+    try {
+        res = await modules.writeFile(path, content)        
+    } catch (error) {
+        console.log(error, 'error writefile')
     }
     return res
 }

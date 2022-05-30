@@ -114,7 +114,6 @@ const RegisterScreen = ({ route }) => {
     try {
       const res = await axios.get(url);
       if (res) {
-        console.log(res.data?.data?.length);
         if (res.data?.data?.length > 0) {
           setIsAlready(true);
         } else {
@@ -218,8 +217,7 @@ const RegisterScreen = ({ route }) => {
           'Content-Type': 'multipart/form-data',
         },
       });
-      console.log(res.data === '', 'empty');
-      console.log(res.data, 'data');
+
       if (res) {
         return { valid: true, message: res.data.message };
       }
@@ -471,7 +469,6 @@ const RegisterScreen = ({ route }) => {
           runClassifications: FaceDetector.FaceDetectorClassifications.none,
         });
         const { x, y } = corner.faces[0].NOSE_BASE;
-        console.log(x, 'x');
         if (x >= 85 && x <= 100) {
           // Left
           console.log('left');
@@ -542,7 +539,6 @@ const RegisterScreen = ({ route }) => {
           runClassifications: FaceDetector.FaceDetectorClassifications.none,
         });
         const { x, y } = corner.faces[0].NOSE_BASE;
-        console.log(x)
         if (x <= 65 && x >= 50) {
           // Right
           console.log('right');
@@ -585,7 +581,6 @@ const RegisterScreen = ({ route }) => {
         });
         const { x, y } = corner.faces[0].NOSE_BASE;
         const jaw = corner.faces[0].bottomMouthPosition.y;
-        console.log(jaw, 'face');
         if (x >= 90) {
           // Left
           console.log('left');
@@ -616,7 +611,6 @@ const RegisterScreen = ({ route }) => {
       const image = await camera.takePictureAsync();
       setIsLoading(true);
       if (image) {
-        console.log(image, 'position');
         // const res = await detectCorner(image);
         cropImage(image);
         // console.log(position);
@@ -639,7 +633,6 @@ const RegisterScreen = ({ route }) => {
 
   const condition4 = event => {
     const jaw = event?.faces[0]?.BOTTOM_MOUTH.y;
-    console.log(jaw);
     if (jaw >= 300 && jaw <= 330) {
       // Top
       console.log('top');
@@ -649,7 +642,6 @@ const RegisterScreen = ({ route }) => {
 
   const condition1 = event => {
     const { x, y } = event?.faces[0]?.NOSE_BASE;
-    console.log(x);
     if (x >= 185 && x <= 200) {
       // Center
       console.log('center');
@@ -659,7 +651,6 @@ const RegisterScreen = ({ route }) => {
 
   const condition2 = event => {
     const { x, y } = event?.faces[0]?.NOSE_BASE;
-    console.log(x);
     if (x >= 130 && x <= 160) {
       // Left
       console.log('left');
@@ -669,7 +660,6 @@ const RegisterScreen = ({ route }) => {
 
   const condition3 = event => {
     const { x, y } = event?.faces[0]?.NOSE_BASE;
-    console.log(x);
     if (x >= 205 && x <= 265) {
       // Left
       console.log('right');
@@ -707,14 +697,17 @@ const RegisterScreen = ({ route }) => {
       const detectThresold = cameraFront ? 0.4 : 0.5
       const detect = await faceapi.detectSingleFace(imageTensor, new faceapi.TinyFaceDetectorOptions({inputSize: 608, scoreThreshold: detectThresold})).withFaceLandmarks().withFaceDescriptor();
       let range = 1.0;
-      if (val === 1) {
-        setMainDescriptor(detect.descriptor);
-        const {valid} = await detectFront(imageTensor);
-        range = valid ? 0.0 : 0.9
+      if (detect.descriptor !== undefined) {
+        if (val === 1) {
+          setMainDescriptor(detect.descriptor);
+          const {valid} = await detectFront(imageTensor);
+          range = valid ? 0.0 : 0.9
+        } else {
+          range = faceapi.euclideanDistance(mainDescriptor, detect.descriptor)
+        }
       } else {
-        range = faceapi.euclideanDistance(mainDescriptor, detect.descriptor)
+        range = 0
       }
-      console.log(range, 'range');
       // const val = RandomPhase[step];
       // if (val === 1) {
       //   position = await detectFront(image);
@@ -909,11 +902,10 @@ const RegisterScreen = ({ route }) => {
               type={cameraFront ? 'front' : 'back'}
               autoFocus={'on'}
               // onCameraReady={() => {
-              //   setTimeout(() => {
-              //     setDetect(true)
-              //   }, step > 0 ? 2000 : 3000)
+              //   setDetect(true)
               // }}
-              onFacesDetected={detect && !hint && !failed ? onFaceDetected : null}
+              flashMode={'torch'}
+              onFacesDetected={detect && !hint && !failed && ready ? onFaceDetected : null}
               faceDetectorSettings={{
                 mode: 2,
                 detectLandmarks: 2,

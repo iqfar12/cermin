@@ -44,7 +44,6 @@ const FinishScreen = ({route}) => {
       UserJsonPath,
       JSON.stringify(objectedData),
     );
-    console.log(info, UserJsonPath);
   };
 
   useEffect(() => {
