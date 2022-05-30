@@ -30,8 +30,8 @@ const ServerList = [
   {
     // Production
     name: 'Production',
-    url: 'https://192.168.100.40:3000/auth/login',
-    baseUrl: 'https://apis-dev1.tap-agri.com',
+    url: 'https://apis.tap-agri.com/crm-msa-auth-data/',
+    baseUrl: 'https://apis.tap-agri.com',
   },
   {
     // QA
@@ -64,7 +64,6 @@ const LoginScreen = () => {
   const user = TaskServices.getCurrentUser();
 
   const postRealm = async (data, token) => {
-    console.log(data);
     const body = {
       ID: data.id,
       USER_NAME: data.username,
@@ -130,10 +129,8 @@ const LoginScreen = () => {
           deviceId: deviceId,
         };
         const url = ServerList[server].url + 'auth/login';
-        console.log(url, body);
         const res = await axios.post(url, body);
         if (res) {
-          console.log(res.data);
           await getUserData(res.data.token);
         }
       } catch (error) {

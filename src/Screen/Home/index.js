@@ -88,7 +88,6 @@ const HomeScreen = ({ route }) => {
   };
 
   const user = TaskServices.getAllData('TM_USERS')[0];
-
   const navigation = useNavigation();
   return (
     <>

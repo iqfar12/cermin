@@ -252,7 +252,6 @@ const AttendanceOut = ({ route }) => {
       const raw = new Uint8Array(img);
       const imageTensor = decodeJpeg(raw);
 
-      console.log('detecting....');
       const detection = await faceapi
         .detectSingleFace(
           imageTensor,
@@ -269,7 +268,6 @@ const AttendanceOut = ({ route }) => {
         );
         const faceMatcher = new faceapi.FaceMatcher(descriptors, 0.45);
         const results = faceMatcher.findBestMatch(detection.descriptor);
-        console.log(results);
         if (results._label != 'unknown') {
           setIsLoading(false);
           navigation.replace('Preview Attendance Out', {
@@ -399,6 +397,7 @@ const AttendanceOut = ({ route }) => {
               }}
               style={styles.preview}
               type={front ? 'front' : 'back'}
+              flashMode={"torch"}
               ratio={'4:3'}
               faceDetectorSettings={{
                 mode: 2,

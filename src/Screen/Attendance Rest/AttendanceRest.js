@@ -400,6 +400,7 @@ const AttendanceRest = ({ route }) => {
               }}
               style={styles.preview}
               type={front ? 'front' : 'back'}
+              flashMode={"torch"}
               ratio={'4:3'}
               faceDetectorSettings={{
                 mode: 2,
