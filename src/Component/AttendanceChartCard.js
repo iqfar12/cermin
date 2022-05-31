@@ -14,7 +14,6 @@ const AttendanceChartCard = ({ onPress }) => {
 
   const ListAttendance = useMemo(() => {
     const location = user?.LOCATION !== null ? user?.LOCATION?.split(',') : [];
-    const location = user?.LOCATION !== null ? user?.LOCATION?.split(',') : [];
 
     const res = MasterAttendance.map((item) => {
       const users = MasterEmployee.find((data) => data.ID == item.EMPLOYEE_ID);
