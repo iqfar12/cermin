@@ -31,7 +31,7 @@ const HomeContent = () => {
 
   const ListEmployee = useMemo(() => {
     const res = MasterEmployee.filter((item) => item.TYPE === 'E')
-    const location = user.LOCATION.split(',');
+    const location = user?.LOCATION?.split(',');
     let data = res;
     if (user.REFERENCE_LOCATION == 'AFD') {
       data = res.filter((item) => location.includes(item?.AFD_CODE))
@@ -57,7 +57,7 @@ const HomeContent = () => {
 
   const ListNotRegisterEmployee = useMemo(() => {
     const res = MasterEmployee.filter((item) => item.REGISTER_STATUS == "NONE" || item.REGISTER_STATUS == 'REJECTED');
-    const location = user.LOCATION.split(',');
+    const location = user?.LOCATION?.split(',');
     let data = res;
     if (user.REFERENCE_LOCATION == 'AFD') {
       data = res.filter((item) => location.includes(item?.AFD_CODE))
