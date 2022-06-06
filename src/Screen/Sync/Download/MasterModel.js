@@ -100,7 +100,7 @@ export const getModel = async () => {
             return 'https://cermindev1.tap-agri.com'
         }
         if (user.SERVER == 'https://apis-qa.tap-agri.com') {
-            return 'https://cerminqa.tap-agri.com/login'
+            return 'https://cerminqa.tap-agri.com'
         }
         return 'https://cermin.tap-agri.com'
     }
