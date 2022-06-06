@@ -9,7 +9,7 @@ export const getMasterEmployee = async () => {
   // const url = 'https://192.168.0.108:4000/employee';
   const duplicate_url = user.SERVER + '/crm-msa-attendance/employee-invalid'
   const dbLocal = TaskServices.getAllData('TM_EMPLOYEE').filter((item) => {
-    const location = user.LOCATION.split(',');
+    const location = user?.LOCATION !== null ? user?.LOCATION?.split(',') : [];
     if (user.REFERENCE_LOCATION == 'AFD') {
       return location.includes(item.AFD_CODE);
     } else if (user.REFERENCE_LOCATION == 'BA') {

@@ -6,7 +6,7 @@ export const getMasterEst = async () => {
   const user = TaskServices.getCurrentUser();
   const url =  user.SERVER + '/crm-msa-attendance/estate';
   const dbLocal = TaskServices.getAllData('TM_EST').filter((item) => {
-    const location = user.LOCATION.split(',');
+    const location = user?.LOCATION !== null ? user?.LOCATION?.split(',') : [];
     if (user.REFERENCE_LOCATION == 'AFD') {
       return location.map((a) => a.substr(0, 4)).includes(item.WERKS);
     } else if (user.REFERENCE_LOCATION == 'BA') {

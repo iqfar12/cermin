@@ -32,7 +32,7 @@ const HistoryAttendance = () => {
     const [warningTime, setWarningTime] = useState(false);
 
     const ListAttendance = useMemo(() => {
-        const location = user.LOCATION.split(',');
+        const location = user?.LOCATION !== null ? user?.LOCATION?.split(',') : [];
         const res = MasterAttendance.map((item) => {
             const users = MasterEmployee.find((data) => data.ID == item.EMPLOYEE_ID);
             item.name = users.EMPLOYEE_FULLNAME
@@ -108,7 +108,7 @@ const HistoryAttendance = () => {
 
     const ListEmployee = useMemo(() => {
         const res = MasterEmployee.filter((item) => item.TYPE === 'E').filter((item) => item.REGISTER_STATUS == 'NONE');
-        const location = user.LOCATION.split(',');
+        const location = user?.LOCATION !== null ? user?.LOCATION?.split(',') : [];
         let data = res;
         if (user.REFERENCE_LOCATION == 'AFD') {
             data = res.filter((item) => location.includes(item?.AFD_CODE))

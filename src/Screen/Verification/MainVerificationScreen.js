@@ -136,7 +136,7 @@ const MainVerificationScreen = ({ route }) => {
   const user = TaskServices.getCurrentUser();
   const Descriptor = useMemo(() => {
     const res = MasterEmployee.filter((item) => item.FACE_DESCRIPTOR !== null)
-    const location = user.LOCATION.split(',');
+    const location = user?.LOCATION !== null ? user?.LOCATION?.split(',') : [];
     let data = res;
     return data.map((item) => JSON.parse(item.FACE_DESCRIPTOR))
   }, [MasterEmployee]);
