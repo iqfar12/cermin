@@ -115,7 +115,7 @@ const AttendanceOut = ({ route }) => {
   const user = TaskServices.getCurrentUser();
   const Descriptor = useMemo(() => {
     const res = MasterEmployee.filter((item) => item.FACE_DESCRIPTOR !== null)
-    const location = user.LOCATION.split(',');
+    const location = user?.LOCATION !== null ? user?.LOCATION?.split(',') : [];
     let data = res;
     if (user.REFERENCE_LOCATION == 'AFD') {
       data = res.filter((item) => location.includes(item?.AFD_CODE))

@@ -9,7 +9,7 @@ const RecognizeBarCard = ({onPress, data = []}) => {
   const MasterEmployee = TaskServices.getAllData('TM_EMPLOYEE');
   const ListEmployee = useMemo(() => {
     const res = MasterEmployee
-    const location = user.LOCATION.split(',');
+    const location = user?.LOCATION !== null ? user?.LOCATION?.split(',') : [];
     let data = res;
     if (user.REFERENCE_LOCATION == 'AFD') {
       data = res.filter((item) => location.includes(item?.AFD_CODE))

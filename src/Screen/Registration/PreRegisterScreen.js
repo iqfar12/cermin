@@ -216,7 +216,7 @@ const PreRegisterScreen = () => {
 
   const ListAfdeling = useMemo(() => {
     const res = MasterAfdeling.map((item) => item).sort((a, b) => parseInt(a.COMP_CODE, 10) - parseInt(b.COMP_CODE, 10))
-    const location = user.LOCATION.split(',');
+    const location = user?.LOCATION !== null ? user?.LOCATION?.split(',') : [];
     let data = res;
     if (user.REFERENCE_LOCATION == 'AFD') {
       data = res.filter((item) => location.includes(item.AFD_CODE_GIS))
@@ -302,7 +302,7 @@ const PreRegisterScreen = () => {
 
   const ListEmployee = useMemo(() => {
     const res = MasterEmployee.filter((item) => item.TYPE === 'E').filter((item) => item.REGISTER_STATUS == 'NONE' || item.REGISTER_STATUS == 'REJECTED');
-    const location = user.LOCATION.split(',');
+    const location = user?.LOCATION !== null ? user?.LOCATION?.split(',') : [];
     let data = res;
     if (user.REFERENCE_LOCATION == 'AFD') {
       data = res.filter((item) => location.includes(item.AFD_CODE))
